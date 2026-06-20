@@ -8,7 +8,25 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ============================================================
--- 2. AREAS
+-- 2. PROFILES (linked to auth.users)
+-- ============================================================
+CREATE TABLE public.profiles (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
+  email TEXT NOT NULL,
+  name TEXT NOT NULL,
+  role TEXT NOT NULL CHECK (role IN ('admin', 'staff')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_profiles_user_id ON public.profiles(user_id);
+CREATE INDEX idx_profiles_role ON public.profiles(role);
+
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+-- ============================================================
+-- 3. AREAS
 -- ============================================================
 CREATE TABLE public.areas (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -392,18 +410,44 @@ CREATE TRIGGER trg_suppliers_updated_at BEFORE UPDATE ON public.suppliers
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 CREATE TRIGGER trg_supplier_settlements_updated_at BEFORE UPDATE ON public.supplier_settlements
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+CREATE TRIGGER trg_profiles_updated_at BEFORE UPDATE ON public.profiles
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
 -- ============================================================
--- 21. RLS POLICIES
+-- 21. AUTO-PROFILE ON SIGNUP
+-- ============================================================
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER SET search_path = public
+AS $$
+BEGIN
+  INSERT INTO public.profiles (user_id, email, name, role)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    COALESCE(NEW.raw_user_meta_data ->> 'name', NEW.email),
+    COALESCE(NEW.raw_user_meta_data ->> 'role', 'staff')
+  );
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- ============================================================
+-- 22. RLS POLICIES
 -- ============================================================
 
 -- Helper: get current user's role
 CREATE OR REPLACE FUNCTION public.get_current_user_role()
 RETURNS TEXT
-LANGUAGE SQL
+LANGUAGE plpgsql
 STABLE SECURITY DEFINER
 SET search_path TO 'public'
-AS $$ SELECT role FROM public.profiles WHERE user_id = auth.uid(); $$;
+AS $$ BEGIN RETURN (SELECT role FROM public.profiles WHERE user_id = auth.uid()); END; $$;
 
 -- Helper: get areas assigned to current staff user
 CREATE OR REPLACE FUNCTION public.get_my_area_ids()
@@ -412,6 +456,15 @@ LANGUAGE SQL
 STABLE SECURITY DEFINER
 SET search_path TO 'public'
 AS $$ SELECT area_id FROM public.staff_area_assignments WHERE staff_id = auth.uid() AND ended_date IS NULL; $$;
+
+-- profiles
+CREATE POLICY "Users can view own profile" ON public.profiles FOR SELECT
+  USING (auth.uid() = user_id);
+CREATE POLICY "Admins can manage all profiles" ON public.profiles FOR ALL
+  USING (public.get_current_user_role() = 'admin')
+  WITH CHECK (public.get_current_user_role() = 'admin');
+CREATE POLICY "Users can insert own profile" ON public.profiles FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
 
 -- areas
 CREATE POLICY "Admins can manage areas" ON public.areas FOR ALL
