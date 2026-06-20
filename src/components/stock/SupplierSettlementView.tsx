@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calculator, CheckCircle } from "lucide-react";
 import { useSettlements } from "@/hooks/useSettlement";
 import { useStockIntake } from "@/hooks/useStockIntake";
+import { formatCurrency } from "@/lib/currency";
 
 interface SupplierSettlementViewProps {
   userRole: "admin" | "staff";
@@ -44,7 +45,7 @@ export const SupplierSettlementView = ({ userRole }: SupplierSettlementViewProps
                 <div>
                   <p className="font-medium">{i.supplier?.name}</p>
                   <p className="text-sm text-muted-foreground">
-                    {new Date(i.intake_date).toLocaleDateString()} — {i.quantity_received} pax @ RM {i.cost_per_pax.toFixed(2)}
+                    {new Date(i.intake_date).toLocaleDateString()} — {i.quantity_received} pax @ {formatCurrency(i.cost_per_pax)}
                   </p>
                 </div>
                 <Button size="sm" onClick={() => calculateSettlement(i.id)}>
@@ -62,7 +63,7 @@ export const SupplierSettlementView = ({ userRole }: SupplierSettlementViewProps
             Settlements ({settlements.length})
             {totalPayable > 0 && (
               <span className="ml-4 text-sm font-normal text-muted-foreground">
-                Total pending: RM {totalPayable.toFixed(2)}
+                Total pending: {formatCurrency(totalPayable)}
               </span>
             )}
           </CardTitle>
@@ -94,8 +95,8 @@ export const SupplierSettlementView = ({ userRole }: SupplierSettlementViewProps
                   <TableCell>{s.total_sold}</TableCell>
                   <TableCell>{s.total_returned}</TableCell>
                   <TableCell className="font-medium">{s.payable_quantity}</TableCell>
-                  <TableCell>RM {s.cost_per_pax.toFixed(2)}</TableCell>
-                  <TableCell className="font-bold">RM {s.payable_amount.toFixed(2)}</TableCell>
+                  <TableCell>{formatCurrency(s.cost_per_pax)}</TableCell>
+                  <TableCell className="font-bold">{formatCurrency(s.payable_amount)}</TableCell>
                   <TableCell>
                     <Badge variant={s.status === "settled" ? "secondary" : "default"}>
                       {s.status}

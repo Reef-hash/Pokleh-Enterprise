@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { useSupplierPriceHistory } from "@/hooks/useSupplierPriceHistory";
 import { usePoklehSuppliers } from "@/hooks/usePoklehSuppliers";
+import { formatCurrency } from "@/lib/currency";
 
 export const SupplierPriceHistoryView = () => {
   const { history } = useSupplierPriceHistory();
@@ -55,7 +56,7 @@ export const SupplierPriceHistoryView = () => {
                   <TableRow key={h.id}>
                     <TableCell>{new Date(h.effective_date).toLocaleDateString()}</TableCell>
                     <TableCell className="font-medium">{supplier?.name || "—"}</TableCell>
-                    <TableCell className="font-medium">RM {h.cost_per_pax.toFixed(2)}</TableCell>
+                    <TableCell className="font-medium">{formatCurrency(h.cost_per_pax)}</TableCell>
                     <TableCell className="text-muted-foreground text-sm">{new Date(h.created_at).toLocaleDateString()}</TableCell>
                   </TableRow>
                 );

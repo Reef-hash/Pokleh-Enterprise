@@ -32,6 +32,7 @@ import {
   AlertTriangle
 } from "lucide-react";
 import type { InventoryItem, Category, Supplier } from "@/types/inventory";
+import { formatCurrency } from "@/lib/currency";
 
 interface InventoryManagementProps {
   inventoryData: InventoryItem[];
@@ -305,7 +306,7 @@ export const InventoryManagement = ({
                         Min: {item.min_quantity}
                       </p>
                     </TableCell>
-                    <TableCell>₱{item.price.toFixed(2)}</TableCell>
+                    <TableCell>{formatCurrency(item.price)}</TableCell>
                     <TableCell>{item.supplier?.name || 'N/A'}</TableCell>
                     <TableCell>
                       <Badge 

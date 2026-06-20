@@ -74,7 +74,7 @@ export const generateManualPDF = () => {
   
   // Cover Page
   yPosition = 80;
-  addTitle('LogistX', 32);
+  addTitle('Pokleh Enterprise', 32);
   addTitle('Inventory Management System', 18);
   addSpace(20);
   addTitle('System & User Manual', 16);
@@ -116,15 +116,15 @@ export const generateManualPDF = () => {
   addTitle('1. System Overview', 16);
   addSpace(5);
   
-  addParagraph('LogistX is a comprehensive inventory management system designed to streamline your business operations. It provides real-time tracking, automated alerts, and detailed analytics to help you manage your inventory efficiently.');
+  addParagraph('Pokleh Enterprise is an ice distribution management system designed to streamline your operations. It provides stock intake-to-sale tracking, debt management, daily closing, and detailed reports to help you run your business efficiently.');
   
   addHeading('Key Features');
-  addBullet('Real-time Inventory Tracking: Monitor stock levels across all locations');
-  addBullet('Order Management: Process and track customer orders');
-  addBullet('Supplier Management: Maintain supplier relationships and contacts');
-  addBullet('Analytics & Reports: Generate insights from your data');
-  addBullet('User Management: Role-based access control');
-  addBullet('Low Stock Alerts: Automatic notifications when stock is low');
+  addBullet('Stock Management: Full intake-to-distribution tracking with automated settlement');
+  addBullet('Sales & Debt: Record sales, manage collections, and track customer balances');
+  addBullet('Daily Closing: Automated end-of-day reconciliation with profit calculation');
+  addBullet('Supplier Management: Price history, cost tracking, and settlement management');
+  addBullet('Reports: Generate insights and export data');
+  addBullet('Area-Based Operations: Assign staff to coverage areas with role-based access');
   
   addSpace(5);
   addHeading('System Requirements');
@@ -139,7 +139,7 @@ export const generateManualPDF = () => {
   addSpace(5);
   
   addHeading('First-Time Setup');
-  addNumberedItem(1, 'Navigate to the LogistX login page');
+  addNumberedItem(1, 'Navigate to the Pokleh Enterprise login page');
   addNumberedItem(2, 'Sign up for a new account or sign in with existing credentials');
   addNumberedItem(3, 'Complete your profile setup');
   addNumberedItem(4, 'Wait for admin approval (if required)');
@@ -150,11 +150,11 @@ export const generateManualPDF = () => {
   addParagraph('For testing purposes, you can use the following demo accounts:');
   addSpace(3);
   addParagraph('Admin Account:');
-  addBullet('Email: admin@logistx.com');
+  addBullet('Email: admin@pokleh.com');
   addBullet('Password: admin123');
   addSpace(3);
   addParagraph('Staff Account:');
-  addBullet('Email: staff@logistx.com');
+  addBullet('Email: staff@pokleh.com');
   addBullet('Password: staff123');
   
   // Section 3: Authentication

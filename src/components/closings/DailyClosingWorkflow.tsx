@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Lock, CheckCircle2, AlertCircle } from "lucide-react";
 import { useDailyClosings } from "@/hooks/useDailyClosings";
 import { useAreas } from "@/hooks/useAreas";
+import { formatCurrency } from "@/lib/currency";
 
 interface DailyClosingWorkflowProps {
   userRole: "admin" | "staff";
@@ -90,11 +91,11 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
                   <span>Assigned: {selectedClosing.total_assigned}</span>
                   <span>Sold: {selectedClosing.total_sold}</span>
                   <span>Returned: {selectedClosing.total_returned}</span>
-                  <span>Cash: RM {selectedClosing.cash_sales.toFixed(2)}</span>
-                  <span>Debt: RM {selectedClosing.debt_sales.toFixed(2)}</span>
-                  <span>Collections: RM {selectedClosing.debt_collections.toFixed(2)}</span>
-                  <span>Expenses: RM {selectedClosing.expenses_total.toFixed(2)}</span>
-                  <span>Profit: RM {selectedClosing.profit_estimate.toFixed(2)}</span>
+                  <span>Cash: {formatCurrency(selectedClosing.cash_sales)}</span>
+                  <span>Debt: {formatCurrency(selectedClosing.debt_sales)}</span>
+                  <span>Collections: {formatCurrency(selectedClosing.debt_collections)}</span>
+                  <span>Expenses: {formatCurrency(selectedClosing.expenses_total)}</span>
+                  <span>Profit: {formatCurrency(selectedClosing.profit_estimate)}</span>
                 </div>
               )}
               <div className="flex gap-2 mt-2">
@@ -152,9 +153,9 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
                   <TableCell>{c.total_assigned}</TableCell>
                   <TableCell>{c.total_sold}</TableCell>
                   <TableCell>{c.total_returned}</TableCell>
-                  <TableCell>RM {c.cash_sales.toFixed(2)}</TableCell>
+                  <TableCell>{formatCurrency(c.cash_sales)}</TableCell>
                   <TableCell className={c.profit_estimate >= 0 ? "text-green-600 font-medium" : "text-destructive font-medium"}>
-                    RM {c.profit_estimate.toFixed(2)}
+                    {formatCurrency(c.profit_estimate)}
                   </TableCell>
                 </TableRow>
               ))}

@@ -7,6 +7,7 @@ import { useExpenses } from "@/hooks/useExpenses";
 import { useDebtCollection } from "@/hooks/useDebtCollection";
 import { useStockIntake } from "@/hooks/useStockIntake";
 import { useAreas } from "@/hooks/useAreas";
+import { formatCurrency } from "@/lib/currency";
 
 const COLORS = ["#2563eb", "#16a34a", "#dc2626", "#f59e0b", "#8b5cf6", "#ec4899"];
 
@@ -77,10 +78,10 @@ export const PoklehReports = ({ userRole }: PoklehReportsProps) => {
 
       {userRole === "admin" && (
         <div className="grid gap-4 md:grid-cols-4">
-          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Revenue</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-green-600">RM {totalRevenue.toFixed(2)}</p></CardContent></Card>
-          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Expenses</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-destructive">RM {totalExpenses.toFixed(2)}</p></CardContent></Card>
-          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Profit</CardTitle></CardHeader><CardContent><p className={`text-2xl font-bold ${profit >= 0 ? "text-green-600" : "text-destructive"}`}>RM {profit.toFixed(2)}</p></CardContent></Card>
-          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Collections</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">RM {totalCollected.toFixed(2)}</p></CardContent></Card>
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Revenue</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-green-600">{formatCurrency(totalRevenue)}</p></CardContent></Card>
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Expenses</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-destructive">{formatCurrency(totalExpenses)}</p></CardContent></Card>
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Profit</CardTitle></CardHeader><CardContent><p className={`text-2xl font-bold ${profit >= 0 ? "text-green-600" : "text-destructive"}`}>{formatCurrency(profit)}</p></CardContent></Card>
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Collections</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{formatCurrency(totalCollected)}</p></CardContent></Card>
         </div>
       )}
 
@@ -202,7 +203,7 @@ export const PoklehReports = ({ userRole }: PoklehReportsProps) => {
                   ].map(({ label, value, color }) => (
                     <div key={label} className="flex justify-between items-center">
                       <span className="text-sm text-muted-foreground">{label}</span>
-                      <span className={`font-bold ${color}`}>RM {typeof value === "number" ? value.toFixed(2) : value}</span>
+                      <span className={`font-bold ${color}`}>{typeof value === "number" ? formatCurrency(value) : value}</span>
                     </div>
                   ))}
                 </CardContent>

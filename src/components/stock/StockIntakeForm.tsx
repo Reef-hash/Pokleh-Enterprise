@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Package } from "lucide-react";
 import { useStockIntake } from "@/hooks/useStockIntake";
 import { usePoklehSuppliers } from "@/hooks/usePoklehSuppliers";
+import { formatCurrency } from "@/lib/currency";
 
 interface StockIntakeFormProps {
   userRole: "admin" | "staff";
@@ -52,7 +53,7 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
       <Card>
         <CardHeader>
           <CardTitle>Intake History ({intakes.length})</CardTitle>
-          <CardDescription>Total cost: RM {totalCost.toFixed(2)}</CardDescription>
+          <CardDescription>Total cost: {formatCurrency(totalCost)}</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -71,8 +72,8 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
                   <TableCell>{new Date(i.intake_date).toLocaleDateString()}</TableCell>
                   <TableCell className="font-medium">{i.supplier?.name || "—"}</TableCell>
                   <TableCell>{i.quantity_received}</TableCell>
-                  <TableCell>RM {i.cost_per_pax.toFixed(2)}</TableCell>
-                  <TableCell className="font-medium">RM {(i.quantity_received * i.cost_per_pax).toFixed(2)}</TableCell>
+                  <TableCell>{formatCurrency(i.cost_per_pax)}</TableCell>
+                  <TableCell className="font-medium">{formatCurrency(i.quantity_received * i.cost_per_pax)}</TableCell>
                 </TableRow>
               ))}
               {intakes.length === 0 && (

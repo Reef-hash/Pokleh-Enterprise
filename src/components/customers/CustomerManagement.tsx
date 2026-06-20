@@ -11,6 +11,7 @@ import { Plus, Search, Phone, MapPin } from "lucide-react";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useAreas } from "@/hooks/useAreas";
 import type { Customer } from "@/types/pokleh";
+import { formatCurrency } from "@/lib/currency";
 
 interface CustomerManagementProps {
   userRole: "admin" | "staff";
@@ -93,7 +94,7 @@ export const CustomerManagement = ({ userRole }: CustomerManagementProps) => {
                   <TableCell>{c.phone ? <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{c.phone}</span> : "—"}</TableCell>
                   <TableCell><span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{c.area?.name || "—"}</span></TableCell>
                   <TableCell className={c.debt_balance > 0 ? "text-destructive font-medium" : ""}>
-                    RM {c.debt_balance.toFixed(2)}
+                    {formatCurrency(c.debt_balance)}
                   </TableCell>
                   <TableCell>
                     <Badge variant={c.active ? "secondary" : "outline"}>{c.active ? "Active" : "Inactive"}</Badge>

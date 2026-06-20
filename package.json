@@ -1,17 +1,17 @@
 {
-  "name": "logistx-inventory-hub",
+  "name": "pokleh-enterprise",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "A comprehensive web-based inventory management system built with React, TypeScript, and Supabase",
+  "description": "Enterprise ice distribution management system built with React, TypeScript, and Supabase",
   "keywords": [
-    "inventory",
+    "ice-distribution",
     "management",
     "react",
     "typescript",
     "supabase"
   ],
-  "author": "LogistX Team",
+  "author": "Pokleh Enterprise",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

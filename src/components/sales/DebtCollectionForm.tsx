@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Wallet } from "lucide-react";
 import { useDebtCollection } from "@/hooks/useDebtCollection";
 import { useCustomers } from "@/hooks/useCustomers";
+import { formatCurrency } from "@/lib/currency";
 
 interface DebtCollectionFormProps {
   userRole: "admin" | "staff";
@@ -52,11 +53,11 @@ export const DebtCollectionForm = ({ userRole }: DebtCollectionFormProps) => {
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Total Collected</CardTitle></CardHeader>
-          <CardContent><p className="text-2xl font-bold text-green-600">RM {totalCollected.toFixed(2)}</p></CardContent>
+          <CardContent><p className="text-2xl font-bold text-green-600">{formatCurrency(totalCollected)}</p></CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Outstanding Debt</CardTitle></CardHeader>
-          <CardContent><p className="text-2xl font-bold text-destructive">RM {totalOutstanding.toFixed(2)}</p></CardContent>
+          <CardContent><p className="text-2xl font-bold text-destructive">{formatCurrency(totalOutstanding)}</p></CardContent>
         </Card>
       </div>
 
@@ -81,7 +82,7 @@ export const DebtCollectionForm = ({ userRole }: DebtCollectionFormProps) => {
                 <TableRow key={c.id}>
                   <TableCell>{new Date(c.collection_date).toLocaleDateString()}</TableCell>
                   <TableCell className="font-medium">{c.customer?.name || "—"}</TableCell>
-                  <TableCell className="text-green-600 font-medium">RM {c.amount.toFixed(2)}</TableCell>
+                  <TableCell className="text-green-600 font-medium">{formatCurrency(c.amount)}</TableCell>
                   <TableCell>{c.staff?.name || "—"}</TableCell>
                   <TableCell className="text-muted-foreground text-sm">{c.notes || "—"}</TableCell>
                 </TableRow>
@@ -111,7 +112,7 @@ export const DebtCollectionForm = ({ userRole }: DebtCollectionFormProps) => {
                 <SelectContent>
                   {activeDebtors.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
-                      {c.name} (RM {c.debt_balance.toFixed(2)})
+                      {c.name} ({formatCurrency(c.debt_balance)})
                     </SelectItem>
                   ))}
                   {activeDebtors.length === 0 && (

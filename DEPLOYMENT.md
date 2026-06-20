@@ -181,7 +181,7 @@ VITE_APP_ENV=production
 ### Update Supabase Client
 ```typescript
 // src/integrations/supabase/client.ts
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://npmeujpnbpqbotksxcdt.supabase.co";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://gsieirprrkuyfzxqcizb.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "your-fallback-key";
 ```
 

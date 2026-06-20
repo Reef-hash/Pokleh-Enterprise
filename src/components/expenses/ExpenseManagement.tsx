@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Receipt } from "lucide-react";
 import { useExpenses } from "@/hooks/useExpenses";
+import { formatCurrency } from "@/lib/currency";
 
 const EXPENSE_CATEGORIES = [
   "Transportation", "Meals", "Utilities", "Maintenance",
@@ -58,7 +59,7 @@ export const ExpenseManagement = ({ userRole }: ExpenseManagementProps) => {
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Total Expenses</CardTitle></CardHeader>
-          <CardContent><p className="text-2xl font-bold text-destructive">RM {totalExpenses.toFixed(2)}</p></CardContent>
+          <CardContent><p className="text-2xl font-bold text-destructive">{formatCurrency(totalExpenses)}</p></CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Categories</CardTitle></CardHeader>
@@ -66,7 +67,7 @@ export const ExpenseManagement = ({ userRole }: ExpenseManagementProps) => {
             <div className="flex flex-wrap gap-2">
               {Object.entries(byCategory).map(([cat, amt]) => (
                 <span key={cat} className="text-sm bg-muted px-2 py-1 rounded-md">
-                  {cat}: RM {amt.toFixed(2)}
+                  {cat}: {formatCurrency(amt)}
                 </span>
               ))}
             </div>
@@ -94,7 +95,7 @@ export const ExpenseManagement = ({ userRole }: ExpenseManagementProps) => {
                 <TableRow key={e.id}>
                   <TableCell>{new Date(e.expense_date).toLocaleDateString()}</TableCell>
                   <TableCell className="font-medium">{e.category}</TableCell>
-                  <TableCell className="text-destructive font-medium">RM {e.amount.toFixed(2)}</TableCell>
+                  <TableCell className="text-destructive font-medium">{formatCurrency(e.amount)}</TableCell>
                   <TableCell className="text-muted-foreground text-sm">{e.notes || "—"}</TableCell>
                 </TableRow>
               ))}

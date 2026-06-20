@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/lib/i18n";
 import { Package } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -17,6 +18,7 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { signIn } = useAuth();
+  const { t } = useLanguage();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,8 +62,8 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
             </div>
           </div>
           <div>
-            <CardTitle className="text-2xl font-bold">LogistX</CardTitle>
-            <CardDescription>Inventory Management System</CardDescription>
+            <CardTitle className="text-2xl font-bold">{t('app.name')}</CardTitle>
+            <CardDescription>{t('app.tagline')}</CardDescription>
           </div>
         </CardHeader>
         <CardContent>

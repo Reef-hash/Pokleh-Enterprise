@@ -51,7 +51,7 @@ const Documentation = () => {
               </Button>
             </Link>
             <div>
-              <h1 className="text-xl font-bold">LogistX Documentation</h1>
+              <h1 className="text-xl font-bold">Pokleh Enterprise Documentation</h1>
               <p className="text-sm text-muted-foreground">System & User Manual</p>
             </div>
           </div>
@@ -110,14 +110,14 @@ const Documentation = () => {
                     <CardTitle className="text-2xl">System Overview</CardTitle>
                   </div>
                   <CardDescription>
-                    Introduction to LogistX Inventory Management System
+                    Introduction to Pokleh Enterprise
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="prose prose-sm max-w-none dark:prose-invert">
                   <p>
-                    LogistX is a comprehensive inventory management system designed to streamline 
-                    your business operations. It provides real-time tracking, automated alerts, 
-                    and detailed analytics to help you manage your inventory efficiently.
+                    Pokleh Enterprise is an ice distribution management system designed to streamline 
+                    your operations. It provides stock intake-to-sale tracking, debt management, 
+                    daily closing, and detailed reports to help you run your business efficiently.
                   </p>
                   
                   <h3>Key Features</h3>
@@ -153,7 +153,7 @@ const Documentation = () => {
                 <CardContent className="prose prose-sm max-w-none dark:prose-invert">
                   <h3>First-Time Setup</h3>
                   <ol>
-                    <li>Navigate to the LogistX login page</li>
+                    <li>Navigate to the Pokleh Enterprise login page</li>
                     <li>Sign up for a new account or sign in with existing credentials</li>
                     <li>Complete your profile setup</li>
                     <li>Wait for admin approval (if required)</li>

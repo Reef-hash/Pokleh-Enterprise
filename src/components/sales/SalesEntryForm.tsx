@@ -11,6 +11,7 @@ import { useSales } from "@/hooks/useSales";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useAreas } from "@/hooks/useAreas";
 import { useAuthStore } from "@/stores/authStore";
+import { formatCurrency } from "@/lib/currency";
 
 interface SalesEntryFormProps {
   userRole: "admin" | "staff";
@@ -62,11 +63,11 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Revenue</CardTitle></CardHeader>
-          <CardContent><p className="text-2xl font-bold">RM {totalRevenue.toFixed(2)}</p></CardContent>
+          <CardContent><p className="text-2xl font-bold">{formatCurrency(totalRevenue)}</p></CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Outstanding Debt</CardTitle></CardHeader>
-          <CardContent><p className="text-2xl font-bold text-destructive">RM {totalDebt.toFixed(2)}</p></CardContent>
+          <CardContent><p className="text-2xl font-bold text-destructive">{formatCurrency(totalDebt)}</p></CardContent>
         </Card>
       </div>
 
@@ -94,7 +95,7 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
                   <TableCell className="font-medium">{s.customer?.name || "—"}</TableCell>
                   <TableCell>{s.area?.name || "—"}</TableCell>
                   <TableCell>{s.quantity}</TableCell>
-                  <TableCell>RM {s.selling_price.toFixed(2)}</TableCell>
+                  <TableCell>{formatCurrency(s.selling_price)}</TableCell>
                   <TableCell>
                     <span className={s.payment_type === "debt" ? "text-destructive font-medium" : "text-green-600 font-medium"}>
                       {s.payment_type}

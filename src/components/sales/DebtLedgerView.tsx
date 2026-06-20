@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { useDebtLedger } from "@/hooks/useDebtLedger";
 import { useCustomers } from "@/hooks/useCustomers";
+import { formatCurrency } from "@/lib/currency";
 
 export const DebtLedgerView = () => {
   const { entries, loading } = useDebtLedger();
@@ -41,7 +42,7 @@ export const DebtLedgerView = () => {
             <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Current Balance</CardTitle></CardHeader>
             <CardContent>
               <p className={`text-2xl font-bold ${currentBalance > 0 ? "text-destructive" : "text-green-600"}`}>
-                RM {currentBalance.toFixed(2)}
+                {formatCurrency(currentBalance)}
               </p>
             </CardContent>
           </Card>
@@ -79,9 +80,9 @@ export const DebtLedgerView = () => {
                       {e.entry_type}
                     </span>
                   </TableCell>
-                  <TableCell>RM {e.amount.toFixed(2)}</TableCell>
-                  <TableCell>RM {e.balance_before.toFixed(2)}</TableCell>
-                  <TableCell className="font-medium">RM {e.balance_after.toFixed(2)}</TableCell>
+                  <TableCell>{formatCurrency(e.amount)}</TableCell>
+                  <TableCell>{formatCurrency(e.balance_before)}</TableCell>
+                  <TableCell className="font-medium">{formatCurrency(e.balance_after)}</TableCell>
                   <TableCell className="text-muted-foreground text-sm">{e.reference_type}</TableCell>
                 </TableRow>
               ))}

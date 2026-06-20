@@ -20,15 +20,15 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_profiles_user_id ON public.profiles(user_id);
-CREATE INDEX idx_profiles_role ON public.profiles(role);
+CREATE INDEX IF NOT EXISTS idx_profiles_user_id ON public.profiles(user_id);
+CREATE INDEX IF NOT EXISTS idx_profiles_role ON public.profiles(role);
 
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================
 -- 3. AREAS
 -- ============================================================
-CREATE TABLE public.areas (
+CREATE TABLE IF NOT EXISTS public.areas (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -39,7 +39,7 @@ ALTER TABLE public.areas ENABLE ROW LEVEL SECURITY;
 -- ============================================================
 -- 3. STAFF AREA ASSIGNMENTS
 -- ============================================================
-CREATE TABLE public.staff_area_assignments (
+CREATE TABLE IF NOT EXISTS public.staff_area_assignments (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   staff_id UUID NOT NULL REFERENCES public.profiles(user_id) ON DELETE CASCADE,
   area_id UUID NOT NULL REFERENCES public.areas(id) ON DELETE CASCADE,
@@ -50,15 +50,15 @@ CREATE TABLE public.staff_area_assignments (
   CONSTRAINT chk_dates CHECK (ended_date IS NULL OR ended_date >= assigned_date)
 );
 
-CREATE INDEX idx_staff_area_staff ON public.staff_area_assignments(staff_id) WHERE ended_date IS NULL;
-CREATE INDEX idx_staff_area_area ON public.staff_area_assignments(area_id) WHERE ended_date IS NULL;
+CREATE INDEX IF NOT EXISTS idx_staff_area_staff ON public.staff_area_assignments(staff_id) WHERE ended_date IS NULL;
+CREATE INDEX IF NOT EXISTS idx_staff_area_area ON public.staff_area_assignments(area_id) WHERE ended_date IS NULL;
 
 ALTER TABLE public.staff_area_assignments ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================
 -- 4. CUSTOMERS
 -- ============================================================
-CREATE TABLE public.customers (
+CREATE TABLE IF NOT EXISTS public.customers (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   name TEXT NOT NULL,
   phone TEXT,
@@ -70,16 +70,16 @@ CREATE TABLE public.customers (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_customers_area ON public.customers(area_id);
-CREATE INDEX idx_customers_active ON public.customers(active);
-CREATE INDEX idx_customers_name ON public.customers(name);
+CREATE INDEX IF NOT EXISTS idx_customers_area ON public.customers(area_id);
+CREATE INDEX IF NOT EXISTS idx_customers_active ON public.customers(active);
+CREATE INDEX IF NOT EXISTS idx_customers_name ON public.customers(name);
 
 ALTER TABLE public.customers ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================
 -- 5. SUPPLIERS
 -- ============================================================
-CREATE TABLE public.suppliers (
+CREATE TABLE IF NOT EXISTS public.suppliers (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
   phone TEXT,
@@ -92,7 +92,7 @@ ALTER TABLE public.suppliers ENABLE ROW LEVEL SECURITY;
 -- ============================================================
 -- 6. SUPPLIER PRICE HISTORY
 -- ============================================================
-CREATE TABLE public.supplier_price_history (
+CREATE TABLE IF NOT EXISTS public.supplier_price_history (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   supplier_id UUID NOT NULL REFERENCES public.suppliers(id) ON DELETE CASCADE,
   cost_per_pax DECIMAL(10,2) NOT NULL CHECK (cost_per_pax >= 0),
@@ -100,14 +100,14 @@ CREATE TABLE public.supplier_price_history (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_price_history_supplier ON public.supplier_price_history(supplier_id);
+CREATE INDEX IF NOT EXISTS idx_price_history_supplier ON public.supplier_price_history(supplier_id);
 
 ALTER TABLE public.supplier_price_history ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================
 -- 7. STOCK INTAKE
 -- ============================================================
-CREATE TABLE public.stock_intake (
+CREATE TABLE IF NOT EXISTS public.stock_intake (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   intake_date DATE NOT NULL,
   supplier_id UUID NOT NULL REFERENCES public.suppliers(id),
@@ -118,15 +118,15 @@ CREATE TABLE public.stock_intake (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_stock_intake_date ON public.stock_intake(intake_date);
-CREATE INDEX idx_stock_intake_supplier ON public.stock_intake(supplier_id);
+CREATE INDEX IF NOT EXISTS idx_stock_intake_date ON public.stock_intake(intake_date);
+CREATE INDEX IF NOT EXISTS idx_stock_intake_supplier ON public.stock_intake(supplier_id);
 
 ALTER TABLE public.stock_intake ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================
 -- 8. STOCK DISTRIBUTION
 -- ============================================================
-CREATE TABLE public.stock_distribution (
+CREATE TABLE IF NOT EXISTS public.stock_distribution (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   intake_id UUID NOT NULL REFERENCES public.stock_intake(id),
   area_id UUID NOT NULL REFERENCES public.areas(id),
@@ -135,15 +135,15 @@ CREATE TABLE public.stock_distribution (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_stock_distribution_intake ON public.stock_distribution(intake_id);
-CREATE INDEX idx_stock_distribution_area ON public.stock_distribution(area_id);
+CREATE INDEX IF NOT EXISTS idx_stock_distribution_intake ON public.stock_distribution(intake_id);
+CREATE INDEX IF NOT EXISTS idx_stock_distribution_area ON public.stock_distribution(area_id);
 
 ALTER TABLE public.stock_distribution ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================
 -- 9. SALES
 -- ============================================================
-CREATE TABLE public.sales (
+CREATE TABLE IF NOT EXISTS public.sales (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   customer_id UUID NOT NULL REFERENCES public.customers(id),
   area_id UUID NOT NULL REFERENCES public.areas(id),
@@ -157,18 +157,18 @@ CREATE TABLE public.sales (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_sales_date ON public.sales(sale_date);
-CREATE INDEX idx_sales_customer ON public.sales(customer_id);
-CREATE INDEX idx_sales_area ON public.sales(area_id);
-CREATE INDEX idx_sales_staff ON public.sales(staff_id);
-CREATE INDEX idx_sales_distribution ON public.sales(distribution_id);
+CREATE INDEX IF NOT EXISTS idx_sales_date ON public.sales(sale_date);
+CREATE INDEX IF NOT EXISTS idx_sales_customer ON public.sales(customer_id);
+CREATE INDEX IF NOT EXISTS idx_sales_area ON public.sales(area_id);
+CREATE INDEX IF NOT EXISTS idx_sales_staff ON public.sales(staff_id);
+CREATE INDEX IF NOT EXISTS idx_sales_distribution ON public.sales(distribution_id);
 
 ALTER TABLE public.sales ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================
 -- 10. DEBT LEDGER
 -- ============================================================
-CREATE TABLE public.debt_ledger (
+CREATE TABLE IF NOT EXISTS public.debt_ledger (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   customer_id UUID NOT NULL REFERENCES public.customers(id),
   entry_type TEXT NOT NULL CHECK (entry_type IN ('sale', 'payment', 'adjustment')),
@@ -181,15 +181,15 @@ CREATE TABLE public.debt_ledger (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_debt_ledger_customer ON public.debt_ledger(customer_id);
-CREATE INDEX idx_debt_ledger_created ON public.debt_ledger(created_at);
+CREATE INDEX IF NOT EXISTS idx_debt_ledger_customer ON public.debt_ledger(customer_id);
+CREATE INDEX IF NOT EXISTS idx_debt_ledger_created ON public.debt_ledger(created_at);
 
 ALTER TABLE public.debt_ledger ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================
 -- 11. DEBT COLLECTION
 -- ============================================================
-CREATE TABLE public.debt_collection (
+CREATE TABLE IF NOT EXISTS public.debt_collection (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   customer_id UUID NOT NULL REFERENCES public.customers(id),
   amount DECIMAL(10,2) NOT NULL CHECK (amount > 0),
@@ -199,15 +199,15 @@ CREATE TABLE public.debt_collection (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_debt_collection_customer ON public.debt_collection(customer_id);
-CREATE INDEX idx_debt_collection_date ON public.debt_collection(collection_date);
+CREATE INDEX IF NOT EXISTS idx_debt_collection_customer ON public.debt_collection(customer_id);
+CREATE INDEX IF NOT EXISTS idx_debt_collection_date ON public.debt_collection(collection_date);
 
 ALTER TABLE public.debt_collection ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================
 -- 12. STOCK RETURN
 -- ============================================================
-CREATE TABLE public.stock_return (
+CREATE TABLE IF NOT EXISTS public.stock_return (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   distribution_id UUID NOT NULL REFERENCES public.stock_distribution(id),
   area_id UUID NOT NULL REFERENCES public.areas(id),
@@ -217,15 +217,15 @@ CREATE TABLE public.stock_return (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_stock_return_distribution ON public.stock_return(distribution_id);
-CREATE INDEX idx_stock_return_date ON public.stock_return(return_date);
+CREATE INDEX IF NOT EXISTS idx_stock_return_distribution ON public.stock_return(distribution_id);
+CREATE INDEX IF NOT EXISTS idx_stock_return_date ON public.stock_return(return_date);
 
 ALTER TABLE public.stock_return ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================
 -- 13. SUPPLIER SETTLEMENTS
 -- ============================================================
-CREATE TABLE public.supplier_settlements (
+CREATE TABLE IF NOT EXISTS public.supplier_settlements (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   intake_id UUID NOT NULL REFERENCES public.stock_intake(id),
   total_received INTEGER NOT NULL DEFAULT 0,
@@ -241,15 +241,15 @@ CREATE TABLE public.supplier_settlements (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_supplier_settlements_intake ON public.supplier_settlements(intake_id);
-CREATE INDEX idx_supplier_settlements_status ON public.supplier_settlements(status);
+CREATE INDEX IF NOT EXISTS idx_supplier_settlements_intake ON public.supplier_settlements(intake_id);
+CREATE INDEX IF NOT EXISTS idx_supplier_settlements_status ON public.supplier_settlements(status);
 
 ALTER TABLE public.supplier_settlements ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================
 -- 14. EXPENSES
 -- ============================================================
-CREATE TABLE public.expenses (
+CREATE TABLE IF NOT EXISTS public.expenses (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   category TEXT NOT NULL,
   amount DECIMAL(10,2) NOT NULL CHECK (amount > 0),
@@ -259,15 +259,15 @@ CREATE TABLE public.expenses (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_expenses_date ON public.expenses(expense_date);
-CREATE INDEX idx_expenses_category ON public.expenses(category);
+CREATE INDEX IF NOT EXISTS idx_expenses_date ON public.expenses(expense_date);
+CREATE INDEX IF NOT EXISTS idx_expenses_category ON public.expenses(category);
 
 ALTER TABLE public.expenses ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================
 -- 15. DAILY CLOSINGS
 -- ============================================================
-CREATE TABLE public.daily_closings (
+CREATE TABLE IF NOT EXISTS public.daily_closings (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   closing_date DATE NOT NULL,
   area_id UUID NOT NULL REFERENCES public.areas(id),
@@ -289,17 +289,17 @@ CREATE TABLE public.daily_closings (
   CONSTRAINT uq_closing_area_date UNIQUE (closing_date, area_id)
 );
 
-CREATE INDEX idx_daily_closings_date ON public.daily_closings(closing_date);
-CREATE INDEX idx_daily_closings_status ON public.daily_closings(status);
+CREATE INDEX IF NOT EXISTS idx_daily_closings_date ON public.daily_closings(closing_date);
+CREATE INDEX IF NOT EXISTS idx_daily_closings_status ON public.daily_closings(status);
 
 ALTER TABLE public.daily_closings ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================
 -- 16. AUDIT LOGS
 -- ============================================================
-CREATE TABLE public.audit_logs (
+CREATE TABLE IF NOT EXISTS public.audit_logs (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID NOT NULL REFERENCES public.profiles(user_id),
+  user_id UUID REFERENCES public.profiles(user_id),
   action TEXT NOT NULL,
   entity TEXT NOT NULL,
   entity_id UUID NOT NULL,
@@ -310,12 +310,11 @@ CREATE TABLE public.audit_logs (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_audit_logs_entity ON public.audit_logs(entity, entity_id);
-CREATE INDEX idx_audit_logs_user ON public.audit_logs(user_id);
-CREATE INDEX idx_audit_logs_created ON public.audit_logs(created_at);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_entity ON public.audit_logs(entity, entity_id);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_user ON public.audit_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_created ON public.audit_logs(created_at);
 
 ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.audit_logs ALTER COLUMN user_id DROP NOT NULL;
 
 -- ============================================================
 -- 17. AUDIT LOG TRIGGER FUNCTION
@@ -373,22 +372,31 @@ $function$;
 -- ============================================================
 -- 19. AUDIT TRIGGERS (on financial tables)
 -- ============================================================
+DROP TRIGGER IF EXISTS trg_audit_customers ON public.customers;
 CREATE TRIGGER trg_audit_customers AFTER INSERT OR UPDATE OR DELETE ON public.customers
   FOR EACH ROW EXECUTE FUNCTION public.log_audit();
+DROP TRIGGER IF EXISTS trg_audit_sales ON public.sales;
 CREATE TRIGGER trg_audit_sales AFTER INSERT OR UPDATE OR DELETE ON public.sales
   FOR EACH ROW EXECUTE FUNCTION public.log_audit();
+DROP TRIGGER IF EXISTS trg_audit_debt_ledger ON public.debt_ledger;
 CREATE TRIGGER trg_audit_debt_ledger AFTER INSERT OR UPDATE OR DELETE ON public.debt_ledger
   FOR EACH ROW EXECUTE FUNCTION public.log_audit();
+DROP TRIGGER IF EXISTS trg_audit_debt_collection ON public.debt_collection;
 CREATE TRIGGER trg_audit_debt_collection AFTER INSERT OR UPDATE OR DELETE ON public.debt_collection
   FOR EACH ROW EXECUTE FUNCTION public.log_audit();
+DROP TRIGGER IF EXISTS trg_audit_stock_intake ON public.stock_intake;
 CREATE TRIGGER trg_audit_stock_intake AFTER INSERT OR UPDATE OR DELETE ON public.stock_intake
   FOR EACH ROW EXECUTE FUNCTION public.log_audit();
+DROP TRIGGER IF EXISTS trg_audit_stock_distribution ON public.stock_distribution;
 CREATE TRIGGER trg_audit_stock_distribution AFTER INSERT OR UPDATE OR DELETE ON public.stock_distribution
   FOR EACH ROW EXECUTE FUNCTION public.log_audit();
+DROP TRIGGER IF EXISTS trg_audit_stock_return ON public.stock_return;
 CREATE TRIGGER trg_audit_stock_return AFTER INSERT OR UPDATE OR DELETE ON public.stock_return
   FOR EACH ROW EXECUTE FUNCTION public.log_audit();
+DROP TRIGGER IF EXISTS trg_audit_expenses ON public.expenses;
 CREATE TRIGGER trg_audit_expenses AFTER INSERT OR UPDATE OR DELETE ON public.expenses
   FOR EACH ROW EXECUTE FUNCTION public.log_audit();
+DROP TRIGGER IF EXISTS trg_audit_supplier_settlements ON public.supplier_settlements;
 CREATE TRIGGER trg_audit_supplier_settlements AFTER INSERT OR UPDATE OR DELETE ON public.supplier_settlements
   FOR EACH ROW EXECUTE FUNCTION public.log_audit();
 
@@ -403,12 +411,16 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trg_customers_updated_at ON public.customers;
 CREATE TRIGGER trg_customers_updated_at BEFORE UPDATE ON public.customers
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+DROP TRIGGER IF EXISTS trg_suppliers_updated_at ON public.suppliers;
 CREATE TRIGGER trg_suppliers_updated_at BEFORE UPDATE ON public.suppliers
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+DROP TRIGGER IF EXISTS trg_supplier_settlements_updated_at ON public.supplier_settlements;
 CREATE TRIGGER trg_supplier_settlements_updated_at BEFORE UPDATE ON public.supplier_settlements
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+DROP TRIGGER IF EXISTS trg_profiles_updated_at ON public.profiles;
 CREATE TRIGGER trg_profiles_updated_at BEFORE UPDATE ON public.profiles
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
@@ -418,7 +430,7 @@ CREATE TRIGGER trg_profiles_updated_at BEFORE UPDATE ON public.profiles
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
-SECURITY DEFINER SET search_path = public
+SECURITY DEFINER SET search_path TO 'public'
 AS $$
 BEGIN
   INSERT INTO public.profiles (user_id, email, name, role)
@@ -432,6 +444,7 @@ BEGIN
 END;
 $$;
 
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
@@ -451,10 +464,10 @@ AS $$ BEGIN RETURN (SELECT role FROM public.profiles WHERE user_id = auth.uid())
 -- Helper: get areas assigned to current staff user
 CREATE OR REPLACE FUNCTION public.get_my_area_ids()
 RETURNS SETOF UUID
-LANGUAGE SQL
+LANGUAGE plpgsql
 STABLE SECURITY DEFINER
 SET search_path TO 'public'
-AS $$ SELECT area_id FROM public.staff_area_assignments WHERE staff_id = auth.uid() AND ended_date IS NULL; $$;
+AS $$ BEGIN RETURN QUERY SELECT area_id FROM public.staff_area_assignments WHERE staff_id = auth.uid() AND ended_date IS NULL; END; $$;
 
 -- profiles
 CREATE POLICY "Users can view own profile" ON public.profiles FOR SELECT

@@ -25,7 +25,7 @@ class OfflineDetector {
     this.heartbeatInterval = setInterval(async () => {
       try {
         const resp = await fetch(
-          "https://npmeujpnbpqbotksxcdt.supabase.co/rest/v1/",
+          "https://gsieirprrkuyfzxqcizb.supabase.co/rest/v1/",
           { method: "HEAD", signal: AbortSignal.timeout(5000) }
         );
         this.setOnline(resp.ok);

@@ -13,6 +13,7 @@ import { useInventory } from "@/hooks/useInventory";
 import { useUsers } from "@/hooks/useUsers";
 import { useTransactions } from "@/hooks/useTransactions";
 import { DatabaseStatus } from "@/components/ui/DatabaseStatus";
+import { formatCurrency } from "@/lib/currency";
 
 export const AdminDashboard = () => {
   const { items: inventoryData, categories, suppliers, lowStockItems, totalValue, loading: inventoryLoading } = useInventory();
@@ -55,7 +56,7 @@ export const AdminDashboard = () => {
     },
     {
       title: "Total Stock Value",
-      value: `₱${totalValue.toLocaleString()}`,
+      value: formatCurrency(totalValue),
       icon: DollarSign,
       description: "Current inventory worth",
       color: "text-success",
@@ -79,7 +80,7 @@ export const AdminDashboard = () => {
     },
     {
       title: "Monthly Revenue",
-      value: `₱${monthlyRevenue.toLocaleString()}`,
+      value: formatCurrency(monthlyRevenue),
       icon: TrendingUp,
       description: "Revenue this month",
       color: "text-success",
@@ -188,11 +189,11 @@ export const AdminDashboard = () => {
                     <div>
                       <p className="font-medium">{item.name}</p>
                       <p className="text-sm text-muted-foreground">
-                        {item.quantity} units × ₱{item.price}
+                        {item.quantity} units × {formatCurrency(item.price)}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold">₱{value.toLocaleString()}</p>
+                      <p className="font-semibold">{formatCurrency(value)}</p>
                       <Badge variant="secondary">#{index + 1}</Badge>
                     </div>
                   </div>

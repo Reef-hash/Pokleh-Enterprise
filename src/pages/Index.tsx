@@ -37,15 +37,14 @@ const Index = () => {
           </div>
           
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
-            Professional
-            <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent ml-3">
-              Inventory Management
+            <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              Pokleh Enterprise
             </span>
           </h1>
           
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Streamline your inventory operations with LogistX - the comprehensive solution for 
-            tracking stock, managing suppliers, and generating insights.
+            Ice distribution management system — track stock, manage sales, handle debt collections, 
+            and generate reports with ease.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -57,9 +56,6 @@ const Index = () => {
               Get Started
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
-            <Button variant="outline" size="lg">
-              Learn More
-            </Button>
           </div>
         </div>
       </div>
@@ -69,7 +65,7 @@ const Index = () => {
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4">Everything You Need</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Powerful features designed to help you manage inventory efficiently and scale your business operations.
+            Purpose-built for ice distribution businesses — from stock intake to daily closing.
           </p>
         </div>
 
@@ -79,9 +75,9 @@ const Index = () => {
               <div className="mx-auto w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
                 <Package className="h-6 w-6 text-primary" />
               </div>
-              <CardTitle>Inventory Tracking</CardTitle>
+              <CardTitle>Stock Management</CardTitle>
               <CardDescription>
-                Real-time stock monitoring with automated low-stock alerts and comprehensive item management.
+                Full intake-to-distribution tracking with automated settlement calculations.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -91,9 +87,9 @@ const Index = () => {
               <div className="mx-auto w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
                 <BarChart3 className="h-6 w-6 text-primary" />
               </div>
-              <CardTitle>Analytics & Reports</CardTitle>
+              <CardTitle>Sales & Debt</CardTitle>
               <CardDescription>
-                Detailed insights and customizable reports to help you make data-driven decisions.
+                Record sales, manage debt collections, and track customer balances in real time.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -103,9 +99,9 @@ const Index = () => {
               <div className="mx-auto w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
                 <Users className="h-6 w-6 text-primary" />
               </div>
-              <CardTitle>Team Management</CardTitle>
+              <CardTitle>Area-Based Operations</CardTitle>
               <CardDescription>
-                Role-based access control with admin and staff permissions for secure operations.
+                Assign staff to coverage areas with role-based access and performance tracking.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -115,9 +111,9 @@ const Index = () => {
               <div className="mx-auto w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
                 <Shield className="h-6 w-6 text-primary" />
               </div>
-              <CardTitle>Secure & Reliable</CardTitle>
+              <CardTitle>Daily Closing</CardTitle>
               <CardDescription>
-                Enterprise-grade security with data backup and recovery to protect your information.
+                Automated end-of-day reconciliation with validation and profit calculation.
               </CardDescription>
             </CardHeader>
           </Card>

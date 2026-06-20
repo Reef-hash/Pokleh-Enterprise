@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { useOrders, type Order } from "@/hooks/useOrders";
 import { useInventory } from "@/hooks/useInventory";
+import { formatCurrency } from "@/lib/currency";
 
 interface OrdersManagementProps {
   userRole: 'admin' | 'staff';
@@ -234,7 +235,7 @@ export const OrdersManagement = ({ userRole }: OrdersManagementProps) => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-gradient">
-              ₱{orderStats.totalRevenue.toLocaleString()}
+              {formatCurrency(orderStats.totalRevenue)}
             </div>
             <p className="text-xs text-muted-foreground font-medium">
               All orders combined
@@ -326,7 +327,7 @@ export const OrdersManagement = ({ userRole }: OrdersManagementProps) => {
                         {new Date(order.order_date).toLocaleDateString()}
                       </div>
                     </TableCell>
-                    <TableCell className="font-bold text-gradient">₱{order.total_amount.toFixed(2)}</TableCell>
+                    <TableCell className="font-bold text-gradient">{formatCurrency(order.total_amount)}</TableCell>
                     <TableCell>{getStatusBadge(order.status)}</TableCell>
                     <TableCell>
                       <div className="flex gap-1">
@@ -446,7 +447,7 @@ export const OrdersManagement = ({ userRole }: OrdersManagementProps) => {
                     <SelectContent className="dropdown-content">
                       {inventoryItems.map(inventoryItem => (
                         <SelectItem key={inventoryItem.id} value={inventoryItem.id}>
-                          {inventoryItem.name} - ₱{inventoryItem.price}
+                          {inventoryItem.name} - {formatCurrency(inventoryItem.price)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -528,7 +529,7 @@ export const OrdersManagement = ({ userRole }: OrdersManagementProps) => {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm">Total:</span>
-                      <span className="font-bold text-gradient">₱{viewingOrder.total_amount.toFixed(2)}</span>
+                      <span className="font-bold text-gradient">{formatCurrency(viewingOrder.total_amount)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm">Date:</span>
@@ -561,8 +562,8 @@ export const OrdersManagement = ({ userRole }: OrdersManagementProps) => {
                               </div>
                             </TableCell>
                             <TableCell>{item.quantity}</TableCell>
-                            <TableCell>₱{item.unit_price.toFixed(2)}</TableCell>
-                            <TableCell className="font-semibold">₱{item.total_price.toFixed(2)}</TableCell>
+                            <TableCell>{formatCurrency(item.unit_price)}</TableCell>
+                            <TableCell className="font-semibold">{formatCurrency(item.total_price)}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>

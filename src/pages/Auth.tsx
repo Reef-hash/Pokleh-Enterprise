@@ -7,12 +7,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Eye, EyeOff, Loader2, LogIn, UserPlus, HelpCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/lib/i18n';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 
 const Auth = () => {
   const { signIn, signUp, loading, isAuthenticated } = useAuth();
+  const { t } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   
@@ -77,12 +79,12 @@ const Auth = () => {
   const fillDemoAccount = (type: 'admin' | 'staff') => {
     if (type === 'admin') {
       setSignInData({
-        email: 'admin@logistx.com',
+        email: 'admin@pokleh.com',
         password: 'admin123'
       });
     } else {
       setSignInData({
-        email: 'staff@logistx.com', 
+        email: 'staff@pokleh.com',
         password: 'staff123'
       });
     }
@@ -94,16 +96,16 @@ const Auth = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-2xl mb-4">
-            <span className="text-2xl font-bold text-primary-foreground">L</span>
+            <span className="text-2xl font-bold text-primary-foreground">P</span>
           </div>
-          <h1 className="text-3xl font-bold mb-2">Welcome to LogistX</h1>
-          <p className="text-muted-foreground">Professional Inventory Management System</p>
+          <h1 className="text-3xl font-bold mb-2">{t('auth.welcome')}</h1>
+          <p className="text-muted-foreground">{t('app.tagline')}</p>
         </div>
 
         <Card className="shadow-xl">
           <CardHeader className="text-center">
-            <CardTitle>Access Your Account</CardTitle>
-            <CardDescription>Sign in or create a new account to continue</CardDescription>
+            <CardTitle>{t('auth.sign-in')}</CardTitle>
+            <CardDescription>{t('auth.sign-in')} / {t('auth.sign-up')}</CardDescription>
           </CardHeader>
           
           <CardContent>
@@ -111,11 +113,11 @@ const Auth = () => {
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="signin" className="flex items-center gap-2">
                   <LogIn className="h-4 w-4" />
-                  Sign In
+                  {t('auth.sign-in')}
                 </TabsTrigger>
                 <TabsTrigger value="signup" className="flex items-center gap-2">
                   <UserPlus className="h-4 w-4" />
-                  Sign Up
+                  {t('auth.sign-up')}
                 </TabsTrigger>
               </TabsList>
               
