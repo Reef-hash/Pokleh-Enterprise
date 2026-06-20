@@ -442,14 +442,14 @@ CREATE POLICY "Admins can view all customers" ON public.customers FOR SELECT
 -- suppliers
 CREATE POLICY "Authenticated users can view suppliers" ON public.suppliers FOR SELECT
   TO authenticated USING (true);
-CREATE POLICY "Admins can manage suppliers" ON public.suppliers FOR INSERT OR UPDATE OR DELETE
+CREATE POLICY "Admins can manage suppliers" ON public.suppliers FOR ALL
   USING (public.get_current_user_role() = 'admin')
   WITH CHECK (public.get_current_user_role() = 'admin');
 
 -- supplier_price_history
 CREATE POLICY "Authenticated users can view price history" ON public.supplier_price_history FOR SELECT
   TO authenticated USING (true);
-CREATE POLICY "Admins can manage price history" ON public.supplier_price_history FOR INSERT OR UPDATE OR DELETE
+CREATE POLICY "Admins can manage price history" ON public.supplier_price_history FOR ALL
   USING (public.get_current_user_role() = 'admin')
   WITH CHECK (public.get_current_user_role() = 'admin');
 
