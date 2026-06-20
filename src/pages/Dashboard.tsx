@@ -8,6 +8,21 @@ import { UserManagement } from "@/components/users/UserManagement";
 import { OrdersManagement } from "@/components/orders/OrdersManagement";
 import { AnalyticsDashboard } from "@/components/analytics/AnalyticsDashboard";
 import { SuppliersManagement } from "@/components/suppliers/SuppliersManagement";
+import { AreaManagement } from "@/components/areas/AreaManagement";
+import { CustomerManagement } from "@/components/customers/CustomerManagement";
+import { StaffAssignment } from "@/components/staff/StaffAssignment";
+import { StockIntakeForm } from "@/components/stock/StockIntakeForm";
+import { StockDistributionForm } from "@/components/stock/StockDistributionForm";
+import { StockReturnForm } from "@/components/stock/StockReturnForm";
+import { SupplierSettlementView } from "@/components/stock/SupplierSettlementView";
+import { SalesEntryForm } from "@/components/sales/SalesEntryForm";
+import { DebtLedgerView } from "@/components/sales/DebtLedgerView";
+import { DebtCollectionForm } from "@/components/sales/DebtCollectionForm";
+import { ExpenseManagement } from "@/components/expenses/ExpenseManagement";
+import { SupplierPriceHistoryView } from "@/components/suppliers/SupplierPriceHistoryView";
+import { PoklehReports } from "@/components/reports/PoklehReports";
+import { DailyClosingWorkflow } from "@/components/closings/DailyClosingWorkflow";
+import { AuditLogViewer } from "@/components/audit/AuditLogViewer";
 import { useInventory } from "@/hooks/useInventory";
 
 interface User {
@@ -40,11 +55,25 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
             onNavigate={handleNavigate}
           />
         );
+      case 'areas':
+        return <AreaManagement userRole={user.role} />;
+      case 'customers':
+        return <CustomerManagement userRole={user.role} />;
+      case 'staff-assignments':
+        return <StaffAssignment userRole={user.role} />;
+      case 'stock-intake':
+        return <StockIntakeForm userRole={user.role} />;
+      case 'stock-distribution':
+        return <StockDistributionForm userRole={user.role} />;
+      case 'stock-return':
+        return <StockReturnForm userRole={user.role} />;
+      case 'settlements':
+        return <SupplierSettlementView userRole={user.role} />;
       case 'inventory':
         return (
           <InventoryManagement 
             inventoryData={inventoryData}
-            onUpdateInventory={() => {}} // This will be handled by the useInventory hook
+            onUpdateInventory={() => {}}
             userRole={user.role}
           />
         );
@@ -64,6 +93,22 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
         return (
           <UserManagement userRole={user.role} />
         );
+      case 'sales':
+        return <SalesEntryForm userRole={user.role} />;
+      case 'debt-ledger':
+        return <DebtLedgerView />;
+      case 'debt-collection':
+        return <DebtCollectionForm userRole={user.role} />;
+      case 'expenses':
+        return <ExpenseManagement userRole={user.role} />;
+      case 'price-history':
+        return <SupplierPriceHistoryView />;
+      case 'pokleh-reports':
+        return <PoklehReports userRole={user.role} />;
+      case 'daily-closing':
+        return <DailyClosingWorkflow userRole={user.role} />;
+      case 'audit-logs':
+        return user.role === "admin" ? <AuditLogViewer /> : <div className="text-center py-12"><h3 className="text-lg font-semibold mb-2">Access Denied</h3><p className="text-muted-foreground">Only administrators can view audit logs.</p></div>;
       case 'analytics':
         return (
           <AnalyticsDashboard userRole={user.role} />

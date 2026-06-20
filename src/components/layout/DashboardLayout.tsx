@@ -11,7 +11,22 @@ import {
   Home,
   ShoppingCart,
   FileText,
-  Building2
+  Building2,
+  MapPin,
+  UserCheck,
+  Wallet,
+  ClipboardList,
+  Truck,
+  RotateCcw,
+  FileSpreadsheet,
+  DollarSign,
+  BookOpen,
+  HandCoins,
+  Receipt,
+  TrendingUp,
+  Clock,
+  Shield,
+  CalendarCheck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { HelpButton } from "@/components/help/HelpButton";
@@ -42,18 +57,40 @@ export const DashboardLayout = ({
 
   const adminNavItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
-    { id: 'inventory', label: 'Inventory', icon: Package },
+    { id: 'areas', label: 'Areas', icon: MapPin },
+    { id: 'customers', label: 'Customers', icon: Users },
     { id: 'suppliers', label: 'Suppliers', icon: Building2 },
+    { id: 'staff-assignments', label: 'Staff Assignments', icon: UserCheck },
+    { id: 'stock-intake', label: 'Stock Intake', icon: ClipboardList },
+    { id: 'stock-distribution', label: 'Stock Distribution', icon: Truck },
+    { id: 'stock-return', label: 'Stock Returns', icon: RotateCcw },
+    { id: 'settlements', label: 'Supplier Settlements', icon: FileSpreadsheet },
+    { id: 'sales', label: 'Sales Entry', icon: DollarSign },
+    { id: 'debt-ledger', label: 'Debt Ledger', icon: BookOpen },
+    { id: 'debt-collection', label: 'Debt Collection', icon: HandCoins },
+    { id: 'expenses', label: 'Expenses', icon: Receipt },
+    { id: 'price-history', label: 'Price History', icon: Clock },
+    { id: 'pokleh-reports', label: 'Pokleh Reports', icon: TrendingUp },
+    { id: 'daily-closing', label: 'Daily Closing', icon: CalendarCheck },
+    { id: 'inventory', label: 'Inventory', icon: Package },
     { id: 'orders', label: 'Orders', icon: ShoppingCart },
     { id: 'reports', label: 'Reports', icon: FileText },
-    { id: 'users', label: 'Users', icon: Users },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    { id: 'users', label: 'Users', icon: Users },
+    { id: 'audit-logs', label: 'Audit Logs', icon: Shield },
   ];
 
   const staffNavItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
+    { id: 'customers', label: 'Customers', icon: Users },
+    { id: 'stock-distribution', label: 'Stock Distribution', icon: Truck },
+    { id: 'stock-return', label: 'Stock Returns', icon: RotateCcw },
+    { id: 'sales', label: 'Sales Entry', icon: DollarSign },
+    { id: 'debt-collection', label: 'Debt Collection', icon: HandCoins },
+    { id: 'expenses', label: 'Expenses', icon: Receipt },
+    { id: 'pokleh-reports', label: 'Pokleh Reports', icon: TrendingUp },
+    { id: 'daily-closing', label: 'Daily Closing', icon: CalendarCheck },
     { id: 'inventory', label: 'Inventory', icon: Package },
-    { id: 'suppliers', label: 'Suppliers', icon: Building2 },
     { id: 'orders', label: 'Orders', icon: ShoppingCart },
   ];
 
@@ -71,7 +108,7 @@ export const DashboardLayout = ({
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <Package className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="text-lg font-bold text-foreground">LogistX</span>
+            <span className="text-lg font-bold text-foreground">Pokleh</span>
           </div>
           <Button
             variant="ghost"

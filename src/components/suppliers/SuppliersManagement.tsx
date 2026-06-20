@@ -2,131 +2,57 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { 
-  Plus, 
-  Search, 
-  Edit, 
-  Trash2, 
-  Building2,
-  Mail,
-  Phone,
-  MapPin
-} from "lucide-react";
-import { useSuppliers } from "@/hooks/useSuppliers";
-import type { Supplier } from "@/types/inventory";
+import { Plus, Search, Edit, Trash2, Building2, Phone } from "lucide-react";
+import { usePoklehSuppliers } from "@/hooks/usePoklehSuppliers";
 
 interface SuppliersManagementProps {
-  userRole: 'admin' | 'staff';
+  userRole: "admin" | "staff";
 }
 
 export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    contact_email: "",
-    contact_phone: "",
-    address: ""
-  });
-  
-  const { suppliers, loading, addSupplier, updateSupplier, deleteSupplier } = useSuppliers();
+  const { suppliers, loading, addSupplier, updateSupplier, deleteSupplier } = usePoklehSuppliers();
+  const [search, setSearch] = useState("");
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
 
-  const filteredSuppliers = suppliers.filter(supplier => 
-    supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    supplier.contact_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    supplier.contact_phone?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filtered = suppliers.filter(
+    (s) => s.name.toLowerCase().includes(search.toLowerCase()) || s.phone?.includes(search)
   );
 
-  const resetForm = () => {
-    setFormData({
-      name: "",
-      contact_email: "",
-      contact_phone: "",
-      address: ""
-    });
+  const handleAdd = async () => {
+    if (!name.trim()) return;
+    await addSupplier(name.trim(), phone.trim() || undefined);
+    setName("");
+    setPhone("");
+    setIsAddOpen(false);
   };
 
-  const handleAddSupplier = async () => {
-    if (!formData.name) {
-      return;
-    }
-
-    const result = await addSupplier({
-      name: formData.name,
-      contact_email: formData.contact_email || null,
-      contact_phone: formData.contact_phone || null,
-      address: formData.address || null
-    });
-
-    if (result.success) {
-      setIsAddDialogOpen(false);
-      resetForm();
-    }
+  const handleEdit = async () => {
+    if (!name.trim() || !editingId) return;
+    await updateSupplier(editingId, name.trim(), phone.trim() || undefined);
+    setName("");
+    setPhone("");
+    setEditingId(null);
+    setIsEditOpen(false);
   };
 
-  const handleEditSupplier = async () => {
-    if (!editingSupplier || !formData.name) {
-      return;
-    }
-
-    const result = await updateSupplier(editingSupplier.id, {
-      name: formData.name,
-      contact_email: formData.contact_email || null,
-      contact_phone: formData.contact_phone || null,
-      address: formData.address || null
-    });
-
-    if (result.success) {
-      setIsEditDialogOpen(false);
-      setEditingSupplier(null);
-      resetForm();
-    }
-  };
-
-  const openEditDialog = (supplier: Supplier) => {
-    setEditingSupplier(supplier);
-    setFormData({
-      name: supplier.name,
-      contact_email: supplier.contact_email || "",
-      contact_phone: supplier.contact_phone || "",
-      address: supplier.address || ""
-    });
-    setIsEditDialogOpen(true);
-  };
-
-  const handleDeleteSupplier = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this supplier?')) {
-      await deleteSupplier(id);
-    }
+  const openEdit = (s: { id: string; name: string; phone?: string | null }) => {
+    setEditingId(s.id);
+    setName(s.name);
+    setPhone(s.phone || "");
+    setIsEditOpen(true);
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading suppliers...</p>
-        </div>
+        <p className="text-muted-foreground">Loading suppliers...</p>
       </div>
     );
   }
@@ -135,120 +61,54 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground">Suppliers Management</h2>
-          <p className="text-muted-foreground font-medium">
-            Manage your supplier relationships and contact information
-          </p>
+          <h2 className="text-3xl font-bold tracking-tight">Supplier Management</h2>
+          <p className="text-muted-foreground">Manage ice suppliers</p>
         </div>
-        {userRole === 'admin' && (
-          <Button onClick={() => setIsAddDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Supplier
+        {userRole === "admin" && (
+          <Button onClick={() => setIsAddOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" /> Add Supplier
           </Button>
         )}
       </div>
 
-      {/* Search and Filters */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Search className="h-5 w-5" />
-            <span>Search Suppliers</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex space-x-4">
-            <div className="flex-1">
-              <Input
-                placeholder="Search by name, email, or phone..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full"
-              />
-            </div>
+        <CardContent className="pt-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input className="pl-10" placeholder="Search suppliers..." value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
         </CardContent>
       </Card>
 
-      {/* Suppliers Table */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Building2 className="h-5 w-5" />
-              <span>Suppliers ({filteredSuppliers.length})</span>
-            </div>
-          </CardTitle>
-          <CardDescription>
-            Manage your supplier database and contact information
-          </CardDescription>
+          <CardTitle>Suppliers ({filtered.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Supplier Name</TableHead>
-                <TableHead>Contact Info</TableHead>
-                <TableHead>Address</TableHead>
-                <TableHead>Added Date</TableHead>
-                {userRole === 'admin' && <TableHead>Actions</TableHead>}
+                <TableHead>Name</TableHead>
+                <TableHead>Phone</TableHead>
+                <TableHead>Added</TableHead>
+                {userRole === "admin" && <TableHead>Actions</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredSuppliers.map((supplier) => (
-                <TableRow key={supplier.id}>
+              {filtered.map((s) => (
+                <TableRow key={s.id}>
                   <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <Building2 className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{supplier.name}</span>
-                    </div>
+                    <span className="flex items-center gap-2 font-medium">
+                      <Building2 className="h-4 w-4 text-muted-foreground" /> {s.name}
+                    </span>
                   </TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      {supplier.contact_email && (
-                        <div className="flex items-center space-x-1 text-sm">
-                          <Mail className="h-3 w-3" />
-                          <span>{supplier.contact_email}</span>
-                        </div>
-                      )}
-                      {supplier.contact_phone && (
-                        <div className="flex items-center space-x-1 text-sm">
-                          <Phone className="h-3 w-3" />
-                          <span>{supplier.contact_phone}</span>
-                        </div>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {supplier.address ? (
-                      <div className="flex items-center space-x-1 text-sm">
-                        <MapPin className="h-3 w-3" />
-                        <span>{supplier.address}</span>
-                      </div>
-                    ) : (
-                      <span className="text-muted-foreground">N/A</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {new Date(supplier.created_at).toLocaleDateString()}
-                  </TableCell>
-                  {userRole === 'admin' && (
+                  <TableCell>{s.phone ? <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{s.phone}</span> : "—"}</TableCell>
+                  <TableCell className="text-muted-foreground">{new Date(s.created_at).toLocaleDateString()}</TableCell>
+                  {userRole === "admin" && (
                     <TableCell>
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openEditDialog(supplier)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDeleteSupplier(supplier.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="sm" onClick={() => openEdit(s)}><Edit className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => deleteSupplier(s.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
                       </div>
                     </TableCell>
                   )}
@@ -259,142 +119,46 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
         </CardContent>
       </Card>
 
-      {/* Add Supplier Dialog */}
-      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add New Supplier</DialogTitle>
-            <DialogDescription>
-              Enter the details for the new supplier.
-            </DialogDescription>
+            <DialogTitle>Add Supplier</DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
-                Name *
-              </Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                className="col-span-3"
-                placeholder="Supplier name"
-              />
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Name *</Label>
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Supplier name" />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="contact_email" className="text-right">
-                Email
-              </Label>
-              <Input
-                id="contact_email"
-                type="email"
-                value={formData.contact_email}
-                onChange={(e) => setFormData(prev => ({ ...prev, contact_email: e.target.value }))}
-                className="col-span-3"
-                placeholder="contact@supplier.com"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="contact_phone" className="text-right">
-                Phone
-              </Label>
-              <Input
-                id="contact_phone"
-                value={formData.contact_phone}
-                onChange={(e) => setFormData(prev => ({ ...prev, contact_phone: e.target.value }))}
-                className="col-span-3"
-                placeholder="+63 XXX XXX XXXX"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="address" className="text-right">
-                Address
-              </Label>
-              <Textarea
-                id="address"
-                value={formData.address}
-                onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-                className="col-span-3"
-                placeholder="Complete address"
-                rows={3}
-              />
+            <div className="space-y-2">
+              <Label>Phone</Label>
+              <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone number" />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleAddSupplier}>Add Supplier</Button>
+            <Button variant="outline" onClick={() => setIsAddOpen(false)}>Cancel</Button>
+            <Button onClick={handleAdd}>Add</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Edit Supplier Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit Supplier</DialogTitle>
-            <DialogDescription>
-              Update the supplier information.
-            </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-name" className="text-right">
-                Name *
-              </Label>
-              <Input
-                id="edit-name"
-                value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                className="col-span-3"
-                placeholder="Supplier name"
-              />
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Name *</Label>
+              <Input value={name} onChange={(e) => setName(e.target.value)} />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-contact_email" className="text-right">
-                Email
-              </Label>
-              <Input
-                id="edit-contact_email"
-                type="email"
-                value={formData.contact_email}
-                onChange={(e) => setFormData(prev => ({ ...prev, contact_email: e.target.value }))}
-                className="col-span-3"
-                placeholder="contact@supplier.com"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-contact_phone" className="text-right">
-                Phone
-              </Label>
-              <Input
-                id="edit-contact_phone"
-                value={formData.contact_phone}
-                onChange={(e) => setFormData(prev => ({ ...prev, contact_phone: e.target.value }))}
-                className="col-span-3"
-                placeholder="+63 XXX XXX XXXX"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-address" className="text-right">
-                Address
-              </Label>
-              <Textarea
-                id="edit-address"
-                value={formData.address}
-                onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-                className="col-span-3"
-                placeholder="Complete address"
-                rows={3}
-              />
+            <div className="space-y-2">
+              <Label>Phone</Label>
+              <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleEditSupplier}>Update Supplier</Button>
+            <Button variant="outline" onClick={() => setIsEditOpen(false)}>Cancel</Button>
+            <Button onClick={handleEdit}>Update</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
