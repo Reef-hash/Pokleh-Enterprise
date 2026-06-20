@@ -325,20 +325,18 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path TO 'public'
 AS $function$
-DECLARE
-  v_user_id UUID;
 BEGIN
-  v_user_id := COALESCE(auth.uid(), '00000000-0000-0000-0000-000000000000');
-
-  INSERT INTO public.audit_logs (user_id, action, entity, entity_id, old_values, new_values)
-  VALUES (
-    v_user_id,
-    TG_OP,
-    TG_TABLE_NAME,
-    COALESCE(NEW.id, OLD.id),
-    CASE WHEN TG_OP = 'DELETE' THEN row_to_json(OLD)::jsonb ELSE NULL END,
-    CASE WHEN TG_OP IN ('INSERT', 'UPDATE') THEN row_to_json(NEW)::jsonb ELSE NULL END
-  );
+  IF auth.uid() IS NOT NULL THEN
+    INSERT INTO public.audit_logs (user_id, action, entity, entity_id, old_values, new_values)
+    VALUES (
+      auth.uid(),
+      TG_OP,
+      TG_TABLE_NAME,
+      COALESCE(NEW.id, OLD.id),
+      CASE WHEN TG_OP = 'DELETE' THEN row_to_json(OLD)::jsonb ELSE NULL END,
+      CASE WHEN TG_OP IN ('INSERT', 'UPDATE') THEN row_to_json(NEW)::jsonb ELSE NULL END
+    );
+  END IF;
 
   RETURN COALESCE(NEW, OLD);
 END;
