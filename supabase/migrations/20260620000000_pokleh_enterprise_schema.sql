@@ -10,7 +10,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- ============================================================
 -- 2. PROFILES (linked to auth.users)
 -- ============================================================
-CREATE TABLE public.profiles (
+CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
   email TEXT NOT NULL,
@@ -315,6 +315,7 @@ CREATE INDEX idx_audit_logs_user ON public.audit_logs(user_id);
 CREATE INDEX idx_audit_logs_created ON public.audit_logs(created_at);
 
 ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.audit_logs ALTER COLUMN user_id DROP NOT NULL;
 
 -- ============================================================
 -- 17. AUDIT LOG TRIGGER FUNCTION
