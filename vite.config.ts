@@ -36,6 +36,8 @@ export default defineConfig(({ mode }) => ({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+        navigationPreload: true,
+        navigateFallback: "/index.html",
         runtimeCaching: [
           {
             urlPattern: /^https?:\/\/.*\.supabase\.co\/rest\/v1\/.*/i,
@@ -44,6 +46,14 @@ export default defineConfig(({ mode }) => ({
               cacheName: "supabase-api",
               expiration: { maxEntries: 100, maxAgeSeconds: 86400 },
               networkTimeoutSeconds: 5,
+            },
+          },
+          {
+            urlPattern: /\.(?:js|css)$/i,
+            handler: "StaleWhileRevalidate",
+            options: {
+              cacheName: "app-shell",
+              expiration: { maxEntries: 50, maxAgeSeconds: 86400 * 7 },
             },
           },
         ],
