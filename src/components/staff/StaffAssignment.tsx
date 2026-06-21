@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +24,13 @@ export const StaffAssignment = ({ userRole }: StaffAssignmentProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState("");
   const [selectedArea, setSelectedArea] = useState("");
+  const [endConfirmId, setEndConfirmId] = useState<string | null>(null);
+
+  const handleEndAssignment = async () => {
+    if (!endConfirmId) return;
+    await endAssignment(endConfirmId);
+    setEndConfirmId(null);
+  };
 
   useEffect(() => {
     supabase
@@ -94,7 +102,7 @@ export const StaffAssignment = ({ userRole }: StaffAssignmentProps) => {
                   <TableCell><Badge variant="secondary">{a.area?.name}</Badge></TableCell>
                   <TableCell className="text-muted-foreground">{new Date(a.assigned_date).toLocaleDateString()}</TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="sm" onClick={() => endAssignment(a.id)} className="text-destructive">
+                    <Button variant="ghost" size="sm" onClick={() => setEndConfirmId(a.id)} className="text-destructive">
                       <X className="h-4 w-4" />
                     </Button>
                   </TableCell>
@@ -148,6 +156,21 @@ export const StaffAssignment = ({ userRole }: StaffAssignmentProps) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!endConfirmId} onOpenChange={(o) => { if (!o) setEndConfirmId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>End Assignment</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to end this staff assignment? The staff member will no longer have access to this area.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleEndAssignment} className="bg-destructive text-destructive-foreground">End Assignment</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

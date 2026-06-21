@@ -26,66 +26,66 @@ export const PoklehDashboard = ({ user, onNavigate }: PoklehDashboardProps) => {
   ];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold">Welcome, {user.name}</h2>
-        <p className="text-muted-foreground">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="px-1 sm:px-0">
+        <h2 className="text-xl sm:text-2xl font-bold">Welcome, {user.name}</h2>
+        <p className="text-sm sm:text-base text-muted-foreground hidden sm:block">
           {user.role === 'admin' ? 'Overview of your ice distribution system' : 'Your ice distribution dashboard'}
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Active Customers</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{activeCustomers}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Service Areas</CardTitle>
-            <MapPin className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{areas.length}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Outstanding Debt</CardTitle>
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-2 md:grid-cols-4">
+        <Card className="order-1">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">Outstanding Debt</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-destructive">{formatCurrency(totalDebt)}</p>
+          <CardContent className="p-3 sm:p-6 pt-0">
+            <p className="text-lg sm:text-2xl font-bold text-destructive">{formatCurrency(totalDebt)}</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Customers</CardTitle>
+        <Card className="order-3 sm:order-2">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">Active Customers</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent className="p-3 sm:p-6 pt-0">
+            <p className="text-lg sm:text-2xl font-bold">{activeCustomers}</p>
+          </CardContent>
+        </Card>
+        <Card className="order-4 sm:order-3">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">Service Areas</CardTitle>
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent className="p-3 sm:p-6 pt-0">
+            <p className="text-lg sm:text-2xl font-bold">{areas.length}</p>
+          </CardContent>
+        </Card>
+        <Card className="order-2 sm:order-4">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">Total Customers</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{customers.length}</p>
+          <CardContent className="p-3 sm:p-6 pt-0">
+            <p className="text-lg sm:text-2xl font-bold">{customers.length}</p>
           </CardContent>
         </Card>
       </div>
 
-      <div>
-        <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="px-1 sm:px-0">
+        <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Quick Actions</h3>
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {quickLinks.map((link) => (
-            <Card key={link.id} className="cursor-pointer hover:bg-accent transition-colors" onClick={() => onNavigate(link.id)}>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                    <link.icon className="h-5 w-5 text-primary" />
+            <Card key={link.id} className="cursor-pointer hover:bg-accent transition-colors active:bg-accent" onClick={() => onNavigate(link.id)}>
+              <CardHeader className="p-3 sm:p-6">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
+                    <link.icon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                   </div>
-                  <div>
-                    <CardTitle className="text-sm">{link.label}</CardTitle>
-                    <p className="text-xs text-muted-foreground">{link.desc}</p>
+                  <div className="min-w-0">
+                    <CardTitle className="text-sm font-medium">{link.label}</CardTitle>
+                    <p className="text-xs text-muted-foreground truncate">{link.desc}</p>
                   </div>
                 </div>
               </CardHeader>

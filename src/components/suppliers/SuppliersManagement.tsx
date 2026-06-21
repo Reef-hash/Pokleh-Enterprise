@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Plus, Search, Edit, Trash2, Building2, Phone } from "lucide-react";
 import { usePoklehSuppliers } from "@/hooks/usePoklehSuppliers";
@@ -20,6 +21,13 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
+  const handleDelete = async () => {
+    if (!deleteConfirmId) return;
+    await deleteSupplier(deleteConfirmId);
+    setDeleteConfirmId(null);
+  };
 
   const filtered = suppliers.filter(
     (s) => s.name.toLowerCase().includes(search.toLowerCase()) || s.phone?.includes(search)
@@ -95,7 +103,14 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((s) => (
+              {filtered.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={userRole === "admin" ? 4 : 3} className="text-center text-muted-foreground py-8">
+                    {suppliers.length === 0 ? "No suppliers yet. Add your first supplier." : "No suppliers match your search."}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filtered.map((s) => (
                 <TableRow key={s.id}>
                   <TableCell>
                     <span className="flex items-center gap-2 font-medium">
@@ -108,12 +123,13 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
                     <TableCell>
                       <div className="flex gap-1">
                         <Button variant="ghost" size="sm" onClick={() => openEdit(s)}><Edit className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="sm" onClick={() => deleteSupplier(s.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => setDeleteConfirmId(s.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
                       </div>
                     </TableCell>
                   )}
                 </TableRow>
               ))}
+              )}
             </TableBody>
           </Table>
         </CardContent>
@@ -164,6 +180,21 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!deleteConfirmId} onOpenChange={(o) => { if (!o) setDeleteConfirmId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Supplier</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this supplier? Stock intake records linked to this supplier will be affected. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

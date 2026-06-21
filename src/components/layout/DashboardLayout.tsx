@@ -29,6 +29,7 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/lib/i18n";
 import { HelpButton } from "@/components/help/HelpButton";
 import { HelpSlidePanel } from "@/components/help/HelpSlidePanel";
+import { Logo } from "@/components/ui/Logo";
 import { getHelpContent } from "@/lib/help-content";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 
@@ -207,9 +208,7 @@ export const DashboardLayout = ({
       )}>
         <div className="flex items-center justify-between h-16 px-4 border-b">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <Package className="w-4 h-4 text-primary-foreground" />
-            </div>
+            <Logo variant="icon" />
             <span className="text-lg font-bold text-foreground">Pokleh</span>
           </div>
           <Button

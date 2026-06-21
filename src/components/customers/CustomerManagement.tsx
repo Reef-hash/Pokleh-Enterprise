@@ -91,7 +91,14 @@ export const CustomerManagement = ({ userRole }: CustomerManagementProps) => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((c) => (
+              {filtered.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                    {customers.length === 0 ? "No customers yet. Add your first customer." : "No customers match your search or filter."}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filtered.map((c) => (
                 <TableRow key={c.id}>
                   <TableCell className="font-medium">{c.name}</TableCell>
                   <TableCell>{c.phone ? <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{c.phone}</span> : "—"}</TableCell>
@@ -104,6 +111,7 @@ export const CustomerManagement = ({ userRole }: CustomerManagementProps) => {
                   </TableCell>
                 </TableRow>
               ))}
+              )}
             </TableBody>
           </Table>
         </CardContent>

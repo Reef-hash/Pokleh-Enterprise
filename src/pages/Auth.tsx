@@ -11,6 +11,7 @@ import { useLanguage } from '@/lib/i18n';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Link, useNavigate } from 'react-router-dom';
+import { Logo } from '@/components/ui/Logo';
 
 const Auth = () => {
   const { signIn, signUp, loading, isAuthenticated } = useAuth();
@@ -82,9 +83,7 @@ const Auth = () => {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-2xl mb-4">
-            <span className="text-2xl font-bold text-primary-foreground">P</span>
-          </div>
+          <Logo variant="splash" className="justify-center mb-4" showText={false} />
           <h1 className="text-3xl font-bold mb-2">{t('auth.welcome')}</h1>
           <p className="text-muted-foreground">{t('app.tagline')}</p>
         </div>

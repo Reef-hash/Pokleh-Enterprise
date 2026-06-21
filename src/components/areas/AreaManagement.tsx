@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Plus, Edit, Trash2, MapPin } from "lucide-react";
 import { useAreas } from "@/hooks/useAreas";
@@ -18,20 +19,34 @@ export const AreaManagement = ({ userRole }: AreaManagementProps) => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState("");
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleAdd = async () => {
-    if (!name.trim()) return;
+    if (!name.trim() || submitting) return;
+    setSubmitting(true);
     await addArea(name.trim());
+    setSubmitting(false);
     setName("");
     setIsAddOpen(false);
   };
 
   const handleEdit = async () => {
-    if (!name.trim() || !editingId) return;
+    if (!name.trim() || !editingId || submitting) return;
+    setSubmitting(true);
     await updateArea(editingId, name.trim());
+    setSubmitting(false);
     setName("");
     setEditingId(null);
     setIsEditOpen(false);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteConfirmId || submitting) return;
+    setSubmitting(true);
+    await deleteArea(deleteConfirmId);
+    setSubmitting(false);
+    setDeleteConfirmId(null);
   };
 
   const openEdit = (area: { id: string; name: string }) => {
@@ -94,7 +109,7 @@ export const AreaManagement = ({ userRole }: AreaManagementProps) => {
                         <Button variant="ghost" size="sm" onClick={() => openEdit(area)}>
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => deleteArea(area.id)} className="text-destructive">
+                        <Button variant="ghost" size="sm" onClick={() => setDeleteConfirmId(area.id)} className="text-destructive">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -128,7 +143,7 @@ export const AreaManagement = ({ userRole }: AreaManagementProps) => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddOpen(false)}>Cancel</Button>
-            <Button onClick={handleAdd}>Create</Button>
+            <Button onClick={handleAdd} disabled={submitting}>{submitting ? "Creating..." : "Create"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -147,10 +162,25 @@ export const AreaManagement = ({ userRole }: AreaManagementProps) => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditOpen(false)}>Cancel</Button>
-            <Button onClick={handleEdit}>Update</Button>
+            <Button onClick={handleEdit} disabled={submitting}>{submitting ? "Updating..." : "Update"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!deleteConfirmId} onOpenChange={(o) => { if (!o) setDeleteConfirmId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Area</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this area? Customers assigned to this area will be affected. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={submitting} className="bg-destructive text-destructive-foreground">{submitting ? "Deleting..." : "Delete"}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
