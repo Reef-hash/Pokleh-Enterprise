@@ -35,10 +35,15 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
   const handleAdd = async () => {
     if (!form.supplier_id || form.quantity_received <= 0 || form.cost_per_pax <= 0 || submitting) { toast.error("Please select a supplier and enter valid quantity and cost."); return; }
     setSubmitting(true);
-    await addIntake(form);
-    setSubmitting(false);
-    setForm({ intake_date: new Date().toISOString().split("T")[0], supplier_id: "", quantity_received: 0, cost_per_pax: 0, notes: "" });
-    setIsOpen(false);
+    try {
+      const result = await addIntake(form);
+      if (result.success) {
+        setForm({ intake_date: new Date().toISOString().split("T")[0], supplier_id: "", quantity_received: 0, cost_per_pax: 0, notes: "" });
+        setIsOpen(false);
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const totalCost = intakes.reduce((sum, i) => sum + i.quantity_received * i.cost_per_pax, 0);

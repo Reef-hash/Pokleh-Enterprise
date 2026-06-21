@@ -106,9 +106,13 @@ class SyncEngine {
 
     const payload = item.payload as Record<string, unknown>;
     switch (item.action) {
-      case "INSERT":
-        await supabase.from(item.entity).insert(payload);
+      case "INSERT": {
+        const { data } = await supabase.from(item.entity).insert(payload).select("id").single();
+        if (data) {
+          await db.syncQueue.update(item.id!, { entityId: data.id });
+        }
         break;
+      }
       case "UPDATE":
         await supabase.from(item.entity).update(payload).eq("id", item.entityId);
         break;

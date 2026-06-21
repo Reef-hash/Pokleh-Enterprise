@@ -38,18 +38,23 @@ export const useStaffAssignments = () => {
       return { success: true, offline: true };
     }
 
-    const { data, error } = await supabase
-      .from("staff_area_assignments")
-      .insert({ staff_id: staffId, area_id: areaId })
-      .select("*, area:areas(*), profile:profiles!staff_id(*)")
-      .single();
-    if (error) {
-      toast.error(getUserFriendlyError(error, "staff_area_assignments"));
+    try {
+      const { data, error } = await supabase
+        .from("staff_area_assignments")
+        .insert({ staff_id: staffId, area_id: areaId })
+        .select("*, area:areas(*), profile:profiles!staff_id(*)")
+        .single();
+      if (error) {
+        toast.error(getUserFriendlyError(error, "staff_area_assignments"));
+        return { success: false };
+      }
+      setAssignments((prev) => [data as unknown as StaffAreaAssignment, ...prev]);
+      toast.success("Staff assigned to area");
+      return { success: true };
+    } catch (err: any) {
+      toast.error("Connection error. Please try again.");
       return { success: false };
     }
-    setAssignments((prev) => [data as unknown as StaffAreaAssignment, ...prev]);
-    toast.success("Staff assigned to area");
-    return { success: true };
   };
 
   const endAssignment = async (id: string) => {
@@ -64,21 +69,26 @@ export const useStaffAssignments = () => {
       return { success: true, offline: true };
     }
 
-    const { error } = await supabase
-      .from("staff_area_assignments")
-      .update({ ended_date: new Date().toISOString().split("T")[0] })
-      .eq("id", id);
-    if (error) {
-      toast.error(getUserFriendlyError(error, "staff_area_assignments"));
+    try {
+      const { error } = await supabase
+        .from("staff_area_assignments")
+        .update({ ended_date: new Date().toISOString().split("T")[0] })
+        .eq("id", id);
+      if (error) {
+        toast.error(getUserFriendlyError(error, "staff_area_assignments"));
+        return { success: false };
+      }
+      setAssignments((prev) =>
+        prev.map((a) =>
+          a.id === id ? { ...a, ended_date: new Date().toISOString().split("T")[0] } : a
+        )
+      );
+      toast.success("Assignment ended");
+      return { success: true };
+    } catch (err: any) {
+      toast.error("Connection error. Please try again.");
       return { success: false };
     }
-    setAssignments((prev) =>
-      prev.map((a) =>
-        a.id === id ? { ...a, ended_date: new Date().toISOString().split("T")[0] } : a
-      )
-    );
-    toast.success("Assignment ended");
-    return { success: true };
   };
 
   useEffect(() => {

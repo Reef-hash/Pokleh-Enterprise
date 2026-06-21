@@ -45,20 +45,25 @@ export const useStockDistribution = (intakeId?: string) => {
       return { success: true, offline: true };
     }
 
-    const { data: result, error } = await supabase
-      .from("stock_distribution")
-      .insert({ ...data, created_by: userId })
-      .select("*, intake:stock_intake(*), area:areas(*)")
-      .single();
-    if (error) {
-      toast.error(getUserFriendlyError(error, "stock_distribution"));
+    try {
+      const { data: result, error } = await supabase
+        .from("stock_distribution")
+        .insert({ ...data, created_by: userId })
+        .select("*, intake:stock_intake(*), area:areas(*)")
+        .single();
+      if (error) {
+        toast.error(getUserFriendlyError(error, "stock_distribution"));
+        return { success: false };
+      }
+      const dist = result as unknown as StockDistribution;
+      setDistributions((prev) => [dist, ...prev]);
+      await db.stockDistributions.put(dist as unknown as import("@/lib/db").OfflineStockDistribution);
+      toast.success("Stock distributed");
+      return { success: true, data: dist };
+    } catch (err: any) {
+      toast.error("Connection error. Please try again.");
       return { success: false };
     }
-    const dist = result as unknown as StockDistribution;
-    setDistributions((prev) => [dist, ...prev]);
-    await db.stockDistributions.put(dist as unknown as import("@/lib/db").OfflineStockDistribution);
-    toast.success("Stock distributed");
-    return { success: true, data: dist };
   };
 
   useEffect(() => {

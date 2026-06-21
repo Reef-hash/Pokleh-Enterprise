@@ -27,28 +27,43 @@ export const AreaManagement = ({ userRole }: AreaManagementProps) => {
   const handleAdd = async () => {
     if (!name.trim() || submitting) { toast.error("Please enter an area name."); return; }
     setSubmitting(true);
-    await addArea(name.trim());
-    setSubmitting(false);
-    setName("");
-    setIsAddOpen(false);
+    try {
+      const result = await addArea(name.trim());
+      if (result.success) {
+        setName("");
+        setIsAddOpen(false);
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleEdit = async () => {
     if (!name.trim() || !editingId || submitting) { toast.error("Please enter an area name."); return; }
     setSubmitting(true);
-    await updateArea(editingId, name.trim());
-    setSubmitting(false);
-    setName("");
-    setEditingId(null);
-    setIsEditOpen(false);
+    try {
+      const result = await updateArea(editingId, name.trim());
+      if (result.success) {
+        setName("");
+        setEditingId(null);
+        setIsEditOpen(false);
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleDelete = async () => {
     if (!deleteConfirmId || submitting) return;
     setSubmitting(true);
-    await deleteArea(deleteConfirmId);
-    setSubmitting(false);
-    setDeleteConfirmId(null);
+    try {
+      const result = await deleteArea(deleteConfirmId);
+      if (result.success) {
+        setDeleteConfirmId(null);
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const openEdit = (area: { id: string; name: string }) => {

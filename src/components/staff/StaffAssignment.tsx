@@ -27,11 +27,19 @@ export const StaffAssignment = ({ userRole }: StaffAssignmentProps) => {
   const [selectedStaff, setSelectedStaff] = useState("");
   const [selectedArea, setSelectedArea] = useState("");
   const [endConfirmId, setEndConfirmId] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleEndAssignment = async () => {
-    if (!endConfirmId) return;
-    await endAssignment(endConfirmId);
-    setEndConfirmId(null);
+    if (!endConfirmId || submitting) return;
+    setSubmitting(true);
+    try {
+      const result = await endAssignment(endConfirmId);
+      if (result.success) {
+        setEndConfirmId(null);
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   useEffect(() => {
@@ -46,11 +54,18 @@ export const StaffAssignment = ({ userRole }: StaffAssignmentProps) => {
   const active = assignments.filter((a) => !a.ended_date);
 
   const handleAssign = async () => {
-    if (!selectedStaff || !selectedArea) { toast.error("Please select a staff member and an area."); return; }
-    await assignStaff(selectedStaff, selectedArea);
-    setSelectedStaff("");
-    setSelectedArea("");
-    setIsOpen(false);
+    if (!selectedStaff || !selectedArea || submitting) { toast.error("Please select a staff member and an area."); return; }
+    setSubmitting(true);
+    try {
+      const result = await assignStaff(selectedStaff, selectedArea);
+      if (result.success) {
+        setSelectedStaff("");
+        setSelectedArea("");
+        setIsOpen(false);
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (userRole !== "admin") {
@@ -176,7 +191,7 @@ export const StaffAssignment = ({ userRole }: StaffAssignmentProps) => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-            <Button onClick={handleAssign}>Assign</Button>
+            <Button onClick={handleAssign} disabled={submitting}>{submitting ? "Assigning..." : "Assign"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -191,7 +206,7 @@ export const StaffAssignment = ({ userRole }: StaffAssignmentProps) => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleEndAssignment} className="bg-destructive text-destructive-foreground">End Assignment</AlertDialogAction>
+            <AlertDialogAction onClick={handleEndAssignment} disabled={submitting} className="bg-destructive text-destructive-foreground">{submitting ? "Ending..." : "End Assignment"}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

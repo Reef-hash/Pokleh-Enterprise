@@ -27,9 +27,16 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
   const [submitting, setSubmitting] = useState(false);
 
   const handleDelete = async () => {
-    if (!deleteConfirmId) return;
-    await deleteSupplier(deleteConfirmId);
-    setDeleteConfirmId(null);
+    if (!deleteConfirmId || submitting) return;
+    setSubmitting(true);
+    try {
+      const result = await deleteSupplier(deleteConfirmId);
+      if (result.success) {
+        setDeleteConfirmId(null);
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const filtered = suppliers.filter(
@@ -39,22 +46,32 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
   const handleAdd = async () => {
     if (!name.trim() || submitting) { toast.error("Please enter a supplier name."); return; }
     setSubmitting(true);
-    await addSupplier(name.trim(), phone.trim() || undefined);
-    setSubmitting(false);
-    setName("");
-    setPhone("");
-    setIsAddOpen(false);
+    try {
+      const result = await addSupplier(name.trim(), phone.trim() || undefined);
+      if (result.success) {
+        setName("");
+        setPhone("");
+        setIsAddOpen(false);
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleEdit = async () => {
     if (!name.trim() || !editingId || submitting) { toast.error("Please enter a supplier name."); return; }
     setSubmitting(true);
-    await updateSupplier(editingId, name.trim(), phone.trim() || undefined);
-    setSubmitting(false);
-    setName("");
-    setPhone("");
-    setEditingId(null);
-    setIsEditOpen(false);
+    try {
+      const result = await updateSupplier(editingId, name.trim(), phone.trim() || undefined);
+      if (result.success) {
+        setName("");
+        setPhone("");
+        setEditingId(null);
+        setIsEditOpen(false);
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const openEdit = (s: { id: string; name: string; phone?: string | null }) => {

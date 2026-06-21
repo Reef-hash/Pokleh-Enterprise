@@ -39,10 +39,15 @@ export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
   const handleAdd = async () => {
     if (!form.distribution_id || !form.area_id || form.quantity_returned <= 0 || submitting) { toast.error("Please select a distribution and enter a valid quantity."); return; }
     setSubmitting(true);
-    await addReturn(form);
-    setSubmitting(false);
-    setForm({ distribution_id: "", area_id: "", quantity_returned: 0, return_date: new Date().toISOString().split("T")[0] });
-    setIsOpen(false);
+    try {
+      const result = await addReturn(form);
+      if (result.success) {
+        setForm({ distribution_id: "", area_id: "", quantity_returned: 0, return_date: new Date().toISOString().split("T")[0] });
+        setIsOpen(false);
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (

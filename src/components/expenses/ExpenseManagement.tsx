@@ -35,10 +35,15 @@ export const ExpenseManagement = ({ userRole }: ExpenseManagementProps) => {
   const handleAdd = async () => {
     if (!form.category || form.amount <= 0 || submitting) { toast.error("Please select a category and enter a valid amount."); return; }
     setSubmitting(true);
-    await addExpense(form);
-    setSubmitting(false);
-    setForm({ category: "", amount: 0, expense_date: new Date().toISOString().split("T")[0], notes: "" });
-    setIsOpen(false);
+    try {
+      const result = await addExpense(form);
+      if (result.success) {
+        setForm({ category: "", amount: 0, expense_date: new Date().toISOString().split("T")[0], notes: "" });
+        setIsOpen(false);
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const totalExpenses = expenses.reduce((s, e) => s + e.amount, 0);

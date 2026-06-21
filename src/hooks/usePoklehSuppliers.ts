@@ -37,20 +37,25 @@ export const usePoklehSuppliers = () => {
       return { success: true, offline: true };
     }
 
-    const { data, error } = await supabase
-      .from("suppliers")
-      .insert({ name, phone: phone || null })
-      .select()
-      .single();
-    if (error) {
-      toast.error(getUserFriendlyError(error, "suppliers"));
+    try {
+      const { data, error } = await supabase
+        .from("suppliers")
+        .insert({ name, phone: phone || null })
+        .select()
+        .single();
+      if (error) {
+        toast.error(getUserFriendlyError(error, "suppliers"));
+        return { success: false };
+      }
+      const supplier = data as Supplier;
+      setSuppliers((prev) => [...prev, supplier]);
+      await db.suppliers.put({ ...supplier, updatedAt: supplier.updated_at, syncedAt: new Date().toISOString() });
+      toast.success("Supplier added");
+      return { success: true };
+    } catch (err: any) {
+      toast.error("Connection error. Please try again.");
       return { success: false };
     }
-    const supplier = data as Supplier;
-    setSuppliers((prev) => [...prev, supplier]);
-    await db.suppliers.put({ ...supplier, updatedAt: supplier.updated_at, syncedAt: new Date().toISOString() });
-    toast.success("Supplier added");
-    return { success: true };
   };
 
   const updateSupplier = async (id: string, name: string, phone?: string) => {
@@ -61,17 +66,26 @@ export const usePoklehSuppliers = () => {
       return { success: true, offline: true };
     }
 
-    const { error } = await supabase
-      .from("suppliers")
-      .update({ name, phone: phone || null })
-      .eq("id", id);
-    if (error) {
-      toast.error(getUserFriendlyError(error, "suppliers"));
+    try {
+      const { data: result, error } = await supabase
+        .from("suppliers")
+        .update({ name, phone: phone || null })
+        .eq("id", id)
+        .select()
+        .single();
+      if (error) {
+        toast.error(getUserFriendlyError(error, "suppliers"));
+        return { success: false };
+      }
+      const updated = result as Supplier;
+      setSuppliers((prev) => prev.map((s) => (s.id === id ? updated : s)));
+      await db.suppliers.put({ ...updated, updatedAt: updated.updated_at, syncedAt: new Date().toISOString() });
+      toast.success("Supplier updated");
+      return { success: true };
+    } catch (err: any) {
+      toast.error("Connection error. Please try again.");
       return { success: false };
     }
-    setSuppliers((prev) => prev.map((s) => (s.id === id ? { ...s, name, phone: phone || null } : s)));
-    toast.success("Supplier updated");
-    return { success: true };
   };
 
   const deleteSupplier = async (id: string) => {
@@ -82,14 +96,20 @@ export const usePoklehSuppliers = () => {
       return { success: true, offline: true };
     }
 
-    const { error } = await supabase.from("suppliers").delete().eq("id", id);
-    if (error) {
-      toast.error(getUserFriendlyError(error, "suppliers"));
+    try {
+      const { error } = await supabase.from("suppliers").delete().eq("id", id);
+      if (error) {
+        toast.error(getUserFriendlyError(error, "suppliers"));
+        return { success: false };
+      }
+      setSuppliers((prev) => prev.filter((s) => s.id !== id));
+      await db.suppliers.delete(id);
+      toast.success("Supplier deleted");
+      return { success: true };
+    } catch (err: any) {
+      toast.error("Connection error. Please try again.");
       return { success: false };
     }
-    setSuppliers((prev) => prev.filter((s) => s.id !== id));
-    toast.success("Supplier deleted");
-    return { success: true };
   };
 
   useEffect(() => {

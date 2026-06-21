@@ -37,10 +37,15 @@ export const DebtCollectionForm = ({ userRole }: DebtCollectionFormProps) => {
   const handleAdd = async () => {
     if (!form.customer_id || form.amount <= 0 || submitting) { toast.error("Please select a customer and enter a valid amount."); return; }
     setSubmitting(true);
-    await addCollection(form);
-    setSubmitting(false);
-    setForm({ customer_id: "", amount: 0, collection_date: new Date().toISOString().split("T")[0], notes: "" });
-    setIsOpen(false);
+    try {
+      const result = await addCollection(form);
+      if (result.success) {
+        setForm({ customer_id: "", amount: 0, collection_date: new Date().toISOString().split("T")[0], notes: "" });
+        setIsOpen(false);
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const totalCollected = collections.reduce((s, c) => s + c.amount, 0);

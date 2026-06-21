@@ -46,20 +46,25 @@ export const useStockIntake = () => {
       return { success: true, offline: true };
     }
 
-    const { data: result, error } = await supabase
-      .from("stock_intake")
-      .insert({ ...data, created_by: userId })
-      .select("*, supplier:suppliers(*)")
-      .single();
-    if (error) {
-      toast.error(getUserFriendlyError(error, "stock_intake"));
+    try {
+      const { data: result, error } = await supabase
+        .from("stock_intake")
+        .insert({ ...data, created_by: userId })
+        .select("*, supplier:suppliers(*)")
+        .single();
+      if (error) {
+        toast.error(getUserFriendlyError(error, "stock_intake"));
+        return { success: false };
+      }
+      const intake = result as unknown as StockIntake;
+      setIntakes((prev) => [intake, ...prev]);
+      await db.stockIntakes.put(intake as unknown as import("@/lib/db").OfflineStockIntake);
+      toast.success("Stock intake recorded");
+      return { success: true, data: intake };
+    } catch (err: any) {
+      toast.error("Connection error. Please try again.");
       return { success: false };
     }
-    const intake = result as unknown as StockIntake;
-    setIntakes((prev) => [intake, ...prev]);
-    await db.stockIntakes.put(intake as unknown as import("@/lib/db").OfflineStockIntake);
-    toast.success("Stock intake recorded");
-    return { success: true, data: intake };
   };
 
   useEffect(() => {

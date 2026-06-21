@@ -40,10 +40,15 @@ export const CustomerManagement = ({ userRole }: CustomerManagementProps) => {
   const handleAdd = async () => {
     if (!form.name || !form.area_id || submitting) { toast.error("Please enter a customer name and select an area."); return; }
     setSubmitting(true);
-    await addCustomer(form);
-    setSubmitting(false);
-    setForm({ name: "", phone: "", address: "", area_id: "" });
-    setIsAddOpen(false);
+    try {
+      const result = await addCustomer(form);
+      if (result.success) {
+        setForm({ name: "", phone: "", address: "", area_id: "" });
+        setIsAddOpen(false);
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (

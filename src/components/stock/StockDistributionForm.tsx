@@ -53,10 +53,15 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
     if (!form.intake_id || !form.area_id || form.quantity_assigned <= 0 || submitting) { toast.error("Please select an intake, area, and enter a valid quantity."); return; }
     if (form.quantity_assigned > remaining) return;
     setSubmitting(true);
-    await addDistribution(form);
-    setSubmitting(false);
-    setForm({ intake_id: "", area_id: "", quantity_assigned: 0 });
-    setIsOpen(false);
+    try {
+      const result = await addDistribution(form);
+      if (result.success) {
+        setForm({ intake_id: "", area_id: "", quantity_assigned: 0 });
+        setIsOpen(false);
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (

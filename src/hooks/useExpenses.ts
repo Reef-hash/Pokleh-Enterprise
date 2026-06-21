@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { db } from "@/lib/db";
+import { offlineDetector } from "@/services/offline";
+import { syncEngine } from "@/services/sync";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
 import type { Expense } from "@/types/pokleh";
@@ -35,6 +37,25 @@ export const useExpenses = () => {
   }) => {
     if (!userId) return { success: false, error: "Not authenticated" };
 
+    if (!offlineDetector.isOnline) {
+      const tempId = crypto.randomUUID();
+      await syncEngine.enqueue({ entity: "expenses", entityId: tempId, action: "INSERT", payload: { ...input, created_by: userId } });
+      const optimistic: Expense = {
+        id: tempId,
+        category: input.category,
+        amount: input.amount,
+        expense_date: input.expense_date,
+        notes: input.notes ?? null,
+        created_by: userId,
+        correction_of: null,
+        correction_status: null,
+        created_at: new Date().toISOString(),
+      };
+      setExpenses((prev) => [optimistic, ...prev]);
+      toast.success("Expense queued for sync");
+      return { success: true, offline: true };
+    }
+
     const tempId = crypto.randomUUID();
     const optimistic: Expense = {
       id: tempId,
@@ -49,21 +70,27 @@ export const useExpenses = () => {
     };
     setExpenses((prev) => [optimistic, ...prev]);
 
-    const { data, error } = await supabase
-      .from("expenses")
-      .insert({ ...input, created_by: userId })
-      .select("*")
-      .single();
-    if (error) {
+    try {
+      const { data, error } = await supabase
+        .from("expenses")
+        .insert({ ...input, created_by: userId })
+        .select("*")
+        .single();
+      if (error) {
+        setExpenses((prev) => prev.filter((e) => e.id !== tempId));
+        toast.error(getUserFriendlyError(error, "expenses"));
+        return { success: false };
+      }
+      const expense = data as unknown as Expense;
+      setExpenses((prev) => prev.map((e) => (e.id === tempId ? expense : e)));
+      await db.expenses.put(expense as unknown as import("@/lib/db").OfflineExpense);
+      toast.success("Expense recorded");
+      return { success: true, data: expense };
+    } catch (err: any) {
       setExpenses((prev) => prev.filter((e) => e.id !== tempId));
-      toast.error(getUserFriendlyError(error, "expenses"));
+      toast.error("Connection error. Please try again.");
       return { success: false };
     }
-    const expense = data as unknown as Expense;
-    setExpenses((prev) => prev.map((e) => (e.id === tempId ? expense : e)));
-    await db.expenses.put(expense as unknown as import("@/lib/db").OfflineExpense);
-    toast.success("Expense recorded");
-    return { success: true, data: expense };
   };
 
   useEffect(() => {

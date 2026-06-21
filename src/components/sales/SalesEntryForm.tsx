@@ -42,10 +42,15 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
   const handleAdd = async () => {
     if (!form.customer_id || !form.area_id || form.quantity <= 0 || form.selling_price <= 0 || submitting) { toast.error("Please select a customer, area, and enter valid quantity and price."); return; }
     setSubmitting(true);
-    await addSale(form);
-    setSubmitting(false);
-    setForm({ customer_id: "", area_id: "", quantity: 0, selling_price: 0, payment_type: "cash", sale_date: new Date().toISOString().split("T")[0], notes: "" });
-    setIsOpen(false);
+    try {
+      const result = await addSale(form);
+      if (result.success) {
+        setForm({ customer_id: "", area_id: "", quantity: 0, selling_price: 0, payment_type: "cash", sale_date: new Date().toISOString().split("T")[0], notes: "" });
+        setIsOpen(false);
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const totalSales = sales.reduce((s, x) => s + x.quantity, 0);
