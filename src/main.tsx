@@ -7,13 +7,15 @@ import { toast } from 'sonner'
 // Register service worker with update detection
 if ('serviceWorker' in navigator) {
   import('virtual:pwa-register').then(({ registerSW }) => {
-    registerSW({
+    // updateSW(true) triggers skipWaiting on the new SW then reloads —
+    // unlike location.reload() which reloads with the OLD SW still active
+    const updateSW = registerSW({
       onNeedRefresh() {
-        toast("A new version is available", {
-          description: "Refresh to get the latest updates.",
+        toast("Versi baru tersedia", {
+          description: "Kemas kini untuk mendapatkan versi terkini.",
           action: {
-            label: "Refresh",
-            onClick: () => window.location.reload(),
+            label: "Kemas Kini",
+            onClick: () => updateSW(true),
           },
           duration: Infinity,
         });

@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     VitePWA({
-      registerType: "autoUpdate",
+      registerType: "prompt",
       includeAssets: ["icons/*.png"],
       manifest: {
         name: "Pokleh Enterprise",
@@ -36,8 +36,9 @@ export default defineConfig(({ mode }) => ({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
-        navigationPreload: false,
+        navigationPreload: true,
         navigateFallback: "/index.html",
+        cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
             urlPattern: /^https?:\/\/.*\.supabase\.co\/rest\/v1\/.*/i,
@@ -45,15 +46,16 @@ export default defineConfig(({ mode }) => ({
             options: {
               cacheName: "supabase-api",
               expiration: { maxEntries: 100, maxAgeSeconds: 86400 },
-              networkTimeoutSeconds: 5,
+              networkTimeoutSeconds: 3,
             },
           },
           {
+            // Hashed JS/CSS assets — never stale, safe to cache-first
             urlPattern: /\.(?:js|css)$/i,
-            handler: "StaleWhileRevalidate",
+            handler: "CacheFirst",
             options: {
               cacheName: "app-shell",
-              expiration: { maxEntries: 50, maxAgeSeconds: 86400 * 7 },
+              expiration: { maxEntries: 60, maxAgeSeconds: 86400 * 30 },
             },
           },
         ],
