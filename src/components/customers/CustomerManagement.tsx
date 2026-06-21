@@ -41,7 +41,8 @@ export const CustomerManagement = ({ userRole }: CustomerManagementProps) => {
     if (!form.name || !form.area_id || submitting) { toast.error("Please enter a customer name and select an area."); return; }
     setSubmitting(true);
     try {
-      const result = await addCustomer(form);
+      const selectedArea = areas.find((a) => a.id === form.area_id);
+      const result = await addCustomer({ ...form, area: selectedArea });
       if (result.success) {
         setForm({ name: "", phone: "", address: "", area_id: "" });
         setIsAddOpen(false);

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { customersRepo } from "@/repositories/customersRepo";
 import { db } from "@/lib/db";
 import { persistWrite } from "@/lib/writeHelper";
-import type { Customer } from "@/types/pokleh";
+import type { Customer, Area } from "@/types/pokleh";
 
 export const useCustomers = (areaId?: string) => {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -37,7 +37,9 @@ export const useCustomers = (areaId?: string) => {
     phone?: string;
     address?: string;
     area_id: string;
+    area?: Area;
   }) => {
+    const { area, ...insertData } = data;
     const tempId = crypto.randomUUID();
     const now = new Date().toISOString();
     const optimistic: Customer = {
@@ -46,6 +48,7 @@ export const useCustomers = (areaId?: string) => {
       phone: data.phone ?? null,
       address: data.address ?? null,
       area_id: data.area_id,
+      area: area,
       debt_balance: 0,
       active: true,
       created_at: now,
@@ -56,7 +59,7 @@ export const useCustomers = (areaId?: string) => {
       action: "INSERT",
       userId: "system",
       data: data as Record<string, unknown>,
-      execute: () => customersRepo.create(data),
+      execute: () => customersRepo.create(insertData),
       optimistic: {
         add: () => setCustomers((prev) => [...prev, optimistic]),
         remove: () => setCustomers((prev) => prev.filter((c) => c.id !== tempId)),

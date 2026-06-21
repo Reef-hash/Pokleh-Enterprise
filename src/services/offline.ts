@@ -35,7 +35,8 @@ class OfflineDetector {
             signal: AbortSignal.timeout(5000),
           }
         );
-        this.setOnline(resp.ok);
+        // Treat any non-5xx response as online — 401/403 means server reachable but unauthorized
+        this.setOnline(resp.status < 500);
       } catch {
         this.setOnline(false);
       }
