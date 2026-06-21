@@ -15,7 +15,7 @@ export const BRANDING = {
     icon512: "/icons/icon-512.png",
     iconMaskable: "/icons/icon-512-maskable.png",
     appleTouchIcon: "/icons/icon-512.png",
-    logoSvg: "/logo.svg",
+    logoSvg: "/logo.jpg",
     logoPng: "/logo.png",
   },
 
