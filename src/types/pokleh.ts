@@ -204,3 +204,13 @@ export interface Profile {
   created_at: string;
   updated_at: string;
 }
+
+export interface SellingPrice {
+  id: string;
+  product_type: ProductType;
+  customer_id: string | null;
+  price_per_pax: number;
+  notes: string | null;
+  created_at: string;
+  customer?: Customer;
+}

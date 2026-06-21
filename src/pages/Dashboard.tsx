@@ -17,6 +17,7 @@ import { DebtLedgerView } from "@/components/sales/DebtLedgerView";
 import { DebtCollectionForm } from "@/components/sales/DebtCollectionForm";
 import { ExpenseManagement } from "@/components/expenses/ExpenseManagement";
 import { SupplierPriceHistoryView } from "@/components/suppliers/SupplierPriceHistoryView";
+import { SellingPriceManagement } from "@/components/sales/SellingPriceManagement";
 import { PoklehReports } from "@/components/reports/PoklehReports";
 import { DailyClosingWorkflow } from "@/components/closings/DailyClosingWorkflow";
 import { AuditLogViewer } from "@/components/audit/AuditLogViewer";
@@ -104,6 +105,8 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
         return <ExpenseManagement userRole={user.role} />;
       case 'price-history':
         return <SupplierPriceHistoryView />;
+      case 'selling-prices':
+        return <SellingPriceManagement userRole={user.role} />;
       case 'pokleh-reports':
         return <PoklehReports userRole={user.role} />;
       case 'daily-closing':

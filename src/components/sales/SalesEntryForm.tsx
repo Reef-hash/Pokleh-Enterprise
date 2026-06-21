@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,10 +8,11 @@ import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, DollarSign } from "lucide-react";
+import { Plus, DollarSign, RotateCcw } from "lucide-react";
 import { useSales } from "@/hooks/useSales";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useAreas } from "@/hooks/useAreas";
+import { useSellingPrices } from "@/hooks/useSellingPrices";
 import { useAuthStore } from "@/stores/authStore";
 import { formatCurrency } from "@/lib/currency";
 import { toast } from "sonner";
@@ -25,6 +26,7 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
   const { sales, loading, addSale } = useSales();
   const { customers } = useCustomers();
   const { areas } = useAreas();
+  const { lookupPrice } = useSellingPrices();
   const user = useAuthStore((s) => s.user);
   const [isOpen, setIsOpen] = useState(false);
   const [form, setForm] = useState({
@@ -38,6 +40,27 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
     notes: "",
   });
   const [submitting, setSubmitting] = useState(false);
+
+  // Suggested price based on price list (customer-specific or default)
+  const suggested = useMemo(() => {
+    if (!form.customer_id || !form.product_type || form.quantity <= 0) return null;
+    const pricePerPax = lookupPrice(form.customer_id, form.product_type);
+    if (pricePerPax === null || pricePerPax === 0) return null;
+    const isCustomerSpecific = lookupPrice(form.customer_id, form.product_type) !== lookupPrice(null, form.product_type);
+    return { total: pricePerPax * form.quantity, perPax: pricePerPax, isCustomerSpecific };
+  }, [form.customer_id, form.product_type, form.quantity, lookupPrice]);
+
+  const applysuggested = () => {
+    if (suggested) setForm((f) => ({ ...f, selling_price: suggested.total }));
+  };
+
+  // Auto-fill when customer/product/qty changes and price is still 0
+  const prevKey = `${form.customer_id}|${form.product_type}|${form.quantity}`;
+  const [lastAutoKey, setLastAutoKey] = useState("");
+  if (suggested && form.selling_price === 0 && prevKey !== lastAutoKey) {
+    setLastAutoKey(prevKey);
+    setForm((f) => ({ ...f, selling_price: suggested.total }));
+  }
 
   if (loading) return <PageLoader />;
 
@@ -201,6 +224,18 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
             <div className="space-y-2">
               <Label>Selling Price (RM)</Label>
               <Input type="number" step="0.01" min={0} value={form.selling_price || ""} onChange={(e) => setForm({ ...form, selling_price: parseFloat(e.target.value) || 0 })} />
+              {suggested && (
+                <div className="flex items-center gap-2 text-sm">
+                  <span className={suggested.isCustomerSpecific ? "text-amber-600 font-medium" : "text-muted-foreground"}>
+                    {suggested.isCustomerSpecific ? "Harga khusus" : "Harga biasa"}: {formatCurrency(suggested.perPax)}/pax = {formatCurrency(suggested.total)}
+                  </span>
+                  {form.selling_price !== suggested.total && (
+                    <button type="button" onClick={applysuggested} className="inline-flex items-center gap-1 text-primary hover:underline">
+                      <RotateCcw className="h-3 w-3" /> Guna harga ini
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
             <div className="space-y-2">
               <Label>Payment Type</Label>

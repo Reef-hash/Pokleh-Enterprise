@@ -24,7 +24,8 @@ import {
   Shield,
   CalendarCheck,
   ChevronDown,
-  RefreshCw
+  RefreshCw,
+  Tag
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/lib/i18n";
@@ -116,6 +117,7 @@ export const DashboardLayout = ({
       suppliers: t('nav.suppliers'),
       'staff-assignments': t('nav.staff-assignments'),
       'price-history': t('nav.price-history'),
+      'selling-prices': 'Harga Jual',
       expenses: t('nav.expenses'),
       'pokleh-reports': t('nav.pokleh-reports'),
       'daily-closing': t('nav.daily-closing'),
@@ -155,6 +157,7 @@ export const DashboardLayout = ({
         { id: 'suppliers', label: 'Suppliers', icon: Building2 },
         { id: 'staff-assignments', label: 'Staff Assignments', icon: UserCheck },
         { id: 'price-history', label: 'Price History', icon: Clock },
+        { id: 'selling-prices', label: 'Harga Jual', icon: Tag },
         { id: 'expenses', label: 'Expenses', icon: Receipt },
       ]
     },
