@@ -7,8 +7,8 @@ export const stockIntakeRepo = {
 };
 // Stock Distribution
 export const stockDistributionRepo = {
-  fetchAll: (intakeId?: string) => { let q = supabase.from("stock_distribution").select("*, intake:stock_intake(*), area:areas(*)"); if (intakeId) q = q.eq("intake_id", intakeId); return q.order("created_at", { ascending: false }); },
-  create: (data: Record<string, unknown>) => supabase.from("stock_distribution").insert(data).select("*, intake:stock_intake(*), area:areas(*)").single(),
+  fetchAll: (intakeId?: string) => { let q = supabase.from("stock_distribution").select("*, intake:stock_intake(*, supplier:suppliers(*)), area:areas(*)"); if (intakeId) q = q.eq("intake_id", intakeId); return q.order("created_at", { ascending: false }); },
+  create: (data: Record<string, unknown>) => supabase.from("stock_distribution").insert(data).select("*, intake:stock_intake(*, supplier:suppliers(*)), area:areas(*)").single(),
   fetchQuantities: () => supabase.from("stock_distribution").select("intake_id, quantity_assigned"),
 };
 // Stock Return
