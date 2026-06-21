@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PageLoader } from "@/components/ui/PageLoader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +18,7 @@ interface StockIntakeFormProps {
 
 export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
   const { intakes, loading, addIntake } = useStockIntake();
+  if (loading) return <PageLoader />;
   const { suppliers } = usePoklehSuppliers();
   const [isOpen, setIsOpen] = useState(false);
   const [form, setForm] = useState({
@@ -130,3 +132,4 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
     </div>
   );
 };
+

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PageLoader } from "@/components/ui/PageLoader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +18,7 @@ interface DebtCollectionFormProps {
 
 export const DebtCollectionForm = ({ userRole }: DebtCollectionFormProps) => {
   const { collections, loading, addCollection } = useDebtCollection();
+  if (loading) return <PageLoader />;
   const { customers } = useCustomers();
   const [isOpen, setIsOpen] = useState(false);
   const [form, setForm] = useState({
@@ -144,3 +146,4 @@ export const DebtCollectionForm = ({ userRole }: DebtCollectionFormProps) => {
     </div>
   );
 };
+

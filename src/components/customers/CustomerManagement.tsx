@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PageLoader } from "@/components/ui/PageLoader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +21,7 @@ interface CustomerManagementProps {
 export const CustomerManagement = ({ userRole }: CustomerManagementProps) => {
   const { areas } = useAreas();
   const { customers, loading, addCustomer, updateCustomer, toggleActive } = useCustomers();
+  if (loading) return <PageLoader />;
   const [search, setSearch] = useState("");
   const [areaFilter, setAreaFilter] = useState("all");
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -144,3 +146,4 @@ export const CustomerManagement = ({ userRole }: CustomerManagementProps) => {
     </div>
   );
 };
+

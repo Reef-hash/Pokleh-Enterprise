@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PageLoader } from "@/components/ui/PageLoader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -14,6 +15,7 @@ interface SupplierSettlementViewProps {
 
 export const SupplierSettlementView = ({ userRole }: SupplierSettlementViewProps) => {
   const { settlements, loading, calculateSettlement, markSettled } = useSettlements();
+  if (loading) return <PageLoader />;
   const { intakes } = useStockIntake();
 
   const unsettledIntakes = intakes.filter(
@@ -127,3 +129,4 @@ export const SupplierSettlementView = ({ userRole }: SupplierSettlementViewProps
     </div>
   );
 };
+

@@ -37,17 +37,40 @@ export const useSales = () => {
     notes?: string;
   }) => {
     if (!userId) return { success: false, error: "Not authenticated" };
+
+    const tempId = crypto.randomUUID();
+    const optimistic: Sale = {
+      id: tempId,
+      customer_id: input.customer_id,
+      area_id: input.area_id,
+      quantity: input.quantity,
+      selling_price: input.selling_price,
+      payment_type: input.payment_type,
+      distribution_id: input.distribution_id ?? null,
+      staff_id: userId,
+      sale_date: input.sale_date,
+      notes: input.notes ?? null,
+      correction_of: null,
+      correction_status: null,
+      created_at: new Date().toISOString(),
+      customer: {} as any,
+      area: {} as any,
+      staff: {} as any,
+    };
+    setSales((prev) => [optimistic, ...prev]);
+
     const { data, error } = await supabase
       .from("sales")
       .insert({ ...input, staff_id: userId })
       .select("*, customer:customers(*), area:areas(*), staff:profiles!sales_staff_id_fkey(*)")
       .single();
     if (error) {
+      setSales((prev) => prev.filter((s) => s.id !== tempId));
       toast.error(error.message);
       return { success: false };
     }
     const sale = data as unknown as Sale;
-    setSales((prev) => [sale, ...prev]);
+    setSales((prev) => prev.map((s) => (s.id === tempId ? sale : s)));
     await db.sales.put(sale as unknown as import("@/lib/db").OfflineSale);
     toast.success("Sale recorded");
     return { success: true, data: sale };

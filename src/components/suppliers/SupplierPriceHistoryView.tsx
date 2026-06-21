@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PageLoader } from "@/components/ui/PageLoader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,7 +9,8 @@ import { usePoklehSuppliers } from "@/hooks/usePoklehSuppliers";
 import { formatCurrency } from "@/lib/currency";
 
 export const SupplierPriceHistoryView = () => {
-  const { history } = useSupplierPriceHistory();
+  const { history, loading } = useSupplierPriceHistory();
+  if (loading) return <PageLoader />;
   const { suppliers } = usePoklehSuppliers();
   const [filterSupplier, setFilterSupplier] = useState("all");
 
@@ -75,3 +77,4 @@ export const SupplierPriceHistoryView = () => {
     </div>
   );
 };
+

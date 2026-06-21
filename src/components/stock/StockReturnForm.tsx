@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { PageLoader } from "@/components/ui/PageLoader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +19,7 @@ interface StockReturnFormProps {
 
 export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
   const { returns, loading, addReturn } = useStockReturn();
+  if (loading) return <PageLoader />;
   const [isOpen, setIsOpen] = useState(false);
   const [distributions, setDistributions] = useState<StockDistribution[]>([]);
   const [form, setForm] = useState({ distribution_id: "", area_id: "", quantity_returned: 0, return_date: new Date().toISOString().split("T")[0] });
@@ -125,3 +127,4 @@ export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
     </div>
   );
 };
+

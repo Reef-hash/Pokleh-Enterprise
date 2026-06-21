@@ -1,22 +1,24 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PoklehDashboard } from "@/components/dashboard/PoklehDashboard";
-import { SuppliersManagement } from "@/components/suppliers/SuppliersManagement";
-import { AreaManagement } from "@/components/areas/AreaManagement";
-import { CustomerManagement } from "@/components/customers/CustomerManagement";
-import { StaffAssignment } from "@/components/staff/StaffAssignment";
-import { StockIntakeForm } from "@/components/stock/StockIntakeForm";
-import { StockDistributionForm } from "@/components/stock/StockDistributionForm";
-import { StockReturnForm } from "@/components/stock/StockReturnForm";
-import { SupplierSettlementView } from "@/components/stock/SupplierSettlementView";
-import { SalesEntryForm } from "@/components/sales/SalesEntryForm";
-import { DebtLedgerView } from "@/components/sales/DebtLedgerView";
-import { DebtCollectionForm } from "@/components/sales/DebtCollectionForm";
-import { ExpenseManagement } from "@/components/expenses/ExpenseManagement";
-import { SupplierPriceHistoryView } from "@/components/suppliers/SupplierPriceHistoryView";
-import { PoklehReports } from "@/components/reports/PoklehReports";
-import { DailyClosingWorkflow } from "@/components/closings/DailyClosingWorkflow";
-import { AuditLogViewer } from "@/components/audit/AuditLogViewer";
+import { PageLoader } from "@/components/ui/PageLoader";
+
+const AreaManagement = lazy(() => import("@/components/areas/AreaManagement"));
+const CustomerManagement = lazy(() => import("@/components/customers/CustomerManagement"));
+const StaffAssignment = lazy(() => import("@/components/staff/StaffAssignment"));
+const StockIntakeForm = lazy(() => import("@/components/stock/StockIntakeForm"));
+const StockDistributionForm = lazy(() => import("@/components/stock/StockDistributionForm"));
+const StockReturnForm = lazy(() => import("@/components/stock/StockReturnForm"));
+const SupplierSettlementView = lazy(() => import("@/components/stock/SupplierSettlementView"));
+const SuppliersManagement = lazy(() => import("@/components/suppliers/SuppliersManagement"));
+const SalesEntryForm = lazy(() => import("@/components/sales/SalesEntryForm"));
+const DebtLedgerView = lazy(() => import("@/components/sales/DebtLedgerView"));
+const DebtCollectionForm = lazy(() => import("@/components/sales/DebtCollectionForm"));
+const ExpenseManagement = lazy(() => import("@/components/expenses/ExpenseManagement"));
+const SupplierPriceHistoryView = lazy(() => import("@/components/suppliers/SupplierPriceHistoryView"));
+const PoklehReports = lazy(() => import("@/components/reports/PoklehReports"));
+const DailyClosingWorkflow = lazy(() => import("@/components/closings/DailyClosingWorkflow"));
+const AuditLogViewer = lazy(() => import("@/components/audit/AuditLogViewer"));
 
 interface User {
   id: string;
@@ -90,7 +92,9 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
       currentPage={currentPage}
       onNavigate={handleNavigate}
     >
-      {renderContent()}
+      <Suspense fallback={<PageLoader />}>
+        {renderContent()}
+      </Suspense>
     </DashboardLayout>
   );
 };

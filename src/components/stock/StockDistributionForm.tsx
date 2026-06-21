@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PageLoader } from "@/components/ui/PageLoader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +21,7 @@ interface StockDistributionFormProps {
 
 export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) => {
   const { distributions, loading, addDistribution } = useStockDistribution();
+  if (loading) return <PageLoader />;
   const { intakes } = useStockIntake();
   const { areas } = useAreas();
   const [isOpen, setIsOpen] = useState(false);
@@ -159,3 +161,4 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
     </div>
   );
 };
+

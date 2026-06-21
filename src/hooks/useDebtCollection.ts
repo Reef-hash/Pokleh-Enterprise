@@ -33,16 +33,33 @@ export const useDebtCollection = () => {
     notes?: string;
   }) => {
     if (!userId) return { success: false, error: "Not authenticated" };
+
+    const tempId = crypto.randomUUID();
+    const optimistic: DebtCollection = {
+      id: tempId,
+      customer_id: input.customer_id,
+      amount: input.amount,
+      collection_date: input.collection_date,
+      notes: input.notes ?? null,
+      staff_id: userId,
+      correction_of: null,
+      correction_status: null,
+      created_at: new Date().toISOString(),
+    };
+    setCollections((prev) => [optimistic, ...prev]);
+
     const { data: colData, error: colError } = await supabase
       .from("debt_collection")
       .insert({ ...input, staff_id: userId })
       .select("*, customer:customers(*), staff:profiles!debt_collection_staff_id_fkey(*)")
       .single();
     if (colError) {
+      setCollections((prev) => prev.filter((c) => c.id !== tempId));
       toast.error(colError.message);
       return { success: false };
     }
     const collection = colData as unknown as DebtCollection;
+    setCollections((prev) => prev.map((c) => (c.id === tempId ? collection : c)));
 
     const { data: cust } = await supabase
       .from("customers")
@@ -66,7 +83,6 @@ export const useDebtCollection = () => {
       toast.error("Collection recorded but debt ledger update failed");
     }
 
-    setCollections((prev) => [collection, ...prev]);
     await db.debtCollections.put(collection as unknown as import("@/lib/db").OfflineDebtCollection);
     toast.success("Debt collection recorded");
     return { success: true, data: collection };

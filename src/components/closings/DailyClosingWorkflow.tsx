@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PageLoader } from "@/components/ui/PageLoader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -20,6 +21,7 @@ interface DailyClosingWorkflowProps {
 
 export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) => {
   const { closings, loading, closeDay, reconcileDay } = useDailyClosings();
+  if (loading) return <PageLoader />;
   const { areas } = useAreas();
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [areaId, setAreaId] = useState("");
@@ -201,3 +203,4 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
     </div>
   );
 };
+
