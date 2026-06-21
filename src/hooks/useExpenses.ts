@@ -58,6 +58,7 @@ export const useExpenses = () => {
         setExpenses((prev) => prev.map((e) => (e.id === tempId ? expense : e))),
       dexiePut: (expense) =>
         db.expenses.put(expense as unknown as import("@/lib/db").OfflineExpense),
+      cacheOffline: async () => db.expenses.put(optimistic as unknown as import("@/lib/db").OfflineExpense),
       msg: "Expense recorded",
     });
   };

@@ -56,6 +56,7 @@ export const useSales = () => {
       },
       onSuccess: (sale: Sale) => setSales((prev) => prev.map((s) => (s.id === tempId ? sale : s))),
       dexiePut: (sale: Sale) => db.sales.put(sale as unknown as import("@/lib/db").OfflineSale),
+      cacheOffline: async () => db.sales.put(optimistic as unknown as import("@/lib/db").OfflineSale),
       msg: "Sale recorded",
     });
   };

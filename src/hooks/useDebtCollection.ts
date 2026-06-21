@@ -66,6 +66,7 @@ export const useDebtCollection = () => {
       },
       dexiePut: (collection) =>
         db.debtCollections.put(collection as unknown as import("@/lib/db").OfflineDebtCollection),
+      cacheOffline: async () => db.debtCollections.put(optimistic as unknown as import("@/lib/db").OfflineDebtCollection),
       msg: "Debt collection recorded",
     });
 

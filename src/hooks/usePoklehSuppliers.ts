@@ -26,6 +26,13 @@ export const usePoklehSuppliers = () => {
   const addSupplier = async (name: string, phone?: string) => {
     const tempId = crypto.randomUUID();
     const now = new Date().toISOString();
+    const optimistic: Supplier = {
+      id: tempId,
+      name,
+      phone: phone || null,
+      created_at: now,
+      updated_at: now,
+    } as Supplier;
     return persistWrite<Supplier>({
       entity: "suppliers",
       action: "INSERT",
@@ -33,23 +40,14 @@ export const usePoklehSuppliers = () => {
       data: { name, phone: phone || null },
       execute: () => suppliersRepo.create({ name, phone: phone || null }),
       optimistic: {
-        add: () =>
-          setSuppliers((prev) => [
-            ...prev,
-            {
-              id: tempId,
-              name,
-              phone: phone || null,
-              created_at: now,
-              updated_at: now,
-            } as Supplier,
-          ]),
+        add: () => setSuppliers((prev) => [...prev, optimistic]),
         remove: () => setSuppliers((prev) => prev.filter((s) => s.id !== tempId)),
       },
       onSuccess: (supplier) =>
         setSuppliers((prev) => prev.map((s) => (s.id === tempId ? supplier : s))),
       dexiePut: (supplier) =>
         db.suppliers.put({ ...supplier, updatedAt: supplier.updated_at, syncedAt: new Date().toISOString() }),
+      cacheOffline: async () => db.suppliers.put(optimistic as unknown as import("@/lib/db").OfflineSupplier),
       msg: "Supplier added",
     });
   };

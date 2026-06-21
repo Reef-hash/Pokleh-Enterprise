@@ -32,6 +32,14 @@ export const useStockDistribution = (intakeId?: string) => {
 
     const tempId = crypto.randomUUID();
     const now = new Date().toISOString();
+    const optimistic: StockDistribution = {
+      id: tempId,
+      intake_id: data.intake_id,
+      area_id: data.area_id,
+      quantity_assigned: data.quantity_assigned,
+      created_by: userId!,
+      created_at: now,
+    } as StockDistribution;
     return persistWrite<StockDistribution>({
       entity: "stock_distribution",
       action: "INSERT",
@@ -39,24 +47,14 @@ export const useStockDistribution = (intakeId?: string) => {
       data: { ...data, created_by: userId },
       execute: () => stockDistributionRepo.create({ ...data, created_by: userId }),
       optimistic: {
-        add: () =>
-          setDistributions((prev) => [
-            {
-              id: tempId,
-              intake_id: data.intake_id,
-              area_id: data.area_id,
-              quantity_assigned: data.quantity_assigned,
-              created_by: userId!,
-              created_at: now,
-            } as StockDistribution,
-            ...prev,
-          ]),
+        add: () => setDistributions((prev) => [optimistic, ...prev]),
         remove: () => setDistributions((prev) => prev.filter((d) => d.id !== tempId)),
       },
       onSuccess: (dist) =>
         setDistributions((prev) => prev.map((d) => (d.id === tempId ? dist : d))),
       dexiePut: (dist) =>
         db.stockDistributions.put(dist as unknown as import("@/lib/db").OfflineStockDistribution),
+      cacheOffline: async () => db.stockDistributions.put(optimistic as unknown as import("@/lib/db").OfflineStockDistribution),
       msg: "Stock distributed",
     });
   };

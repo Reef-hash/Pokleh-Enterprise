@@ -40,6 +40,17 @@ export const useCustomers = (areaId?: string) => {
   }) => {
     const tempId = crypto.randomUUID();
     const now = new Date().toISOString();
+    const optimistic: Customer = {
+      id: tempId,
+      name: data.name,
+      phone: data.phone ?? null,
+      address: data.address ?? null,
+      area_id: data.area_id,
+      debt_balance: 0,
+      active: true,
+      created_at: now,
+      updated_at: now,
+    } as Customer;
     return persistWrite<Customer>({
       entity: "customers",
       action: "INSERT",
@@ -47,21 +58,7 @@ export const useCustomers = (areaId?: string) => {
       data: data as Record<string, unknown>,
       execute: () => customersRepo.create(data),
       optimistic: {
-        add: () =>
-          setCustomers((prev) => [
-            ...prev,
-            {
-              id: tempId,
-              name: data.name,
-              phone: data.phone ?? null,
-              address: data.address ?? null,
-              area_id: data.area_id,
-              debt_balance: 0,
-              active: true,
-              created_at: now,
-              updated_at: now,
-            } as Customer,
-          ]),
+        add: () => setCustomers((prev) => [...prev, optimistic]),
         remove: () => setCustomers((prev) => prev.filter((c) => c.id !== tempId)),
       },
       onSuccess: (customer) =>
@@ -72,6 +69,7 @@ export const useCustomers = (areaId?: string) => {
           updatedAt: customer.updated_at,
           syncedAt: new Date().toISOString(),
         }),
+      cacheOffline: async () => db.customers.put({ ...optimistic, updatedAt: optimistic.created_at, syncedAt: now }),
       msg: "Customer added",
     });
   };

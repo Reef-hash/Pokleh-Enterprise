@@ -33,6 +33,15 @@ export const useStockReturn = (areaId?: string) => {
 
     const tempId = crypto.randomUUID();
     const now = new Date().toISOString();
+    const optimistic: StockReturn = {
+      id: tempId,
+      distribution_id: data.distribution_id,
+      area_id: data.area_id,
+      quantity_returned: data.quantity_returned,
+      return_date: data.return_date,
+      created_by: userId!,
+      created_at: now,
+    } as StockReturn;
     return persistWrite<StockReturn>({
       entity: "stock_return",
       action: "INSERT",
@@ -40,25 +49,14 @@ export const useStockReturn = (areaId?: string) => {
       data: { ...data, created_by: userId },
       execute: () => stockReturnRepo.create({ ...data, created_by: userId }),
       optimistic: {
-        add: () =>
-          setReturns((prev) => [
-            {
-              id: tempId,
-              distribution_id: data.distribution_id,
-              area_id: data.area_id,
-              quantity_returned: data.quantity_returned,
-              return_date: data.return_date,
-              created_by: userId!,
-              created_at: now,
-            } as StockReturn,
-            ...prev,
-          ]),
+        add: () => setReturns((prev) => [optimistic, ...prev]),
         remove: () => setReturns((prev) => prev.filter((r) => r.id !== tempId)),
       },
       onSuccess: (ret) =>
         setReturns((prev) => prev.map((r) => (r.id === tempId ? ret : r))),
       dexiePut: (ret) =>
         db.stockReturns.put(ret as unknown as import("@/lib/db").OfflineStockReturn),
+      cacheOffline: async () => db.stockReturns.put(optimistic as unknown as import("@/lib/db").OfflineStockReturn),
       msg: "Stock return recorded",
     });
   };

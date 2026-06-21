@@ -17,6 +17,7 @@ export interface PersistConfig<T> {
   onSuccess: (result: T) => void;
   dexiePut?: (result: T) => Promise<void>;
   dexieDelete?: () => Promise<void>;
+  cacheOffline?: () => Promise<void>;
   msg: string;
 }
 
@@ -36,6 +37,7 @@ export async function persistWrite<T>(config: PersistConfig<T>): Promise<Persist
     const payload = id ? { ...data, id } : { ...data };
     await syncEngine.enqueue({ entity, entityId: id || tempId, action, payload: payload as Record<string, unknown> });
     if (optimistic) optimistic.add();
+    if (cacheOffline) await cacheOffline();
     toast.success("Saved offline — will sync when connected");
     return { success: true, offline: true };
   }
