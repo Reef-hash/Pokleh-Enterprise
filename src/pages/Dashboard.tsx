@@ -3,22 +3,22 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PoklehDashboard } from "@/components/dashboard/PoklehDashboard";
 import { PageLoader } from "@/components/ui/PageLoader";
 
-const AreaManagement = lazy(() => import("@/components/areas/AreaManagement"));
-const CustomerManagement = lazy(() => import("@/components/customers/CustomerManagement"));
-const StaffAssignment = lazy(() => import("@/components/staff/StaffAssignment"));
-const StockIntakeForm = lazy(() => import("@/components/stock/StockIntakeForm"));
-const StockDistributionForm = lazy(() => import("@/components/stock/StockDistributionForm"));
-const StockReturnForm = lazy(() => import("@/components/stock/StockReturnForm"));
-const SupplierSettlementView = lazy(() => import("@/components/stock/SupplierSettlementView"));
-const SuppliersManagement = lazy(() => import("@/components/suppliers/SuppliersManagement"));
-const SalesEntryForm = lazy(() => import("@/components/sales/SalesEntryForm"));
-const DebtLedgerView = lazy(() => import("@/components/sales/DebtLedgerView"));
-const DebtCollectionForm = lazy(() => import("@/components/sales/DebtCollectionForm"));
-const ExpenseManagement = lazy(() => import("@/components/expenses/ExpenseManagement"));
-const SupplierPriceHistoryView = lazy(() => import("@/components/suppliers/SupplierPriceHistoryView"));
-const PoklehReports = lazy(() => import("@/components/reports/PoklehReports"));
-const DailyClosingWorkflow = lazy(() => import("@/components/closings/DailyClosingWorkflow"));
-const AuditLogViewer = lazy(() => import("@/components/audit/AuditLogViewer"));
+const AreaManagement = lazy(() => import("@/components/areas/AreaManagement").then(m => ({ default: m.AreaManagement })));
+const CustomerManagement = lazy(() => import("@/components/customers/CustomerManagement").then(m => ({ default: m.CustomerManagement })));
+const StaffAssignment = lazy(() => import("@/components/staff/StaffAssignment").then(m => ({ default: m.StaffAssignment })));
+const StockIntakeForm = lazy(() => import("@/components/stock/StockIntakeForm").then(m => ({ default: m.StockIntakeForm })));
+const StockDistributionForm = lazy(() => import("@/components/stock/StockDistributionForm").then(m => ({ default: m.StockDistributionForm })));
+const StockReturnForm = lazy(() => import("@/components/stock/StockReturnForm").then(m => ({ default: m.StockReturnForm })));
+const SupplierSettlementView = lazy(() => import("@/components/stock/SupplierSettlementView").then(m => ({ default: m.SupplierSettlementView })));
+const SuppliersManagement = lazy(() => import("@/components/suppliers/SuppliersManagement").then(m => ({ default: m.SuppliersManagement })));
+const SalesEntryForm = lazy(() => import("@/components/sales/SalesEntryForm").then(m => ({ default: m.SalesEntryForm })));
+const DebtLedgerView = lazy(() => import("@/components/sales/DebtLedgerView").then(m => ({ default: m.DebtLedgerView })));
+const DebtCollectionForm = lazy(() => import("@/components/sales/DebtCollectionForm").then(m => ({ default: m.DebtCollectionForm })));
+const ExpenseManagement = lazy(() => import("@/components/expenses/ExpenseManagement").then(m => ({ default: m.ExpenseManagement })));
+const SupplierPriceHistoryView = lazy(() => import("@/components/suppliers/SupplierPriceHistoryView").then(m => ({ default: m.SupplierPriceHistoryView })));
+const PoklehReports = lazy(() => import("@/components/reports/PoklehReports").then(m => ({ default: m.PoklehReports })));
+const DailyClosingWorkflow = lazy(() => import("@/components/closings/DailyClosingWorkflow").then(m => ({ default: m.DailyClosingWorkflow })));
+const AuditLogViewer = lazy(() => import("@/components/audit/AuditLogViewer").then(m => ({ default: m.AuditLogViewer })));
 
 interface User {
   id: string;
