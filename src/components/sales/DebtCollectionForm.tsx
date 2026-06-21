@@ -11,6 +11,7 @@ import { Plus, Wallet } from "lucide-react";
 import { useDebtCollection } from "@/hooks/useDebtCollection";
 import { useCustomers } from "@/hooks/useCustomers";
 import { formatCurrency } from "@/lib/currency";
+import { toast } from "sonner";
 
 interface DebtCollectionFormProps {
   userRole: "admin" | "staff";
@@ -26,14 +27,17 @@ export const DebtCollectionForm = ({ userRole }: DebtCollectionFormProps) => {
     collection_date: new Date().toISOString().split("T")[0],
     notes: "",
   });
+  const [submitting, setSubmitting] = useState(false);
 
   if (loading) return <PageLoader />;
 
   const activeDebtors = customers.filter((c) => c.debt_balance > 0);
 
   const handleAdd = async () => {
-    if (!form.customer_id || form.amount <= 0) return;
+    if (!form.customer_id || form.amount <= 0 || submitting) { toast.error("Please select a customer and enter a valid amount."); return; }
+    setSubmitting(true);
     await addCollection(form);
+    setSubmitting(false);
     setForm({ customer_id: "", amount: 0, collection_date: new Date().toISOString().split("T")[0], notes: "" });
     setIsOpen(false);
   };
@@ -140,7 +144,7 @@ export const DebtCollectionForm = ({ userRole }: DebtCollectionFormProps) => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-            <Button onClick={handleAdd}>Record Collection</Button>
+            <Button onClick={handleAdd} disabled={submitting}>{submitting ? "Saving..." : "Save"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -8,6 +8,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Label } from "@/components/ui/label";
 import { Plus, Edit, Trash2, MapPin } from "lucide-react";
 import { useAreas } from "@/hooks/useAreas";
+import { toast } from "sonner";
 
 interface AreaManagementProps {
   userRole: "admin" | "staff";
@@ -23,7 +24,7 @@ export const AreaManagement = ({ userRole }: AreaManagementProps) => {
   const [submitting, setSubmitting] = useState(false);
 
   const handleAdd = async () => {
-    if (!name.trim() || submitting) return;
+    if (!name.trim() || submitting) { toast.error("Please enter an area name."); return; }
     setSubmitting(true);
     await addArea(name.trim());
     setSubmitting(false);
@@ -32,7 +33,7 @@ export const AreaManagement = ({ userRole }: AreaManagementProps) => {
   };
 
   const handleEdit = async () => {
-    if (!name.trim() || !editingId || submitting) return;
+    if (!name.trim() || !editingId || submitting) { toast.error("Please enter an area name."); return; }
     setSubmitting(true);
     await updateArea(editingId, name.trim());
     setSubmitting(false);

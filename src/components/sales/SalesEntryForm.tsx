@@ -13,6 +13,7 @@ import { useCustomers } from "@/hooks/useCustomers";
 import { useAreas } from "@/hooks/useAreas";
 import { useAuthStore } from "@/stores/authStore";
 import { formatCurrency } from "@/lib/currency";
+import { toast } from "sonner";
 
 interface SalesEntryFormProps {
   userRole: "admin" | "staff";
@@ -33,12 +34,15 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
     sale_date: new Date().toISOString().split("T")[0],
     notes: "",
   });
+  const [submitting, setSubmitting] = useState(false);
 
   if (loading) return <PageLoader />;
 
   const handleAdd = async () => {
-    if (!form.customer_id || !form.area_id || form.quantity <= 0 || form.selling_price <= 0) return;
+    if (!form.customer_id || !form.area_id || form.quantity <= 0 || form.selling_price <= 0 || submitting) { toast.error("Please select a customer, area, and enter valid quantity and price."); return; }
+    setSubmitting(true);
     await addSale(form);
+    setSubmitting(false);
     setForm({ customer_id: "", area_id: "", quantity: 0, selling_price: 0, payment_type: "cash", sale_date: new Date().toISOString().split("T")[0], notes: "" });
     setIsOpen(false);
   };
@@ -172,7 +176,7 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-            <Button onClick={handleAdd}>Record Sale</Button>
+            <Button onClick={handleAdd} disabled={submitting}>{submitting ? "Saving..." : "Save"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

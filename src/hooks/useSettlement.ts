@@ -5,6 +5,7 @@ import { syncEngine } from "@/services/sync";
 import { toast } from "sonner";
 import type { SupplierSettlement } from "@/types/pokleh";
 import { useAuthStore } from "@/stores/authStore";
+import { getUserFriendlyError } from "@/lib/errors";
 
 export const useSettlements = () => {
   const [settlements, setSettlements] = useState<SupplierSettlement[]>([]);
@@ -93,7 +94,7 @@ export const useSettlements = () => {
         .select("*, intake:stock_intake(*, supplier:suppliers(*))")
         .single();
       if (updateError) {
-        toast.error(updateError.message);
+        toast.error(getUserFriendlyError(updateError, "supplier_settlements"));
         return { success: false };
       }
       result = updateData;
@@ -112,7 +113,7 @@ export const useSettlements = () => {
         .select("*, intake:stock_intake(*, supplier:suppliers(*))")
         .single();
       if (insertError) {
-        toast.error(insertError.message);
+        toast.error(getUserFriendlyError(insertError, "supplier_settlements"));
         return { success: false };
       }
       result = insertData;
@@ -145,7 +146,7 @@ export const useSettlements = () => {
       .update({ status: "settled", settlement_date: new Date().toISOString().split("T")[0], settled_by: userId })
       .eq("id", id);
     if (error) {
-      toast.error(error.message);
+      toast.error(getUserFriendlyError(error, "supplier_settlements"));
       return { success: false };
     }
     setSettlements((prev) =>

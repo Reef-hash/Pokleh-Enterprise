@@ -12,6 +12,7 @@ import { Plus, RotateCcw } from "lucide-react";
 import { useStockReturn } from "@/hooks/useStockReturn";
 import { supabase } from "@/integrations/supabase/client";
 import type { StockDistribution } from "@/types/pokleh";
+import { toast } from "sonner";
 
 interface StockReturnFormProps {
   userRole: "admin" | "staff";
@@ -22,6 +23,7 @@ export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [distributions, setDistributions] = useState<StockDistribution[]>([]);
   const [form, setForm] = useState({ distribution_id: "", area_id: "", quantity_returned: 0, return_date: new Date().toISOString().split("T")[0] });
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     supabase
@@ -34,8 +36,10 @@ export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
   if (loading) return <PageLoader />;
 
   const handleAdd = async () => {
-    if (!form.distribution_id || !form.area_id || form.quantity_returned <= 0) return;
+    if (!form.distribution_id || !form.area_id || form.quantity_returned <= 0 || submitting) { toast.error("Please select a distribution and enter a valid quantity."); return; }
+    setSubmitting(true);
     await addReturn(form);
+    setSubmitting(false);
     setForm({ distribution_id: "", area_id: "", quantity_returned: 0, return_date: new Date().toISOString().split("T")[0] });
     setIsOpen(false);
   };
@@ -121,7 +125,7 @@ export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-            <Button onClick={handleAdd}>Record Return</Button>
+            <Button onClick={handleAdd} disabled={submitting}>{submitting ? "Saving..." : "Save"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

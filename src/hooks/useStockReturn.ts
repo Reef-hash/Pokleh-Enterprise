@@ -6,6 +6,7 @@ import { offlineDetector } from "@/services/offline";
 import { syncEngine } from "@/services/sync";
 import { toast } from "sonner";
 import type { StockReturn } from "@/types/pokleh";
+import { getUserFriendlyError } from "@/lib/errors";
 
 export const useStockReturn = (areaId?: string) => {
   const [returns, setReturns] = useState<StockReturn[]>([]);
@@ -52,7 +53,7 @@ export const useStockReturn = (areaId?: string) => {
       .select("*, distribution:stock_distribution(*, area:areas(*)), area:areas(*)")
       .single();
     if (error) {
-      toast.error(error.message);
+      toast.error(getUserFriendlyError(error, "stock_return"));
       return { success: false };
     }
     const ret = result as unknown as StockReturn;

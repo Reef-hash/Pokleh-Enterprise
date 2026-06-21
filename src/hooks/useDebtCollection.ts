@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
 import type { DebtCollection } from "@/types/pokleh";
+import { getUserFriendlyError } from "@/lib/errors";
 
 export const useDebtCollection = () => {
   const [collections, setCollections] = useState<DebtCollection[]>([]);
@@ -55,7 +56,7 @@ export const useDebtCollection = () => {
       .single();
     if (colError) {
       setCollections((prev) => prev.filter((c) => c.id !== tempId));
-      toast.error(colError.message);
+      toast.error(getUserFriendlyError(colError, "debt_collection"));
       return { success: false };
     }
     const collection = colData as unknown as DebtCollection;

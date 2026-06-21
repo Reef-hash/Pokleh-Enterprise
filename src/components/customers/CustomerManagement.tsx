@@ -12,6 +12,7 @@ import { Plus, Search, Phone, MapPin } from "lucide-react";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useAreas } from "@/hooks/useAreas";
 import type { Customer } from "@/types/pokleh";
+import { toast } from "sonner";
 import { formatCurrency } from "@/lib/currency";
 
 interface CustomerManagementProps {
@@ -25,6 +26,7 @@ export const CustomerManagement = ({ userRole }: CustomerManagementProps) => {
   const [areaFilter, setAreaFilter] = useState("all");
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", address: "", area_id: "" });
+  const [submitting, setSubmitting] = useState(false);
 
   if (loading) return <PageLoader />;
 
@@ -35,8 +37,10 @@ export const CustomerManagement = ({ userRole }: CustomerManagementProps) => {
   });
 
   const handleAdd = async () => {
-    if (!form.name || !form.area_id) return;
+    if (!form.name || !form.area_id || submitting) { toast.error("Please enter a customer name and select an area."); return; }
+    setSubmitting(true);
     await addCustomer(form);
+    setSubmitting(false);
     setForm({ name: "", phone: "", address: "", area_id: "" });
     setIsAddOpen(false);
   };
@@ -110,8 +114,7 @@ export const CustomerManagement = ({ userRole }: CustomerManagementProps) => {
                     <Badge variant={c.active ? "secondary" : "outline"}>{c.active ? "Active" : "Inactive"}</Badge>
                   </TableCell>
                 </TableRow>
-              ))}
-              )}
+              )))}
             </TableBody>
           </Table>
         </CardContent>
@@ -148,7 +151,7 @@ export const CustomerManagement = ({ userRole }: CustomerManagementProps) => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddOpen(false)}>Cancel</Button>
-            <Button onClick={handleAdd}>Add Customer</Button>
+            <Button onClick={handleAdd} disabled={submitting}>{submitting ? "Saving..." : "Save"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

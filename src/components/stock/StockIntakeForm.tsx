@@ -11,6 +11,7 @@ import { Plus, Package } from "lucide-react";
 import { useStockIntake } from "@/hooks/useStockIntake";
 import { usePoklehSuppliers } from "@/hooks/usePoklehSuppliers";
 import { formatCurrency } from "@/lib/currency";
+import { toast } from "sonner";
 
 interface StockIntakeFormProps {
   userRole: "admin" | "staff";
@@ -27,12 +28,15 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
     cost_per_pax: 0,
     notes: "",
   });
+  const [submitting, setSubmitting] = useState(false);
 
   if (loading) return <PageLoader />;
 
   const handleAdd = async () => {
-    if (!form.supplier_id || form.quantity_received <= 0 || form.cost_per_pax <= 0) return;
+    if (!form.supplier_id || form.quantity_received <= 0 || form.cost_per_pax <= 0 || submitting) { toast.error("Please select a supplier and enter valid quantity and cost."); return; }
+    setSubmitting(true);
     await addIntake(form);
+    setSubmitting(false);
     setForm({ intake_date: new Date().toISOString().split("T")[0], supplier_id: "", quantity_received: 0, cost_per_pax: 0, notes: "" });
     setIsOpen(false);
   };
@@ -126,7 +130,7 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-            <Button onClick={handleAdd}>Record Intake</Button>
+            <Button onClick={handleAdd} disabled={submitting}>{submitting ? "Saving..." : "Save"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

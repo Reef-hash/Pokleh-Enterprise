@@ -8,6 +8,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Label } from "@/components/ui/label";
 import { Plus, Search, Edit, Trash2, Building2, Phone } from "lucide-react";
 import { usePoklehSuppliers } from "@/hooks/usePoklehSuppliers";
+import { toast } from "sonner";
 
 interface SuppliersManagementProps {
   userRole: "admin" | "staff";
@@ -22,6 +23,7 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleDelete = async () => {
     if (!deleteConfirmId) return;
@@ -34,16 +36,20 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
   );
 
   const handleAdd = async () => {
-    if (!name.trim()) return;
+    if (!name.trim() || submitting) { toast.error("Please enter a supplier name."); return; }
+    setSubmitting(true);
     await addSupplier(name.trim(), phone.trim() || undefined);
+    setSubmitting(false);
     setName("");
     setPhone("");
     setIsAddOpen(false);
   };
 
   const handleEdit = async () => {
-    if (!name.trim() || !editingId) return;
+    if (!name.trim() || !editingId || submitting) { toast.error("Please enter a supplier name."); return; }
+    setSubmitting(true);
     await updateSupplier(editingId, name.trim(), phone.trim() || undefined);
+    setSubmitting(false);
     setName("");
     setPhone("");
     setEditingId(null);
@@ -128,8 +134,7 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
                     </TableCell>
                   )}
                 </TableRow>
-              ))}
-              )}
+              )))}
             </TableBody>
           </Table>
         </CardContent>
@@ -153,7 +158,7 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddOpen(false)}>Cancel</Button>
-            <Button onClick={handleAdd}>Add</Button>
+            <Button onClick={handleAdd} disabled={submitting}>{submitting ? "Saving..." : "Save"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -176,7 +181,7 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditOpen(false)}>Cancel</Button>
-            <Button onClick={handleEdit}>Update</Button>
+            <Button onClick={handleEdit} disabled={submitting}>{submitting ? "Saving..." : "Save"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

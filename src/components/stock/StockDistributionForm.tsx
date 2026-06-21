@@ -14,6 +14,7 @@ import { useStockIntake } from "@/hooks/useStockIntake";
 import { useAreas } from "@/hooks/useAreas";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState as useStateFn } from "react";
+import { toast } from "sonner";
 
 interface StockDistributionFormProps {
   userRole: "admin" | "staff";
@@ -26,6 +27,7 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
   const [isOpen, setIsOpen] = useState(false);
   const [form, setForm] = useState({ intake_id: "", area_id: "", quantity_assigned: 0 });
   const [assignedTotals, setAssignedTotals] = useState<Record<string, number>>({});
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     supabase
@@ -47,9 +49,11 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
   const remaining = selectedIntake ? selectedIntake.quantity_received - alreadyAssigned : 0;
 
   const handleAdd = async () => {
-    if (!form.intake_id || !form.area_id || form.quantity_assigned <= 0) return;
+    if (!form.intake_id || !form.area_id || form.quantity_assigned <= 0 || submitting) { toast.error("Please select an intake, area, and enter a valid quantity."); return; }
     if (form.quantity_assigned > remaining) return;
+    setSubmitting(true);
     await addDistribution(form);
+    setSubmitting(false);
     setForm({ intake_id: "", area_id: "", quantity_assigned: 0 });
     setIsOpen(false);
   };
@@ -155,7 +159,7 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-            <Button onClick={handleAdd} disabled={form.quantity_assigned > remaining}>Distribute</Button>
+            <Button onClick={handleAdd} disabled={submitting || form.quantity_assigned > remaining}>{submitting ? "Saving..." : "Save"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
 import type { Sale } from "@/types/pokleh";
+import { getUserFriendlyError } from "@/lib/errors";
 
 export const useSales = () => {
   const [sales, setSales] = useState<Sale[]>([]);
@@ -66,7 +67,7 @@ export const useSales = () => {
       .single();
     if (error) {
       setSales((prev) => prev.filter((s) => s.id !== tempId));
-      toast.error(error.message);
+      toast.error(getUserFriendlyError(error, "sales"));
       return { success: false };
     }
     const sale = data as unknown as Sale;

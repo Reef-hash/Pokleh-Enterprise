@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { db } from "@/lib/db";
 import { toast } from "sonner";
 import type { Customer } from "@/types/pokleh";
+import { getUserFriendlyError } from "@/lib/errors";
 
 export const useCustomers = (areaId?: string) => {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -46,7 +47,7 @@ export const useCustomers = (areaId?: string) => {
       .select("*, area:areas(*)")
       .single();
     if (error) {
-      toast.error(error.message);
+      toast.error(getUserFriendlyError(error, "customers"));
       return { success: false };
     }
     const customer = result as unknown as Customer;
@@ -66,7 +67,7 @@ export const useCustomers = (areaId?: string) => {
       .update(updates)
       .eq("id", id);
     if (error) {
-      toast.error(error.message);
+      toast.error(getUserFriendlyError(error, "customers"));
       return { success: false };
     }
     setCustomers((prev) =>

@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Lock, CheckCircle2, AlertCircle } from "lucide-react";
+import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
 import { useDailyClosings } from "@/hooks/useDailyClosings";
 import { useAreas } from "@/hooks/useAreas";
 import { formatCurrency } from "@/lib/currency";
@@ -134,43 +135,75 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
           <CardDescription>All closed/reconciled days</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Area</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Assigned</TableHead>
-                <TableHead>Sold</TableHead>
-                <TableHead>Returned</TableHead>
-                <TableHead>Cash</TableHead>
-                <TableHead>Profit</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {closings.map((c) => (
-                <TableRow key={c.id}>
-                  <TableCell>{new Date(c.closing_date).toLocaleDateString()}</TableCell>
-                  <TableCell className="font-medium">{c.area?.name || "—"}</TableCell>
-                  <TableCell>{statusBadge(c.status)}</TableCell>
-                  <TableCell>{c.total_assigned}</TableCell>
-                  <TableCell>{c.total_sold}</TableCell>
-                  <TableCell>{c.total_returned}</TableCell>
-                  <TableCell>{formatCurrency(c.cash_sales)}</TableCell>
-                  <TableCell className={c.profit_estimate >= 0 ? "text-green-600 font-medium" : "text-destructive font-medium"}>
-                    {formatCurrency(c.profit_estimate)}
-                  </TableCell>
-                </TableRow>
-              ))}
-              {closings.length === 0 && (
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
-                    No daily closings yet
-                  </TableCell>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Area</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Assigned</TableHead>
+                  <TableHead>Sold</TableHead>
+                  <TableHead>Returned</TableHead>
+                  <TableHead>Cash</TableHead>
+                  <TableHead>Profit</TableHead>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {closings.map((c) => (
+                  <TableRow key={c.id}>
+                    <TableCell>{new Date(c.closing_date).toLocaleDateString()}</TableCell>
+                    <TableCell className="font-medium">{c.area?.name || "—"}</TableCell>
+                    <TableCell>{statusBadge(c.status)}</TableCell>
+                    <TableCell>{c.total_assigned}</TableCell>
+                    <TableCell>{c.total_sold}</TableCell>
+                    <TableCell>{c.total_returned}</TableCell>
+                    <TableCell>{formatCurrency(c.cash_sales)}</TableCell>
+                    <TableCell className={c.profit_estimate >= 0 ? "text-green-600 font-medium" : "text-destructive font-medium"}>
+                      {formatCurrency(c.profit_estimate)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {closings.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                      No daily closings yet
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="block md:hidden space-y-3">
+            {closings.map((c) => (
+              <ResponsiveCard key={c.id}>
+                <ResponsiveRow label="Date">
+                  {new Date(c.closing_date).toLocaleDateString()}
+                </ResponsiveRow>
+                <ResponsiveRow label="Area">
+                  <span className="font-medium">{c.area?.name || "—"}</span>
+                </ResponsiveRow>
+                <ResponsiveRow label="Status">{statusBadge(c.status)}</ResponsiveRow>
+                <ResponsiveRow label="Assigned">{c.total_assigned}</ResponsiveRow>
+                <ResponsiveRow label="Sold">{c.total_sold}</ResponsiveRow>
+                <ResponsiveRow label="Returned">{c.total_returned}</ResponsiveRow>
+                <ResponsiveRow label="Cash">{formatCurrency(c.cash_sales)}</ResponsiveRow>
+                <ResponsiveRow label="Profit">
+                  <span className={c.profit_estimate >= 0 ? "text-green-600 font-medium" : "text-destructive font-medium"}>
+                    {formatCurrency(c.profit_estimate)}
+                  </span>
+                </ResponsiveRow>
+              </ResponsiveCard>
+            ))}
+            {closings.length === 0 && (
+              <p className="text-center text-muted-foreground py-8">
+                No daily closings yet
+              </p>
+            )}
+          </div>
         </CardContent>
       </Card>
 

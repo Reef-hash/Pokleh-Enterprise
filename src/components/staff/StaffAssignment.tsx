@@ -12,6 +12,7 @@ import { useStaffAssignments } from "@/hooks/useStaffAssignments";
 import { useAreas } from "@/hooks/useAreas";
 import { supabase } from "@/integrations/supabase/client";
 import type { Profile } from "@/types/pokleh";
+import { toast } from "sonner";
 
 interface StaffAssignmentProps {
   userRole: "admin" | "staff";
@@ -44,7 +45,7 @@ export const StaffAssignment = ({ userRole }: StaffAssignmentProps) => {
   const active = assignments.filter((a) => !a.ended_date);
 
   const handleAssign = async () => {
-    if (!selectedStaff || !selectedArea) return;
+    if (!selectedStaff || !selectedArea) { toast.error("Please select a staff member and an area."); return; }
     await assignStaff(selectedStaff, selectedArea);
     setSelectedStaff("");
     setSelectedArea("");

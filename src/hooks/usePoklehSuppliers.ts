@@ -5,6 +5,7 @@ import { offlineDetector } from "@/services/offline";
 import { syncEngine } from "@/services/sync";
 import { toast } from "sonner";
 import type { Supplier } from "@/types/pokleh";
+import { getUserFriendlyError } from "@/lib/errors";
 
 export const usePoklehSuppliers = () => {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -42,7 +43,7 @@ export const usePoklehSuppliers = () => {
       .select()
       .single();
     if (error) {
-      toast.error(error.message);
+      toast.error(getUserFriendlyError(error, "suppliers"));
       return { success: false };
     }
     const supplier = data as Supplier;
@@ -65,7 +66,7 @@ export const usePoklehSuppliers = () => {
       .update({ name, phone: phone || null })
       .eq("id", id);
     if (error) {
-      toast.error(error.message);
+      toast.error(getUserFriendlyError(error, "suppliers"));
       return { success: false };
     }
     setSuppliers((prev) => prev.map((s) => (s.id === id ? { ...s, name, phone: phone || null } : s)));
@@ -83,7 +84,7 @@ export const usePoklehSuppliers = () => {
 
     const { error } = await supabase.from("suppliers").delete().eq("id", id);
     if (error) {
-      toast.error(error.message);
+      toast.error(getUserFriendlyError(error, "suppliers"));
       return { success: false };
     }
     setSuppliers((prev) => prev.filter((s) => s.id !== id));

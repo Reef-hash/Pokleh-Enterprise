@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Receipt } from "lucide-react";
 import { useExpenses } from "@/hooks/useExpenses";
 import { formatCurrency } from "@/lib/currency";
+import { toast } from "sonner";
 
 const EXPENSE_CATEGORIES = [
   "Transportation", "Meals", "Utilities", "Maintenance",
@@ -28,10 +29,13 @@ export const ExpenseManagement = ({ userRole }: ExpenseManagementProps) => {
     expense_date: new Date().toISOString().split("T")[0],
     notes: "",
   });
+  const [submitting, setSubmitting] = useState(false);
 
   const handleAdd = async () => {
-    if (!form.category || form.amount <= 0) return;
+    if (!form.category || form.amount <= 0 || submitting) { toast.error("Please select a category and enter a valid amount."); return; }
+    setSubmitting(true);
     await addExpense(form);
+    setSubmitting(false);
     setForm({ category: "", amount: 0, expense_date: new Date().toISOString().split("T")[0], notes: "" });
     setIsOpen(false);
   };
@@ -142,7 +146,7 @@ export const ExpenseManagement = ({ userRole }: ExpenseManagementProps) => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-            <Button onClick={handleAdd}>Add Expense</Button>
+            <Button onClick={handleAdd} disabled={submitting}>{submitting ? "Saving..." : "Save"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

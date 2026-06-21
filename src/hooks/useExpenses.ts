@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
 import type { Expense } from "@/types/pokleh";
+import { getUserFriendlyError } from "@/lib/errors";
 
 export const useExpenses = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -55,7 +56,7 @@ export const useExpenses = () => {
       .single();
     if (error) {
       setExpenses((prev) => prev.filter((e) => e.id !== tempId));
-      toast.error(error.message);
+      toast.error(getUserFriendlyError(error, "expenses"));
       return { success: false };
     }
     const expense = data as unknown as Expense;

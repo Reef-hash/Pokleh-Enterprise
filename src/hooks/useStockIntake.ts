@@ -6,6 +6,7 @@ import { offlineDetector } from "@/services/offline";
 import { syncEngine } from "@/services/sync";
 import { toast } from "sonner";
 import type { StockIntake } from "@/types/pokleh";
+import { getUserFriendlyError } from "@/lib/errors";
 
 export const useStockIntake = () => {
   const [intakes, setIntakes] = useState<StockIntake[]>([]);
@@ -51,7 +52,7 @@ export const useStockIntake = () => {
       .select("*, supplier:suppliers(*)")
       .single();
     if (error) {
-      toast.error(error.message);
+      toast.error(getUserFriendlyError(error, "stock_intake"));
       return { success: false };
     }
     const intake = result as unknown as StockIntake;

@@ -5,6 +5,7 @@ import { offlineDetector } from "@/services/offline";
 import { syncEngine } from "@/services/sync";
 import { toast } from "sonner";
 import type { StaffAreaAssignment } from "@/types/pokleh";
+import { getUserFriendlyError } from "@/lib/errors";
 
 export const useStaffAssignments = () => {
   const [assignments, setAssignments] = useState<StaffAreaAssignment[]>([]);
@@ -43,7 +44,7 @@ export const useStaffAssignments = () => {
       .select("*, area:areas(*), profile:profiles!staff_id(*)")
       .single();
     if (error) {
-      toast.error(error.message);
+      toast.error(getUserFriendlyError(error, "staff_area_assignments"));
       return { success: false };
     }
     setAssignments((prev) => [data as unknown as StaffAreaAssignment, ...prev]);
@@ -68,7 +69,7 @@ export const useStaffAssignments = () => {
       .update({ ended_date: new Date().toISOString().split("T")[0] })
       .eq("id", id);
     if (error) {
-      toast.error(error.message);
+      toast.error(getUserFriendlyError(error, "staff_area_assignments"));
       return { success: false };
     }
     setAssignments((prev) =>

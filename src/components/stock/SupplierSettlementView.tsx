@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Calculator, CheckCircle } from "lucide-react";
+import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
 import { useSettlements } from "@/hooks/useSettlement";
 import { useStockIntake } from "@/hooks/useStockIntake";
 import { formatCurrency } from "@/lib/currency";
@@ -72,59 +73,103 @@ export const SupplierSettlementView = ({ userRole }: SupplierSettlementViewProps
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Supplier</TableHead>
-                <TableHead>Intake Date</TableHead>
-                <TableHead>Received</TableHead>
-                <TableHead>Sold</TableHead>
-                <TableHead>Returned</TableHead>
-                <TableHead>Payable Qty</TableHead>
-                <TableHead>Cost/Pax</TableHead>
-                <TableHead>Payable (RM)</TableHead>
-                <TableHead>Status</TableHead>
-                {userRole === "admin" && <TableHead>Actions</TableHead>}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {settlements.map((s) => (
-                <TableRow key={s.id}>
-                  <TableCell className="font-medium">{s.intake?.supplier?.name}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {s.intake ? new Date(s.intake.intake_date).toLocaleDateString() : "—"}
-                  </TableCell>
-                  <TableCell>{s.total_received}</TableCell>
-                  <TableCell>{s.total_sold}</TableCell>
-                  <TableCell>{s.total_returned}</TableCell>
-                  <TableCell className="font-medium">{s.payable_quantity}</TableCell>
-                  <TableCell>{formatCurrency(s.cost_per_pax)}</TableCell>
-                  <TableCell className="font-bold">{formatCurrency(s.payable_amount)}</TableCell>
-                  <TableCell>
-                    <Badge variant={s.status === "settled" ? "secondary" : "default"}>
-                      {s.status}
-                    </Badge>
-                  </TableCell>
-                  {userRole === "admin" && (
-                    <TableCell>
-                      {s.status === "pending" && (
-                        <Button size="sm" variant="outline" onClick={() => markSettled(s.id)}>
-                          <CheckCircle className="mr-1 h-4 w-4" /> Settle
-                        </Button>
-                      )}
-                    </TableCell>
-                  )}
-                </TableRow>
-              ))}
-              {settlements.length === 0 && (
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center text-muted-foreground py-8">
-                    No settlements calculated yet
-                  </TableCell>
+                  <TableHead>Supplier</TableHead>
+                  <TableHead>Intake Date</TableHead>
+                  <TableHead>Received</TableHead>
+                  <TableHead>Sold</TableHead>
+                  <TableHead>Returned</TableHead>
+                  <TableHead>Payable Qty</TableHead>
+                  <TableHead>Cost/Pax</TableHead>
+                  <TableHead>Payable (RM)</TableHead>
+                  <TableHead>Status</TableHead>
+                  {userRole === "admin" && <TableHead>Actions</TableHead>}
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {settlements.map((s) => (
+                  <TableRow key={s.id}>
+                    <TableCell className="font-medium">{s.intake?.supplier?.name}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {s.intake ? new Date(s.intake.intake_date).toLocaleDateString() : "—"}
+                    </TableCell>
+                    <TableCell>{s.total_received}</TableCell>
+                    <TableCell>{s.total_sold}</TableCell>
+                    <TableCell>{s.total_returned}</TableCell>
+                    <TableCell className="font-medium">{s.payable_quantity}</TableCell>
+                    <TableCell>{formatCurrency(s.cost_per_pax)}</TableCell>
+                    <TableCell className="font-bold">{formatCurrency(s.payable_amount)}</TableCell>
+                    <TableCell>
+                      <Badge variant={s.status === "settled" ? "secondary" : "default"}>
+                        {s.status}
+                      </Badge>
+                    </TableCell>
+                    {userRole === "admin" && (
+                      <TableCell>
+                        {s.status === "pending" && (
+                          <Button size="sm" variant="outline" onClick={() => markSettled(s.id)}>
+                            <CheckCircle className="mr-1 h-4 w-4" /> Settle
+                          </Button>
+                        )}
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))}
+                {settlements.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={10} className="text-center text-muted-foreground py-8">
+                      No settlements calculated yet
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="block md:hidden space-y-3">
+            {settlements.map((s) => (
+              <ResponsiveCard key={s.id}>
+                <ResponsiveRow label="Supplier">
+                  <span className="font-medium">{s.intake?.supplier?.name}</span>
+                </ResponsiveRow>
+                <ResponsiveRow label="Intake Date">
+                  {s.intake ? new Date(s.intake.intake_date).toLocaleDateString() : "—"}
+                </ResponsiveRow>
+                <ResponsiveRow label="Received">{s.total_received}</ResponsiveRow>
+                <ResponsiveRow label="Sold">{s.total_sold}</ResponsiveRow>
+                <ResponsiveRow label="Returned">{s.total_returned}</ResponsiveRow>
+                <ResponsiveRow label="Payable Qty">
+                  <span className="font-medium">{s.payable_quantity}</span>
+                </ResponsiveRow>
+                <ResponsiveRow label="Cost/Pax">{formatCurrency(s.cost_per_pax)}</ResponsiveRow>
+                <ResponsiveRow label="Payable (RM)">
+                  <span className="font-bold">{formatCurrency(s.payable_amount)}</span>
+                </ResponsiveRow>
+                <ResponsiveRow label="Status">
+                  <Badge variant={s.status === "settled" ? "secondary" : "default"}>
+                    {s.status}
+                  </Badge>
+                </ResponsiveRow>
+                {userRole === "admin" && s.status === "pending" && (
+                  <ResponsiveRow label="Action">
+                    <Button size="sm" variant="outline" onClick={() => markSettled(s.id)}>
+                      <CheckCircle className="mr-1 h-4 w-4" /> Settle
+                    </Button>
+                  </ResponsiveRow>
+                )}
+              </ResponsiveCard>
+            ))}
+            {settlements.length === 0 && (
+              <p className="text-center text-muted-foreground py-8">
+                No settlements calculated yet
+              </p>
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>
