@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { db } from "@/lib/db";
+import { offlineDetector } from "@/services/offline";
+import { syncEngine } from "@/services/sync";
 import { toast } from "sonner";
 import type { Supplier } from "@/types/pokleh";
 
@@ -27,6 +29,13 @@ export const usePoklehSuppliers = () => {
   }, []);
 
   const addSupplier = async (name: string, phone?: string) => {
+    if (!offlineDetector.isOnline) {
+      const tempId = crypto.randomUUID();
+      await syncEngine.enqueue({ entity: "suppliers", entityId: tempId, action: "INSERT", payload: { name, phone: phone || null } });
+      toast.success("Supplier queued for sync");
+      return { success: true, offline: true };
+    }
+
     const { data, error } = await supabase
       .from("suppliers")
       .insert({ name, phone: phone || null })
@@ -44,6 +53,13 @@ export const usePoklehSuppliers = () => {
   };
 
   const updateSupplier = async (id: string, name: string, phone?: string) => {
+    if (!offlineDetector.isOnline) {
+      await syncEngine.enqueue({ entity: "suppliers", entityId: id, action: "UPDATE", payload: { name, phone: phone || null } });
+      setSuppliers((prev) => prev.map((s) => (s.id === id ? { ...s, name, phone: phone || null } : s)));
+      toast.success("Supplier update queued for sync");
+      return { success: true, offline: true };
+    }
+
     const { error } = await supabase
       .from("suppliers")
       .update({ name, phone: phone || null })
@@ -58,6 +74,13 @@ export const usePoklehSuppliers = () => {
   };
 
   const deleteSupplier = async (id: string) => {
+    if (!offlineDetector.isOnline) {
+      await syncEngine.enqueue({ entity: "suppliers", entityId: id, action: "DELETE", payload: {} });
+      setSuppliers((prev) => prev.filter((s) => s.id !== id));
+      toast.success("Supplier delete queued for sync");
+      return { success: true, offline: true };
+    }
+
     const { error } = await supabase.from("suppliers").delete().eq("id", id);
     if (error) {
       toast.error(error.message);

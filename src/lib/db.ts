@@ -128,6 +128,7 @@ export interface SyncQueueItem {
   createdAt: string;
   retryCount: number;
   lastError?: string;
+  lastAttempt?: string;
 }
 
 export interface OfflineAuditLog {

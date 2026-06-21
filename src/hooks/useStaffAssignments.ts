@@ -1,5 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/lib/db";
+import { offlineDetector } from "@/services/offline";
+import { syncEngine } from "@/services/sync";
 import { toast } from "sonner";
 import type { StaffAreaAssignment } from "@/types/pokleh";
 
@@ -14,13 +17,26 @@ export const useStaffAssignments = () => {
         .select("*, area:areas(*), profile:profiles!staff_id(*)")
         .order("assigned_date", { ascending: false });
       if (error) throw error;
-      setAssignments((data || []) as unknown as StaffAreaAssignment[]);
+      const result = (data || []) as unknown as StaffAreaAssignment[];
+      setAssignments(result);
     } catch {
       // offline fallback
     }
   }, []);
 
   const assignStaff = async (staffId: string, areaId: string) => {
+    if (!offlineDetector.isOnline) {
+      const tempId = crypto.randomUUID();
+      await syncEngine.enqueue({
+        entity: "staff_area_assignments",
+        entityId: tempId,
+        action: "INSERT",
+        payload: { staff_id: staffId, area_id: areaId },
+      });
+      toast.success("Assignment queued for sync");
+      return { success: true, offline: true };
+    }
+
     const { data, error } = await supabase
       .from("staff_area_assignments")
       .insert({ staff_id: staffId, area_id: areaId })
@@ -36,6 +52,17 @@ export const useStaffAssignments = () => {
   };
 
   const endAssignment = async (id: string) => {
+    if (!offlineDetector.isOnline) {
+      await syncEngine.enqueue({
+        entity: "staff_area_assignments",
+        entityId: id,
+        action: "UPDATE",
+        payload: { ended_date: new Date().toISOString().split("T")[0] },
+      });
+      toast.success("End of assignment queued for sync");
+      return { success: true, offline: true };
+    }
+
     const { error } = await supabase
       .from("staff_area_assignments")
       .update({ ended_date: new Date().toISOString().split("T")[0] })

@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
+import { offlineDetector } from "@/services/offline";
+import { syncEngine } from "@/services/sync";
 import { toast } from "sonner";
 import type { StockDistribution } from "@/types/pokleh";
 
@@ -17,9 +20,12 @@ export const useStockDistribution = (intakeId?: string) => {
       if (intakeId) query = query.eq("intake_id", intakeId);
       const { data, error } = await query.order("created_at", { ascending: false });
       if (error) throw error;
-      setDistributions((data || []) as unknown as StockDistribution[]);
+      const result = (data || []) as unknown as StockDistribution[];
+      setDistributions(result);
+      await db.stockDistributions.bulkPut(result as unknown as import("@/lib/db").OfflineStockDistribution[]);
     } catch {
-      // offline fallback
+      const cached = await db.stockDistributions.orderBy("created_at").reverse().toArray();
+      if (cached.length > 0) setDistributions(cached as unknown as StockDistribution[]);
     }
   }, [intakeId]);
 
@@ -29,6 +35,14 @@ export const useStockDistribution = (intakeId?: string) => {
     quantity_assigned: number;
   }) => {
     if (!userId) return { success: false, error: "Not authenticated" };
+
+    if (!offlineDetector.isOnline) {
+      const tempId = crypto.randomUUID();
+      const offlineData = { ...data, created_by: userId } as Record<string, unknown>;
+      await syncEngine.enqueue({ entity: "stock_distribution", entityId: tempId, action: "INSERT", payload: offlineData });
+      toast.success("Distribution queued for sync");
+      return { success: true, offline: true };
+    }
 
     const { data: result, error } = await supabase
       .from("stock_distribution")
@@ -41,6 +55,7 @@ export const useStockDistribution = (intakeId?: string) => {
     }
     const dist = result as unknown as StockDistribution;
     setDistributions((prev) => [dist, ...prev]);
+    await db.stockDistributions.put(dist as unknown as import("@/lib/db").OfflineStockDistribution);
     toast.success("Stock distributed");
     return { success: true, data: dist };
   };

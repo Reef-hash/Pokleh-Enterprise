@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { offlineDetector } from "@/services/offline";
+import { syncEngine } from "@/services/sync";
 import { toast } from "sonner";
 import type { SupplierSettlement } from "@/types/pokleh";
 import { useAuthStore } from "@/stores/authStore";
@@ -126,6 +128,18 @@ export const useSettlements = () => {
 
   const markSettled = async (id: string) => {
     if (!userId) return { success: false };
+
+    if (!offlineDetector.isOnline) {
+      await syncEngine.enqueue({
+        entity: "supplier_settlements",
+        entityId: id,
+        action: "UPDATE",
+        payload: { status: "settled", settlement_date: new Date().toISOString().split("T")[0], settled_by: userId },
+      });
+      toast.success("Settlement queued for sync");
+      return { success: true, offline: true };
+    }
+
     const { error } = await supabase
       .from("supplier_settlements")
       .update({ status: "settled", settlement_date: new Date().toISOString().split("T")[0], settled_by: userId })

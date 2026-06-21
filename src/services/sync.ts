@@ -64,17 +64,23 @@ class SyncEngine {
     try {
       const queue = await db.syncQueue.orderBy("createdAt").toArray();
       for (const item of queue) {
+        // Exponential backoff: skip if not enough time since last attempt
+        if (item.lastAttempt) {
+          const backoffMs = Math.min(1000 * Math.pow(2, item.retryCount), 16000);
+          const elapsed = Date.now() - new Date(item.lastAttempt).getTime();
+          if (elapsed < backoffMs) continue;
+        }
         try {
           await this.processItem(item);
           await db.syncQueue.delete(item.id!);
-        } catch (err) {
-          const message = err instanceof Error ? err.message : "Sync failed";
+        } catch {
           if (item.retryCount >= 5) {
             await db.syncQueue.delete(item.id!);
           } else {
             await db.syncQueue.update(item.id!, {
               retryCount: item.retryCount + 1,
-              lastError: message,
+              lastAttempt: new Date().toISOString(),
+              lastError: "Retry scheduled",
             });
           }
         }

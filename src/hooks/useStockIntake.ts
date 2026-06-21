@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
+import { offlineDetector } from "@/services/offline";
+import { syncEngine } from "@/services/sync";
 import { toast } from "sonner";
 import type { StockIntake } from "@/types/pokleh";
 
@@ -17,9 +19,12 @@ export const useStockIntake = () => {
         .select("*, supplier:suppliers(*)")
         .order("intake_date", { ascending: false });
       if (error) throw error;
-      setIntakes((data || []) as unknown as StockIntake[]);
+      const result = (data || []) as unknown as StockIntake[];
+      setIntakes(result);
+      await db.stockIntakes.bulkPut(result as unknown as import("@/lib/db").OfflineStockIntake[]);
     } catch {
-      // offline fallback
+      const cached = await db.stockIntakes.orderBy("intake_date").reverse().toArray();
+      if (cached.length > 0) setIntakes(cached as unknown as StockIntake[]);
     }
   }, []);
 
@@ -31,6 +36,15 @@ export const useStockIntake = () => {
     notes?: string;
   }) => {
     if (!userId) return { success: false, error: "Not authenticated" };
+
+    if (!offlineDetector.isOnline) {
+      const tempId = crypto.randomUUID();
+      const offlineData = { ...data, created_by: userId } as Record<string, unknown>;
+      await syncEngine.enqueue({ entity: "stock_intake", entityId: tempId, action: "INSERT", payload: offlineData });
+      toast.success("Stock intake queued for sync");
+      return { success: true, offline: true };
+    }
+
     const { data: result, error } = await supabase
       .from("stock_intake")
       .insert({ ...data, created_by: userId })
@@ -42,6 +56,7 @@ export const useStockIntake = () => {
     }
     const intake = result as unknown as StockIntake;
     setIntakes((prev) => [intake, ...prev]);
+    await db.stockIntakes.put(intake as unknown as import("@/lib/db").OfflineStockIntake);
     toast.success("Stock intake recorded");
     return { success: true, data: intake };
   };
