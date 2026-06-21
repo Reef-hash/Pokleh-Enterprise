@@ -10,20 +10,21 @@ import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/lib/i18n';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Auth = () => {
   const { signIn, signUp, loading, isAuthenticated } = useAuth();
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  
+
   // Sign in form
   const [signInData, setSignInData] = useState({
     email: '',
     password: ''
   });
-  
+
   // Sign up form
   const [signUpData, setSignUpData] = useState({
     email: '',
@@ -35,18 +36,18 @@ const Auth = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      window.location.href = '/';
+      navigate('/', { replace: true });
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, navigate]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!signInData.email || !signInData.password) return;
-    
+
     setIsLoading(true);
     const result = await signIn(signInData.email, signInData.password);
     if (result.success) {
-      window.location.href = '/';
+      navigate('/', { replace: true });
     }
     setIsLoading(false);
   };
@@ -277,7 +278,7 @@ const Auth = () => {
         <div className="text-center mt-6 flex flex-col gap-2">
           <Button
             variant="ghost"
-            onClick={() => window.location.href = '/'}
+            onClick={() => navigate('/')}
             className="text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />

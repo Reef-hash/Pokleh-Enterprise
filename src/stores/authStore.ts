@@ -38,40 +38,46 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   restoreSession: async () => {
     set({ loading: true });
-    const { data: sessionData } = await supabase.auth.getSession();
-    const session = sessionData.session;
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const session = sessionData.session;
 
-    if (session?.user) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("user_id", session.user.id)
-        .single();
-
-      set({
-        user: session.user,
-        session,
-        profile: profile as unknown as UserProfile,
-        loading: false,
-        initialized: true,
-      });
-    } else {
-      set({ loading: false, initialized: true });
-    }
-
-    supabase.auth.onAuthStateChange(async (_event, session) => {
-      set({ session, user: session?.user ?? null });
       if (session?.user) {
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("*")
           .eq("user_id", session.user.id)
           .single();
-        set({ profile: profile as unknown as UserProfile });
+
+        if (profileError) throw profileError;
+
+        set({
+          user: session.user,
+          session,
+          profile: profile as unknown as UserProfile,
+          loading: false,
+          initialized: true,
+        });
       } else {
-        set({ profile: null });
+        set({ loading: false, initialized: true });
       }
-    });
+
+      supabase.auth.onAuthStateChange(async (_event, session) => {
+        set({ session, user: session?.user ?? null });
+        if (session?.user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("user_id", session.user.id)
+            .single();
+          set({ profile: profile as unknown as UserProfile });
+        } else {
+          set({ profile: null });
+        }
+      });
+    } catch {
+      set({ user: null, session: null, profile: null, loading: false, initialized: true });
+    }
   },
 
   signIn: async (email: string, password: string) => {

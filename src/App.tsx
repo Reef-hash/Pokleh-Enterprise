@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Documentation from "./pages/Documentation";
 import NotFound from "./pages/NotFound";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { syncEngine } from "@/services/sync";
 import { useOfflineStore } from "@/stores/offlineStore";
 import { useSyncStore } from "@/stores/syncStore";

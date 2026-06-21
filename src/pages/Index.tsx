@@ -3,9 +3,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ArrowRight, Package, BarChart3, Users, Shield, Loader2 } from "lucide-react";
 import { Dashboard } from "@/pages/Dashboard";
 import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const { user, profile, loading, signOut } = useAuth();
+  const navigate = useNavigate();
 
   if (loading) {
     return (
@@ -50,7 +52,7 @@ const Index = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
               size="lg"
-              onClick={() => window.location.href = '/auth'}
+              onClick={() => navigate('/auth')}
               className="group"
             >
               Get Started

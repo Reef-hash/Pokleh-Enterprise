@@ -1,9 +1,11 @@
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
 
 export const useAuth = () => {
   const store = useAuthStore();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!store.initialized) {
@@ -13,8 +15,12 @@ export const useAuth = () => {
 
   const signIn = async (email: string, password: string) => {
     const result = await store.signIn(email, password);
-    if (result.success) toast.success("Successfully signed in!");
-    else toast.error(result.error || "Login failed");
+    if (result.success) {
+      toast.success("Successfully signed in!");
+      navigate("/", { replace: true });
+    } else {
+      toast.error(result.error || "Login failed");
+    }
     return result;
   };
 
@@ -28,7 +34,7 @@ export const useAuth = () => {
   const signOut = async () => {
     await store.signOut();
     toast.success("Successfully signed out!");
-    window.location.href = "/";
+    navigate("/", { replace: true });
   };
 
   return {
