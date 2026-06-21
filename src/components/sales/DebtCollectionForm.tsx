@@ -18,7 +18,6 @@ interface DebtCollectionFormProps {
 
 export const DebtCollectionForm = ({ userRole }: DebtCollectionFormProps) => {
   const { collections, loading, addCollection } = useDebtCollection();
-  if (loading) return <PageLoader />;
   const { customers } = useCustomers();
   const [isOpen, setIsOpen] = useState(false);
   const [form, setForm] = useState({
@@ -27,6 +26,8 @@ export const DebtCollectionForm = ({ userRole }: DebtCollectionFormProps) => {
     collection_date: new Date().toISOString().split("T")[0],
     notes: "",
   });
+
+  if (loading) return <PageLoader />;
 
   const activeDebtors = customers.filter((c) => c.debt_balance > 0);
 

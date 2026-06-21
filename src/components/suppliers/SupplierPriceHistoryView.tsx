@@ -10,9 +10,10 @@ import { formatCurrency } from "@/lib/currency";
 
 export const SupplierPriceHistoryView = () => {
   const { history, loading } = useSupplierPriceHistory();
-  if (loading) return <PageLoader />;
   const { suppliers } = usePoklehSuppliers();
   const [filterSupplier, setFilterSupplier] = useState("all");
+
+  if (loading) return <PageLoader />;
 
   const filtered = filterSupplier === "all"
     ? history

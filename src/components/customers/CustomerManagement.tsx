@@ -21,11 +21,12 @@ interface CustomerManagementProps {
 export const CustomerManagement = ({ userRole }: CustomerManagementProps) => {
   const { areas } = useAreas();
   const { customers, loading, addCustomer, updateCustomer, toggleActive } = useCustomers();
-  if (loading) return <PageLoader />;
   const [search, setSearch] = useState("");
   const [areaFilter, setAreaFilter] = useState("all");
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", address: "", area_id: "" });
+
+  if (loading) return <PageLoader />;
 
   const filtered = customers.filter((c) => {
     const matchSearch = c.name.toLowerCase().includes(search.toLowerCase()) || c.phone?.includes(search);

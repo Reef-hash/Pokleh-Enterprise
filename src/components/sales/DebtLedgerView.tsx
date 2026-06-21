@@ -10,9 +10,10 @@ import { formatCurrency } from "@/lib/currency";
 
 export const DebtLedgerView = () => {
   const { entries, loading } = useDebtLedger();
-  if (loading) return <PageLoader />;
   const { customers } = useCustomers();
   const [filterCustomer, setFilterCustomer] = useState("all");
+
+  if (loading) return <PageLoader />;
 
   const filtered = filterCustomer === "all"
     ? entries

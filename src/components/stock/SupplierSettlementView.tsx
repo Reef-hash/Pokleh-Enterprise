@@ -15,8 +15,9 @@ interface SupplierSettlementViewProps {
 
 export const SupplierSettlementView = ({ userRole }: SupplierSettlementViewProps) => {
   const { settlements, loading, calculateSettlement, markSettled } = useSettlements();
-  if (loading) return <PageLoader />;
   const { intakes } = useStockIntake();
+
+  if (loading) return <PageLoader />;
 
   const unsettledIntakes = intakes.filter(
     (i) => !settlements.some((s) => s.intake_id === i.id)

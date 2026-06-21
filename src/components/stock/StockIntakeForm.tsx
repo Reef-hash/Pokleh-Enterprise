@@ -18,7 +18,6 @@ interface StockIntakeFormProps {
 
 export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
   const { intakes, loading, addIntake } = useStockIntake();
-  if (loading) return <PageLoader />;
   const { suppliers } = usePoklehSuppliers();
   const [isOpen, setIsOpen] = useState(false);
   const [form, setForm] = useState({
@@ -28,6 +27,8 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
     cost_per_pax: 0,
     notes: "",
   });
+
+  if (loading) return <PageLoader />;
 
   const handleAdd = async () => {
     if (!form.supplier_id || form.quantity_received <= 0 || form.cost_per_pax <= 0) return;

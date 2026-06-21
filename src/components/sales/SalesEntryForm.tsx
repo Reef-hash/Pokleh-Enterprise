@@ -20,7 +20,6 @@ interface SalesEntryFormProps {
 
 export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
   const { sales, loading, addSale } = useSales();
-  if (loading) return <PageLoader />;
   const { customers } = useCustomers();
   const { areas } = useAreas();
   const user = useAuthStore((s) => s.user);
@@ -34,6 +33,8 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
     sale_date: new Date().toISOString().split("T")[0],
     notes: "",
   });
+
+  if (loading) return <PageLoader />;
 
   const handleAdd = async () => {
     if (!form.customer_id || !form.area_id || form.quantity <= 0 || form.selling_price <= 0) return;

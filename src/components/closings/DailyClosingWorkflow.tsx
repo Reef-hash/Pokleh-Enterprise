@@ -21,12 +21,13 @@ interface DailyClosingWorkflowProps {
 
 export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) => {
   const { closings, loading, closeDay, reconcileDay } = useDailyClosings();
-  if (loading) return <PageLoader />;
   const { areas } = useAreas();
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [areaId, setAreaId] = useState("");
   const [action, setAction] = useState<"close" | "reconcile">("close");
   const [confirmOpen, setConfirmOpen] = useState(false);
+
+  if (loading) return <PageLoader />;
 
   const selectedClosing = closings.find((c) => c.closing_date === date && c.area_id === areaId);
   const selectedArea = areas.find((a) => a.id === areaId);

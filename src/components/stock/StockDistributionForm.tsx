@@ -21,7 +21,6 @@ interface StockDistributionFormProps {
 
 export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) => {
   const { distributions, loading, addDistribution } = useStockDistribution();
-  if (loading) return <PageLoader />;
   const { intakes } = useStockIntake();
   const { areas } = useAreas();
   const [isOpen, setIsOpen] = useState(false);
@@ -40,6 +39,8 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
         setAssignedTotals(totals);
       });
   }, [distributions]);
+
+  if (loading) return <PageLoader />;
 
   const selectedIntake = intakes.find((i) => i.id === form.intake_id);
   const alreadyAssigned = assignedTotals[form.intake_id] || 0;

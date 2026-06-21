@@ -19,10 +19,11 @@ interface StockReturnFormProps {
 
 export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
   const { returns, loading, addReturn } = useStockReturn();
-  if (loading) return <PageLoader />;
   const [isOpen, setIsOpen] = useState(false);
   const [distributions, setDistributions] = useState<StockDistribution[]>([]);
   const [form, setForm] = useState({ distribution_id: "", area_id: "", quantity_returned: 0, return_date: new Date().toISOString().split("T")[0] });
+
+  if (loading) return <PageLoader />;
 
   useEffect(() => {
     supabase
