@@ -43,7 +43,7 @@ export const HelpButton = () => {
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
             <a
-              href="mailto:support@logistx.com"
+              href="mailto:support@pokleh.com"
               className="flex items-center cursor-pointer"
             >
               <ExternalLink className="mr-2 h-4 w-4" />

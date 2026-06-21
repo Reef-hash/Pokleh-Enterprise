@@ -17,7 +17,7 @@ const getDemoUsers = (): UserProfile[] => [
   {
     id: 'demo-user-1',
     user_id: '00000000-0000-0000-0000-000000000001',
-    email: 'admin@logistx.com',
+    email: 'admin@pokleh.com',
     name: 'System Administrator',
     role: 'admin',
     created_at: new Date().toISOString(),
@@ -26,7 +26,7 @@ const getDemoUsers = (): UserProfile[] => [
   {
     id: 'demo-user-2',
     user_id: '00000000-0000-0000-0000-000000000002',
-    email: 'staff@logistx.com',
+    email: 'staff@pokleh.com',
     name: 'Inventory Staff',
     role: 'staff',
     created_at: new Date().toISOString(),

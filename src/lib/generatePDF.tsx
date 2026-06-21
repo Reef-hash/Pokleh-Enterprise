@@ -143,7 +143,7 @@ export const generateManualPDF = () => {
   addNumberedItem(2, 'Sign up for a new account or sign in with existing credentials');
   addNumberedItem(3, 'Complete your profile setup');
   addNumberedItem(4, 'Wait for admin approval (if required)');
-  addNumberedItem(5, 'Start managing your inventory!');
+  addNumberedItem(5, 'Start managing your distribution!');
   
   addSpace(5);
   addHeading('Demo Accounts');
@@ -333,12 +333,12 @@ export const generateManualPDF = () => {
     doc.setFontSize(8);
     doc.setFont('helvetica', 'normal');
     doc.text(
-      `LogistX User Manual - Page ${i} of ${totalPages}`,
+      `Pokleh Enterprise User Manual - Page ${i} of ${totalPages}`,
       pageWidth / 2,
       doc.internal.pageSize.getHeight() - 10,
       { align: 'center' }
     );
   }
   
-  doc.save('LogistX_User_Manual.pdf');
+  doc.save('Pokleh_Enterprise_User_Manual.pdf');
 };

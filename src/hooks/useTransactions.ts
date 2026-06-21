@@ -30,7 +30,7 @@ const getDemoTransactions = (): InventoryTransaction[] => [
     notes: 'Initial inventory setup',
     created_at: new Date().toISOString(),
     item: { name: 'MacBook Pro 14"', sku: 'APPLE-MBP14-001' },
-    user: { name: 'System Administrator', email: 'admin@logistx.com' }
+    user: { name: 'System Administrator', email: 'admin@pokleh.com' }
   },
   {
     id: 'demo-tx-2',
@@ -43,7 +43,7 @@ const getDemoTransactions = (): InventoryTransaction[] => [
     notes: 'Stock received from supplier',
     created_at: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
     item: { name: 'Office Chair Ergonomic', sku: 'FURN-CHAIR-002' },
-    user: { name: 'Inventory Staff', email: 'staff@logistx.com' }
+    user: { name: 'Inventory Staff', email: 'staff@pokleh.com' }
   }
 ];
 

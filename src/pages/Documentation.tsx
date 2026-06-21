@@ -171,7 +171,7 @@ const Documentation = () => {
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="text-sm">
-                          <p><strong>Email:</strong> admin@logistx.com</p>
+                          <p><strong>Email:</strong> admin@pokleh.com</p>
                           <p><strong>Password:</strong> admin123</p>
                         </CardContent>
                       </Card>
@@ -182,7 +182,7 @@ const Documentation = () => {
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="text-sm">
-                          <p><strong>Email:</strong> staff@logistx.com</p>
+                          <p><strong>Email:</strong> staff@pokleh.com</p>
                           <p><strong>Password:</strong> staff123</p>
                         </CardContent>
                       </Card>
