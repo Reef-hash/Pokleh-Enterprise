@@ -2,15 +2,12 @@ import { ReactNode, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { 
-  Package, 
-  BarChart3, 
+  Package,
   Users, 
   LogOut, 
   Menu,
   X,
   Home,
-  ShoppingCart,
-  FileText,
   Building2,
   MapPin,
   UserCheck,
@@ -107,11 +104,6 @@ export const DashboardLayout = ({
       expenses: t('nav.expenses'),
       'pokleh-reports': t('nav.pokleh-reports'),
       'daily-closing': t('nav.daily-closing'),
-      inventory: t('nav.inventory'),
-      orders: t('nav.orders'),
-      reports: t('nav.reports'),
-      analytics: t('nav.analytics'),
-      users: t('nav.users'),
       'audit-logs': t('nav.audit-logs'),
     };
     return map[id] ?? id;
@@ -155,16 +147,11 @@ export const DashboardLayout = ({
       items: [
         { id: 'pokleh-reports', label: 'Pokleh Reports', icon: TrendingUp },
         { id: 'daily-closing', label: 'Daily Closing', icon: CalendarCheck },
-        { id: 'inventory', label: 'Inventory', icon: Package },
-        { id: 'orders', label: 'Orders', icon: ShoppingCart },
-        { id: 'reports', label: 'Reports', icon: FileText },
-        { id: 'analytics', label: 'Analytics', icon: BarChart3 },
       ]
     },
     {
       label: 'Admin', key: 'admin',
       items: [
-        { id: 'users', label: 'Users', icon: Users },
         { id: 'audit-logs', label: 'Audit Logs', icon: Shield },
       ]
     },
@@ -201,8 +188,6 @@ export const DashboardLayout = ({
       items: [
         { id: 'pokleh-reports', label: 'Pokleh Reports', icon: TrendingUp },
         { id: 'daily-closing', label: 'Daily Closing', icon: CalendarCheck },
-        { id: 'inventory', label: 'Inventory', icon: Package },
-        { id: 'orders', label: 'Orders', icon: ShoppingCart },
       ]
     },
   ];

@@ -1,12 +1,6 @@
 import { useState } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { AdminDashboard } from "@/components/dashboard/AdminDashboard";
-import { StaffDashboard } from "@/components/dashboard/StaffDashboard";
-import { InventoryManagement } from "@/components/inventory/InventoryManagement";
-import { ReportsManagement } from "@/components/reports/ReportsManagement";
-import { UserManagement } from "@/components/users/UserManagement";
-import { OrdersManagement } from "@/components/orders/OrdersManagement";
-import { AnalyticsDashboard } from "@/components/analytics/AnalyticsDashboard";
+import { PoklehDashboard } from "@/components/dashboard/PoklehDashboard";
 import { SuppliersManagement } from "@/components/suppliers/SuppliersManagement";
 import { AreaManagement } from "@/components/areas/AreaManagement";
 import { CustomerManagement } from "@/components/customers/CustomerManagement";
@@ -23,7 +17,6 @@ import { SupplierPriceHistoryView } from "@/components/suppliers/SupplierPriceHi
 import { PoklehReports } from "@/components/reports/PoklehReports";
 import { DailyClosingWorkflow } from "@/components/closings/DailyClosingWorkflow";
 import { AuditLogViewer } from "@/components/audit/AuditLogViewer";
-import { useInventory } from "@/hooks/useInventory";
 
 interface User {
   id: string;
@@ -39,7 +32,6 @@ interface DashboardProps {
 
 export const Dashboard = ({ user, onLogout }: DashboardProps) => {
   const [currentPage, setCurrentPage] = useState('dashboard');
-  const { items: inventoryData } = useInventory();
 
   const handleNavigate = (page: string) => {
     setCurrentPage(page);
@@ -48,13 +40,7 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
   const renderContent = () => {
     switch (currentPage) {
       case 'dashboard':
-        return user.role === 'admin' ? (
-          <AdminDashboard />
-        ) : (
-          <StaffDashboard 
-            onNavigate={handleNavigate}
-          />
-        );
+        return <PoklehDashboard user={user} onNavigate={handleNavigate} />;
       case 'areas':
         return <AreaManagement userRole={user.role} />;
       case 'customers':
@@ -69,30 +55,8 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
         return <StockReturnForm userRole={user.role} />;
       case 'settlements':
         return <SupplierSettlementView userRole={user.role} />;
-      case 'inventory':
-        return (
-          <InventoryManagement 
-            inventoryData={inventoryData}
-            onUpdateInventory={() => {}}
-            userRole={user.role}
-          />
-        );
       case 'suppliers':
-        return (
-          <SuppliersManagement userRole={user.role} />
-        );
-      case 'orders':
-        return (
-          <OrdersManagement userRole={user.role} />
-        );
-      case 'reports':
-        return (
-          <ReportsManagement userRole={user.role} />
-        );
-      case 'users':
-        return (
-          <UserManagement userRole={user.role} />
-        );
+        return <SuppliersManagement userRole={user.role} />;
       case 'sales':
         return <SalesEntryForm userRole={user.role} />;
       case 'debt-ledger':
@@ -109,10 +73,6 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
         return <DailyClosingWorkflow userRole={user.role} />;
       case 'audit-logs':
         return user.role === "admin" ? <AuditLogViewer /> : <div className="text-center py-12"><h3 className="text-lg font-semibold mb-2">Access Denied</h3><p className="text-muted-foreground">Only administrators can view audit logs.</p></div>;
-      case 'analytics':
-        return (
-          <AnalyticsDashboard userRole={user.role} />
-        );
       default:
         return (
           <div className="text-center py-12">

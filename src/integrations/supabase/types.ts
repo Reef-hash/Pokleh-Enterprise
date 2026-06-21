@@ -7,135 +7,69 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.4"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
-      categories: {
+      areas: {
         Row: {
           created_at: string
-          description: string | null
           id: string
           name: string
         }
         Insert: {
           created_at?: string
-          description?: string | null
           id?: string
           name: string
         }
         Update: {
           created_at?: string
-          description?: string | null
           id?: string
           name?: string
         }
         Relationships: []
       }
-      inventory_items: {
+      audit_logs: {
         Row: {
-          category_id: string | null
+          action: string
           created_at: string
-          description: string | null
+          entity: string
+          entity_id: string
           id: string
-          min_quantity: number
-          name: string
-          price: number
-          quantity: number
-          sku: string
-          supplier_id: string | null
-          updated_at: string
+          ip_address: string | null
+          new_values: Json | null
+          old_values: Json | null
+          user_agent: string | null
+          user_id: string | null
         }
         Insert: {
-          category_id?: string | null
+          action: string
           created_at?: string
-          description?: string | null
+          entity: string
+          entity_id: string
           id?: string
-          min_quantity?: number
-          name: string
-          price: number
-          quantity?: number
-          sku: string
-          supplier_id?: string | null
-          updated_at?: string
+          ip_address?: string | null
+          new_values?: Json | null
+          old_values?: Json | null
+          user_agent?: string | null
+          user_id?: string | null
         }
         Update: {
-          category_id?: string | null
+          action?: string
           created_at?: string
-          description?: string | null
+          entity?: string
+          entity_id?: string
           id?: string
-          min_quantity?: number
-          name?: string
-          price?: number
-          quantity?: number
-          sku?: string
-          supplier_id?: string | null
-          updated_at?: string
+          ip_address?: string | null
+          new_values?: Json | null
+          old_values?: Json | null
+          user_agent?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "inventory_items_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inventory_items_supplier_id_fkey"
-            columns: ["supplier_id"]
-            isOneToOne: false
-            referencedRelation: "suppliers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      inventory_transactions: {
-        Row: {
-          created_at: string
-          id: string
-          item_id: string
-          new_quantity: number
-          notes: string | null
-          previous_quantity: number
-          quantity_change: number
-          transaction_type: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          item_id: string
-          new_quantity?: number
-          notes?: string | null
-          previous_quantity?: number
-          quantity_change?: number
-          transaction_type: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          item_id?: string
-          new_quantity?: number
-          notes?: string | null
-          previous_quantity?: number
-          quantity_change?: number
-          transaction_type?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "inventory_transactions_item_id_fkey"
-            columns: ["item_id"]
-            isOneToOne: false
-            referencedRelation: "inventory_items"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inventory_transactions_user_id_fkey"
+            foreignKeyName: "audit_logs_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -143,95 +77,271 @@ export type Database = {
           },
         ]
       }
-      order_items: {
+      customers: {
         Row: {
+          active: boolean
+          address: string | null
+          area_id: string
           created_at: string
+          debt_balance: number
           id: string
-          inventory_item_id: string
-          order_id: string
-          quantity: number
-          total_price: number
-          unit_price: number
+          name: string
+          phone: string | null
+          updated_at: string
         }
         Insert: {
+          active?: boolean
+          address?: string | null
+          area_id: string
           created_at?: string
+          debt_balance?: number
           id?: string
-          inventory_item_id: string
-          order_id: string
-          quantity: number
-          total_price: number
-          unit_price: number
+          name: string
+          phone?: string | null
+          updated_at?: string
         }
         Update: {
+          active?: boolean
+          address?: string | null
+          area_id?: string
           created_at?: string
+          debt_balance?: number
           id?: string
-          inventory_item_id?: string
-          order_id?: string
-          quantity?: number
-          total_price?: number
-          unit_price?: number
+          name?: string
+          phone?: string | null
+          updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "order_items_inventory_item_id_fkey"
-            columns: ["inventory_item_id"]
+            foreignKeyName: "customers_area_id_fkey"
+            columns: ["area_id"]
             isOneToOne: false
-            referencedRelation: "inventory_items"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "order_items_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
+            referencedRelation: "areas"
             referencedColumns: ["id"]
           },
         ]
       }
-      orders: {
+      daily_closings: {
         Row: {
+          area_id: string
+          cash_sales: number
+          closed_at: string | null
+          closed_by: string | null
+          closing_date: string
           created_at: string
-          customer_email: string
-          customer_name: string
-          customer_phone: string | null
-          delivery_date: string | null
+          debt_collections: number
+          debt_sales: number
+          expenses_total: number
           id: string
-          notes: string | null
-          order_date: string
-          order_number: string
+          profit_estimate: number
+          reconciled_at: string | null
+          reconciled_by: string | null
           status: string
-          total_amount: number
-          updated_at: string
+          supplier_payable: number
+          total_assigned: number
+          total_returned: number
+          total_sold: number
         }
         Insert: {
+          area_id: string
+          cash_sales?: number
+          closed_at?: string | null
+          closed_by?: string | null
+          closing_date: string
           created_at?: string
-          customer_email: string
-          customer_name: string
-          customer_phone?: string | null
-          delivery_date?: string | null
+          debt_collections?: number
+          debt_sales?: number
+          expenses_total?: number
           id?: string
-          notes?: string | null
-          order_date?: string
-          order_number: string
+          profit_estimate?: number
+          reconciled_at?: string | null
+          reconciled_by?: string | null
           status?: string
-          total_amount?: number
-          updated_at?: string
+          supplier_payable?: number
+          total_assigned?: number
+          total_returned?: number
+          total_sold?: number
         }
         Update: {
+          area_id?: string
+          cash_sales?: number
+          closed_at?: string | null
+          closed_by?: string | null
+          closing_date?: string
           created_at?: string
-          customer_email?: string
-          customer_name?: string
-          customer_phone?: string | null
-          delivery_date?: string | null
+          debt_collections?: number
+          debt_sales?: number
+          expenses_total?: number
+          id?: string
+          profit_estimate?: number
+          reconciled_at?: string | null
+          reconciled_by?: string | null
+          status?: string
+          supplier_payable?: number
+          total_assigned?: number
+          total_returned?: number
+          total_sold?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_closings_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daily_closings_closed_by_fkey"
+            columns: ["closed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "daily_closings_reconciled_by_fkey"
+            columns: ["reconciled_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      debt_collection: {
+        Row: {
+          amount: number
+          collection_date: string
+          created_at: string
+          customer_id: string
+          id: string
+          notes: string | null
+          staff_id: string
+        }
+        Insert: {
+          amount: number
+          collection_date: string
+          created_at?: string
+          customer_id: string
           id?: string
           notes?: string | null
-          order_date?: string
-          order_number?: string
-          status?: string
-          total_amount?: number
-          updated_at?: string
+          staff_id: string
         }
-        Relationships: []
+        Update: {
+          amount?: number
+          collection_date?: string
+          created_at?: string
+          customer_id?: string
+          id?: string
+          notes?: string | null
+          staff_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "debt_collection_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "debt_collection_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      debt_ledger: {
+        Row: {
+          amount: number
+          balance_after: number
+          balance_before: number
+          created_at: string
+          created_by: string
+          customer_id: string
+          entry_type: string
+          id: string
+          reference_id: string
+          reference_type: string
+        }
+        Insert: {
+          amount: number
+          balance_after: number
+          balance_before: number
+          created_at?: string
+          created_by: string
+          customer_id: string
+          entry_type: string
+          id?: string
+          reference_id: string
+          reference_type: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number
+          balance_before?: number
+          created_at?: string
+          created_by?: string
+          customer_id?: string
+          entry_type?: string
+          id?: string
+          reference_id?: string
+          reference_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "debt_ledger_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "debt_ledger_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expenses: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          created_by: string
+          expense_date: string
+          id: string
+          notes: string | null
+        }
+        Insert: {
+          amount: number
+          category: string
+          created_at?: string
+          created_by: string
+          expense_date: string
+          id?: string
+          notes?: string | null
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          created_by?: string
+          expense_date?: string
+          id?: string
+          notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expenses_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -263,32 +373,383 @@ export type Database = {
         }
         Relationships: []
       }
-      suppliers: {
+      sales: {
         Row: {
-          address: string | null
-          contact_email: string | null
-          contact_phone: string | null
+          area_id: string
+          created_at: string
+          customer_id: string
+          distribution_id: string | null
+          id: string
+          notes: string | null
+          payment_type: string
+          quantity: number
+          sale_date: string
+          selling_price: number
+          staff_id: string
+        }
+        Insert: {
+          area_id: string
+          created_at?: string
+          customer_id: string
+          distribution_id?: string | null
+          id?: string
+          notes?: string | null
+          payment_type: string
+          quantity: number
+          sale_date: string
+          selling_price: number
+          staff_id: string
+        }
+        Update: {
+          area_id?: string
+          created_at?: string
+          customer_id?: string
+          distribution_id?: string | null
+          id?: string
+          notes?: string | null
+          payment_type?: string
+          quantity?: number
+          sale_date?: string
+          selling_price?: number
+          staff_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_distribution_id_fkey"
+            columns: ["distribution_id"]
+            isOneToOne: false
+            referencedRelation: "stock_distribution"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      staff_area_assignments: {
+        Row: {
+          area_id: string
+          assigned_date: string
+          created_at: string
+          ended_date: string | null
+          id: string
+          staff_id: string
+        }
+        Insert: {
+          area_id: string
+          assigned_date?: string
+          created_at?: string
+          ended_date?: string | null
+          id?: string
+          staff_id: string
+        }
+        Update: {
+          area_id?: string
+          assigned_date?: string
+          created_at?: string
+          ended_date?: string | null
+          id?: string
+          staff_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_area_assignments_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_area_assignments_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      stock_distribution: {
+        Row: {
+          area_id: string
+          created_at: string
+          created_by: string
+          id: string
+          intake_id: string
+          quantity_assigned: number
+        }
+        Insert: {
+          area_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          intake_id: string
+          quantity_assigned: number
+        }
+        Update: {
+          area_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          intake_id?: string
+          quantity_assigned?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_distribution_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_distribution_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "stock_distribution_intake_id_fkey"
+            columns: ["intake_id"]
+            isOneToOne: false
+            referencedRelation: "stock_intake"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_intake: {
+        Row: {
+          cost_per_pax: number
+          created_at: string
+          created_by: string
+          id: string
+          intake_date: string
+          notes: string | null
+          quantity_received: number
+          supplier_id: string
+        }
+        Insert: {
+          cost_per_pax: number
+          created_at?: string
+          created_by: string
+          id?: string
+          intake_date: string
+          notes?: string | null
+          quantity_received: number
+          supplier_id: string
+        }
+        Update: {
+          cost_per_pax?: number
+          created_at?: string
+          created_by?: string
+          id?: string
+          intake_date?: string
+          notes?: string | null
+          quantity_received?: number
+          supplier_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_intake_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "stock_intake_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_return: {
+        Row: {
+          area_id: string
+          created_at: string
+          created_by: string
+          distribution_id: string
+          id: string
+          quantity_returned: number
+          return_date: string
+        }
+        Insert: {
+          area_id: string
+          created_at?: string
+          created_by: string
+          distribution_id: string
+          id?: string
+          quantity_returned: number
+          return_date: string
+        }
+        Update: {
+          area_id?: string
+          created_at?: string
+          created_by?: string
+          distribution_id?: string
+          id?: string
+          quantity_returned?: number
+          return_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_return_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_return_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "stock_return_distribution_id_fkey"
+            columns: ["distribution_id"]
+            isOneToOne: false
+            referencedRelation: "stock_distribution"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_price_history: {
+        Row: {
+          cost_per_pax: number
+          created_at: string
+          effective_date: string
+          id: string
+          supplier_id: string
+        }
+        Insert: {
+          cost_per_pax: number
+          created_at?: string
+          effective_date: string
+          id?: string
+          supplier_id: string
+        }
+        Update: {
+          cost_per_pax?: number
+          created_at?: string
+          effective_date?: string
+          id?: string
+          supplier_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_price_history_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_settlements: {
+        Row: {
+          cost_per_pax: number
           created_at: string
           id: string
-          name: string
+          intake_id: string
+          payable_amount: number
+          payable_quantity: number
+          settled_by: string | null
+          settlement_date: string | null
+          status: string
+          total_received: number
+          total_returned: number
+          total_sold: number
           updated_at: string
         }
         Insert: {
-          address?: string | null
-          contact_email?: string | null
-          contact_phone?: string | null
+          cost_per_pax?: number
           created_at?: string
           id?: string
-          name: string
+          intake_id: string
+          payable_amount?: number
+          payable_quantity?: number
+          settled_by?: string | null
+          settlement_date?: string | null
+          status?: string
+          total_received?: number
+          total_returned?: number
+          total_sold?: number
           updated_at?: string
         }
         Update: {
-          address?: string | null
-          contact_email?: string | null
-          contact_phone?: string | null
+          cost_per_pax?: number
+          created_at?: string
+          id?: string
+          intake_id?: string
+          payable_amount?: number
+          payable_quantity?: number
+          settled_by?: string | null
+          settlement_date?: string | null
+          status?: string
+          total_received?: number
+          total_returned?: number
+          total_sold?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_settlements_intake_id_fkey"
+            columns: ["intake_id"]
+            isOneToOne: false
+            referencedRelation: "stock_intake"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_settlements_settled_by_fkey"
+            columns: ["settled_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      suppliers: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
           created_at?: string
           id?: string
           name?: string
+          phone?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -299,6 +760,28 @@ export type Database = {
     }
     Functions: {
       get_current_user_role: { Args: never; Returns: string }
+      get_my_area_ids: { Args: never; Returns: string[] }
+      get_total_returned_for_intake: {
+        Args: { p_intake_id: string }
+        Returns: number
+      }
+      get_total_sold_for_intake: {
+        Args: { p_intake_id: string }
+        Returns: number
+      }
+      perform_daily_closing: {
+        Args: {
+          p_action?: string
+          p_area_id: string
+          p_closing_date: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
+      recalculate_customer_balance: {
+        Args: { p_customer_id: string }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
@@ -311,7 +794,7 @@ export type Database = {
 
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof DatabaseWithoutInternals, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends

@@ -1,5 +1,7 @@
 type OfflineListener = (online: boolean) => void;
 
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://gsieirprrkuyfzxqcizb.supabase.co";
+
 class OfflineDetector {
   private listeners: Set<OfflineListener> = new Set();
   private heartbeatInterval: ReturnType<typeof setInterval> | null = null;
@@ -25,7 +27,7 @@ class OfflineDetector {
     this.heartbeatInterval = setInterval(async () => {
       try {
         const resp = await fetch(
-          "https://gsieirprrkuyfzxqcizb.supabase.co/rest/v1/",
+          `${SUPABASE_URL}/rest/v1/`,
           { method: "HEAD", signal: AbortSignal.timeout(5000) }
         );
         this.setOnline(resp.ok);
