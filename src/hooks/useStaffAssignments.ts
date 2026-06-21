@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useSyncStore } from "@/stores/syncStore";
 import { staffAssignmentsRepo, profilesRepo } from "@/repositories/staffRepo";
 import { persistWrite } from "@/lib/writeHelper";
 import type { StaffAreaAssignment } from "@/types/pokleh";
@@ -70,9 +71,11 @@ export const useStaffAssignments = () => {
     });
   };
 
+  const refreshTick = useSyncStore((s) => s.refreshTick);
+
   useEffect(() => {
     fetchAssignments().finally(() => setLoading(false));
-  }, [fetchAssignments]);
+  }, [fetchAssignments, refreshTick]);
 
   return { assignments, loading, assignStaff, endAssignment, refresh: fetchAssignments };
 };

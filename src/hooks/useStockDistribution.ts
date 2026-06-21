@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useSyncStore } from "@/stores/syncStore";
 import { stockDistributionRepo } from "@/repositories/stockRepo";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
@@ -59,9 +60,11 @@ export const useStockDistribution = (intakeId?: string) => {
     });
   };
 
+  const refreshTick = useSyncStore((s) => s.refreshTick);
+
   useEffect(() => {
     fetchDistributions().finally(() => setLoading(false));
-  }, [fetchDistributions]);
+  }, [fetchDistributions, refreshTick]);
 
   return { distributions, loading, addDistribution, refresh: fetchDistributions };
 };

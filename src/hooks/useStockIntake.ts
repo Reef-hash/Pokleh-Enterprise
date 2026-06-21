@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useSyncStore } from "@/stores/syncStore";
 import { stockIntakeRepo } from "@/repositories/stockRepo";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
@@ -63,9 +64,11 @@ export const useStockIntake = () => {
     });
   };
 
+  const refreshTick = useSyncStore((s) => s.refreshTick);
+
   useEffect(() => {
     fetchIntakes().finally(() => setLoading(false));
-  }, [fetchIntakes]);
+  }, [fetchIntakes, refreshTick]);
 
   return { intakes, loading, addIntake, refresh: fetchIntakes };
 };

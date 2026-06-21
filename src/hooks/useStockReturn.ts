@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useSyncStore } from "@/stores/syncStore";
 import { stockReturnRepo } from "@/repositories/stockRepo";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
@@ -61,9 +62,11 @@ export const useStockReturn = (areaId?: string) => {
     });
   };
 
+  const refreshTick = useSyncStore((s) => s.refreshTick);
+
   useEffect(() => {
     fetchReturns().finally(() => setLoading(false));
-  }, [fetchReturns]);
+  }, [fetchReturns, refreshTick]);
 
   return { returns, loading, addReturn, refresh: fetchReturns };
 };

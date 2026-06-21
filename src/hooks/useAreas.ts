@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useSyncStore } from "@/stores/syncStore";
 import { areasRepo } from "@/repositories/areasRepo";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
@@ -61,9 +62,11 @@ export const useAreas = () => {
     return { success: true };
   };
 
+  const refreshTick = useSyncStore((s) => s.refreshTick);
+
   useEffect(() => {
     fetchAreas().finally(() => setLoading(false));
-  }, [fetchAreas]);
+  }, [fetchAreas, refreshTick]);
 
   return { areas, loading, addArea, updateArea, deleteArea, refresh: fetchAreas };
 };

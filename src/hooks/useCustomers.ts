@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useSyncStore } from "@/stores/syncStore";
 import { customersRepo } from "@/repositories/customersRepo";
 import { db } from "@/lib/db";
 import { persistWrite } from "@/lib/writeHelper";
@@ -101,9 +102,11 @@ export const useCustomers = (areaId?: string) => {
     return updateCustomer(id, { active } as Partial<Customer>);
   };
 
+  const refreshTick = useSyncStore((s) => s.refreshTick);
+
   useEffect(() => {
     fetchCustomers().finally(() => setLoading(false));
-  }, [fetchCustomers]);
+  }, [fetchCustomers, refreshTick]);
 
   return {
     customers,

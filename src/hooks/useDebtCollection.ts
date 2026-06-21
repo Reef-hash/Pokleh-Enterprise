@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useSyncStore } from "@/stores/syncStore";
 import { debtCollectionRepo, debtLedgerRepo } from "@/repositories/debtRepo";
 import { customersRepo } from "@/repositories/customersRepo";
 import { db } from "@/lib/db";
@@ -93,9 +94,11 @@ export const useDebtCollection = () => {
     return result;
   };
 
+  const refreshTick = useSyncStore((s) => s.refreshTick);
+
   useEffect(() => {
     fetchCollections().finally(() => setLoading(false));
-  }, [fetchCollections]);
+  }, [fetchCollections, refreshTick]);
 
   return { collections, loading, addCollection, refresh: fetchCollections };
 };

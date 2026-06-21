@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useSyncStore } from "@/stores/syncStore";
 import { closingRepo } from "@/repositories/closingRepo";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
@@ -67,9 +68,11 @@ export const useDailyClosings = () => {
     return { success: true, data: closing };
   };
 
+  const refreshTick = useSyncStore((s) => s.refreshTick);
+
   useEffect(() => {
     fetchClosings().finally(() => setLoading(false));
-  }, [fetchClosings]);
+  }, [fetchClosings, refreshTick]);
 
   return { closings, loading, closeDay, reconcileDay, refresh: fetchClosings };
 };

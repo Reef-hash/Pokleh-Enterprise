@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useSyncStore } from "@/stores/syncStore";
 import { suppliersRepo } from "@/repositories/suppliersRepo";
 import { db } from "@/lib/db";
 import { persistWrite } from "@/lib/writeHelper";
@@ -85,9 +86,11 @@ export const usePoklehSuppliers = () => {
     });
   };
 
+  const refreshTick = useSyncStore((s) => s.refreshTick);
+
   useEffect(() => {
     fetchSuppliers().finally(() => setLoading(false));
-  }, [fetchSuppliers]);
+  }, [fetchSuppliers, refreshTick]);
 
   return { suppliers, loading, addSupplier, updateSupplier, deleteSupplier, refresh: fetchSuppliers };
 };

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useSyncStore } from "@/stores/syncStore";
 import { salesRepo } from "@/repositories/salesRepo";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
@@ -61,9 +62,11 @@ export const useSales = () => {
     });
   };
 
+  const refreshTick = useSyncStore((s) => s.refreshTick);
+
   useEffect(() => {
     fetchSales().finally(() => setLoading(false));
-  }, [fetchSales]);
+  }, [fetchSales, refreshTick]);
 
   return { sales, loading, addSale, refresh: fetchSales };
 };

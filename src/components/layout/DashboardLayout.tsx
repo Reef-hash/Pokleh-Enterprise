@@ -23,7 +23,8 @@ import {
   Clock,
   Shield,
   CalendarCheck,
-  ChevronDown
+  ChevronDown,
+  RefreshCw
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/lib/i18n";
@@ -32,6 +33,7 @@ import { HelpSlidePanel } from "@/components/help/HelpSlidePanel";
 import { Logo } from "@/components/ui/Logo";
 import { getHelpContent } from "@/lib/help-content";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import { useSyncStore } from "@/stores/syncStore";
 
 interface User {
   id: string;
@@ -74,7 +76,15 @@ export const DashboardLayout = ({
   });
   const { t } = useLanguage();
   const [helpOpen, setHelpOpen] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const triggerRefresh = useSyncStore((s) => s.triggerRefresh);
   const helpContent = getHelpContent(currentPage);
+
+  const handleSync = async () => {
+    setSyncing(true);
+    await triggerRefresh();
+    setSyncing(false);
+  };
 
   const toggleSection = (key: string) => {
     setExpandedSections(prev => ({ ...prev, [key]: !prev[key] }));
@@ -321,6 +331,16 @@ export const DashboardLayout = ({
           </div>
           <div className="flex items-center space-x-1">
             <LanguageSwitcher />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleSync}
+              disabled={syncing}
+              title="Sync data dengan server"
+              className="px-2"
+            >
+              <RefreshCw className={cn("h-4 w-4", syncing && "animate-spin")} />
+            </Button>
             <span className="text-sm text-muted-foreground hidden sm:inline font-medium">
               {t('common.welcome')}, {user.name}
             </span>

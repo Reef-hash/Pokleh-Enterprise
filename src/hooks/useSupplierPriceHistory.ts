@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useSyncStore } from "@/stores/syncStore";
 import { priceHistoryRepo } from "@/repositories/suppliersRepo";
 import { db } from "@/lib/db";
 import { toast } from "sonner";
@@ -21,9 +22,11 @@ export const useSupplierPriceHistory = () => {
     }
   }, []);
 
+  const refreshTick = useSyncStore((s) => s.refreshTick);
+
   useEffect(() => {
     fetchHistory().finally(() => setLoading(false));
-  }, [fetchHistory]);
+  }, [fetchHistory, refreshTick]);
 
   return { history, loading, refresh: fetchHistory };
 };

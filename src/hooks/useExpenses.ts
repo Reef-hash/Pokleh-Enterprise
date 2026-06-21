@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useSyncStore } from "@/stores/syncStore";
 import { expensesRepo } from "@/repositories/expensesRepo";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
@@ -63,9 +64,11 @@ export const useExpenses = () => {
     });
   };
 
+  const refreshTick = useSyncStore((s) => s.refreshTick);
+
   useEffect(() => {
     fetchExpenses().finally(() => setLoading(false));
-  }, [fetchExpenses]);
+  }, [fetchExpenses, refreshTick]);
 
   return { expenses, loading, addExpense, refresh: fetchExpenses };
 };

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useSyncStore } from "@/stores/syncStore";
 import { debtLedgerRepo } from "@/repositories/debtRepo";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
@@ -44,9 +45,11 @@ export const useDebtLedger = () => {
     return { success: true, data: entry };
   };
 
+  const refreshTick = useSyncStore((s) => s.refreshTick);
+
   useEffect(() => {
     fetchEntries().finally(() => setLoading(false));
-  }, [fetchEntries]);
+  }, [fetchEntries, refreshTick]);
 
   return { entries, loading, addEntry, refresh: fetchEntries };
 };
