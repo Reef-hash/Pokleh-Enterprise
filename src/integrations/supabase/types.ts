@@ -210,6 +210,8 @@ export type Database = {
         Row: {
           amount: number
           collection_date: string
+          correction_of: string | null
+          correction_status: string | null
           created_at: string
           customer_id: string
           id: string
@@ -219,6 +221,8 @@ export type Database = {
         Insert: {
           amount: number
           collection_date: string
+          correction_of?: string | null
+          correction_status?: string | null
           created_at?: string
           customer_id: string
           id?: string
@@ -228,6 +232,8 @@ export type Database = {
         Update: {
           amount?: number
           collection_date?: string
+          correction_of?: string | null
+          correction_status?: string | null
           created_at?: string
           customer_id?: string
           id?: string
@@ -235,6 +241,13 @@ export type Database = {
           staff_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "debt_collection_correction_of_fkey"
+            columns: ["correction_of"]
+            isOneToOne: false
+            referencedRelation: "debt_collection"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "debt_collection_customer_id_fkey"
             columns: ["customer_id"]
@@ -309,6 +322,8 @@ export type Database = {
         Row: {
           amount: number
           category: string
+          correction_of: string | null
+          correction_status: string | null
           created_at: string
           created_by: string
           expense_date: string
@@ -318,6 +333,8 @@ export type Database = {
         Insert: {
           amount: number
           category: string
+          correction_of?: string | null
+          correction_status?: string | null
           created_at?: string
           created_by: string
           expense_date: string
@@ -327,6 +344,8 @@ export type Database = {
         Update: {
           amount?: number
           category?: string
+          correction_of?: string | null
+          correction_status?: string | null
           created_at?: string
           created_by?: string
           expense_date?: string
@@ -334,6 +353,13 @@ export type Database = {
           notes?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "expenses_correction_of_fkey"
+            columns: ["correction_of"]
+            isOneToOne: false
+            referencedRelation: "expenses"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "expenses_created_by_fkey"
             columns: ["created_by"]
@@ -376,6 +402,8 @@ export type Database = {
       sales: {
         Row: {
           area_id: string
+          correction_of: string | null
+          correction_status: string | null
           created_at: string
           customer_id: string
           distribution_id: string | null
@@ -389,6 +417,8 @@ export type Database = {
         }
         Insert: {
           area_id: string
+          correction_of?: string | null
+          correction_status?: string | null
           created_at?: string
           customer_id: string
           distribution_id?: string | null
@@ -402,6 +432,8 @@ export type Database = {
         }
         Update: {
           area_id?: string
+          correction_of?: string | null
+          correction_status?: string | null
           created_at?: string
           customer_id?: string
           distribution_id?: string | null
@@ -419,6 +451,13 @@ export type Database = {
             columns: ["area_id"]
             isOneToOne: false
             referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_correction_of_fkey"
+            columns: ["correction_of"]
+            isOneToOne: false
+            referencedRelation: "sales"
             referencedColumns: ["id"]
           },
           {
@@ -489,6 +528,8 @@ export type Database = {
       stock_distribution: {
         Row: {
           area_id: string
+          correction_of: string | null
+          correction_status: string | null
           created_at: string
           created_by: string
           id: string
@@ -497,6 +538,8 @@ export type Database = {
         }
         Insert: {
           area_id: string
+          correction_of?: string | null
+          correction_status?: string | null
           created_at?: string
           created_by: string
           id?: string
@@ -505,6 +548,8 @@ export type Database = {
         }
         Update: {
           area_id?: string
+          correction_of?: string | null
+          correction_status?: string | null
           created_at?: string
           created_by?: string
           id?: string
@@ -517,6 +562,13 @@ export type Database = {
             columns: ["area_id"]
             isOneToOne: false
             referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_distribution_correction_of_fkey"
+            columns: ["correction_of"]
+            isOneToOne: false
+            referencedRelation: "stock_distribution"
             referencedColumns: ["id"]
           },
           {
@@ -537,6 +589,8 @@ export type Database = {
       }
       stock_intake: {
         Row: {
+          correction_of: string | null
+          correction_status: string | null
           cost_per_pax: number
           created_at: string
           created_by: string
@@ -547,6 +601,8 @@ export type Database = {
           supplier_id: string
         }
         Insert: {
+          correction_of?: string | null
+          correction_status?: string | null
           cost_per_pax: number
           created_at?: string
           created_by: string
@@ -557,6 +613,8 @@ export type Database = {
           supplier_id: string
         }
         Update: {
+          correction_of?: string | null
+          correction_status?: string | null
           cost_per_pax?: number
           created_at?: string
           created_by?: string
@@ -567,6 +625,13 @@ export type Database = {
           supplier_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "stock_intake_correction_of_fkey"
+            columns: ["correction_of"]
+            isOneToOne: false
+            referencedRelation: "stock_intake"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "stock_intake_created_by_fkey"
             columns: ["created_by"]
@@ -586,6 +651,8 @@ export type Database = {
       stock_return: {
         Row: {
           area_id: string
+          correction_of: string | null
+          correction_status: string | null
           created_at: string
           created_by: string
           distribution_id: string
@@ -595,6 +662,8 @@ export type Database = {
         }
         Insert: {
           area_id: string
+          correction_of?: string | null
+          correction_status?: string | null
           created_at?: string
           created_by: string
           distribution_id: string
@@ -604,6 +673,8 @@ export type Database = {
         }
         Update: {
           area_id?: string
+          correction_of?: string | null
+          correction_status?: string | null
           created_at?: string
           created_by?: string
           distribution_id?: string
@@ -617,6 +688,13 @@ export type Database = {
             columns: ["area_id"]
             isOneToOne: false
             referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_return_correction_of_fkey"
+            columns: ["correction_of"]
+            isOneToOne: false
+            referencedRelation: "stock_return"
             referencedColumns: ["id"]
           },
           {
@@ -669,8 +747,11 @@ export type Database = {
       }
       supplier_settlements: {
         Row: {
+          correction_of: string | null
+          correction_status: string | null
           cost_per_pax: number
           created_at: string
+          created_by: string | null
           id: string
           intake_id: string
           payable_amount: number
@@ -684,8 +765,11 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          correction_of?: string | null
+          correction_status?: string | null
           cost_per_pax?: number
           created_at?: string
+          created_by?: string | null
           id?: string
           intake_id: string
           payable_amount?: number
@@ -699,8 +783,11 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          correction_of?: string | null
+          correction_status?: string | null
           cost_per_pax?: number
           created_at?: string
+          created_by?: string | null
           id?: string
           intake_id?: string
           payable_amount?: number
@@ -714,6 +801,20 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "supplier_settlements_correction_of_fkey"
+            columns: ["correction_of"]
+            isOneToOne: false
+            referencedRelation: "supplier_settlements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_settlements_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
           {
             foreignKeyName: "supplier_settlements_intake_id_fkey"
             columns: ["intake_id"]

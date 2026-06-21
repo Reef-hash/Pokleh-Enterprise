@@ -66,11 +66,6 @@ export const useDebtCollection = () => {
       toast.error("Collection recorded but debt ledger update failed");
     }
 
-    await supabase
-      .from("customers")
-      .update({ debt_balance: balanceAfter })
-      .eq("id", input.customer_id);
-
     setCollections((prev) => [collection, ...prev]);
     await db.debtCollections.put(collection as unknown as import("@/lib/db").OfflineDebtCollection);
     toast.success("Debt collection recorded");
