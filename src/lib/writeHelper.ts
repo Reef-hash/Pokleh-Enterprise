@@ -27,7 +27,7 @@ export interface PersistResult {
 }
 
 export async function persistWrite<T>(config: PersistConfig<T>): Promise<PersistResult> {
-  const { entity, action, userId, data, id, execute, optimistic, onSuccess, dexiePut, dexieDelete, msg } = config;
+  const { entity, action, userId, data, id, execute, optimistic, onSuccess, dexiePut, dexieDelete, cacheOffline, msg } = config;
 
   if (userId === undefined || userId === null) return { success: false };
 
