@@ -1,11 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { db } from "@/lib/db";
-import { offlineDetector } from "@/services/offline";
-import { syncEngine } from "@/services/sync";
-import { toast } from "sonner";
+import { persistWrite } from "@/lib/writeHelper";
 import type { StaffAreaAssignment } from "@/types/pokleh";
-import { getUserFriendlyError } from "@/lib/errors";
 
 export const useStaffAssignments = () => {
   const [assignments, setAssignments] = useState<StaffAreaAssignment[]>([]);
@@ -26,69 +22,44 @@ export const useStaffAssignments = () => {
   }, []);
 
   const assignStaff = async (staffId: string, areaId: string) => {
-    if (!offlineDetector.isOnline) {
-      const tempId = crypto.randomUUID();
-      await syncEngine.enqueue({
-        entity: "staff_area_assignments",
-        entityId: tempId,
-        action: "INSERT",
-        payload: { staff_id: staffId, area_id: areaId },
-      });
-      toast.success("Assignment queued for sync");
-      return { success: true, offline: true };
-    }
-
-    try {
-      const { data, error } = await supabase
-        .from("staff_area_assignments")
-        .insert({ staff_id: staffId, area_id: areaId })
-        .select("*, area:areas(*), profile:profiles!staff_id(*)")
-        .single();
-      if (error) {
-        toast.error(getUserFriendlyError(error, "staff_area_assignments"));
-        return { success: false };
-      }
-      setAssignments((prev) => [data as unknown as StaffAreaAssignment, ...prev]);
-      toast.success("Staff assigned to area");
-      return { success: true };
-    } catch (err: any) {
-      toast.error("Connection error. Please try again.");
-      return { success: false };
-    }
+    return persistWrite<StaffAreaAssignment>({
+      entity: "staff_area_assignments",
+      action: "INSERT",
+      userId: "system",
+      data: { staff_id: staffId, area_id: areaId },
+      execute: () =>
+        supabase
+          .from("staff_area_assignments")
+          .insert({ staff_id: staffId, area_id: areaId })
+          .select("*, area:areas(*), profile:profiles!staff_id(*)")
+          .single(),
+      onSuccess: (assignment) => setAssignments((prev) => [assignment, ...prev]),
+      msg: "Staff assigned to area",
+    });
   };
 
   const endAssignment = async (id: string) => {
-    if (!offlineDetector.isOnline) {
-      await syncEngine.enqueue({
-        entity: "staff_area_assignments",
-        entityId: id,
-        action: "UPDATE",
-        payload: { ended_date: new Date().toISOString().split("T")[0] },
-      });
-      toast.success("End of assignment queued for sync");
-      return { success: true, offline: true };
-    }
-
-    try {
-      const { error } = await supabase
-        .from("staff_area_assignments")
-        .update({ ended_date: new Date().toISOString().split("T")[0] })
-        .eq("id", id);
-      if (error) {
-        toast.error(getUserFriendlyError(error, "staff_area_assignments"));
-        return { success: false };
-      }
-      setAssignments((prev) =>
-        prev.map((a) =>
-          a.id === id ? { ...a, ended_date: new Date().toISOString().split("T")[0] } : a
-        )
-      );
-      toast.success("Assignment ended");
-      return { success: true };
-    } catch (err: any) {
-      toast.error("Connection error. Please try again.");
-      return { success: false };
-    }
+    const endedDate = new Date().toISOString().split("T")[0];
+    return persistWrite<StaffAreaAssignment>({
+      entity: "staff_area_assignments",
+      action: "UPDATE",
+      userId: "system",
+      id,
+      data: { ended_date: endedDate },
+      execute: async () => {
+        const { error } = await supabase
+          .from("staff_area_assignments")
+          .update({ ended_date: endedDate })
+          .eq("id", id);
+        if (error) return { data: null, error };
+        return { data: { id, ended_date: endedDate } as unknown as StaffAreaAssignment, error: undefined };
+      },
+      onSuccess: () =>
+        setAssignments((prev) =>
+          prev.map((a) => (a.id === id ? { ...a, ended_date: endedDate } : a))
+        ),
+      msg: "Assignment ended",
+    });
   };
 
   useEffect(() => {

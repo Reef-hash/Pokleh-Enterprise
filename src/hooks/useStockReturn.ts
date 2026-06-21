@@ -2,11 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
-import { offlineDetector } from "@/services/offline";
-import { syncEngine } from "@/services/sync";
-import { toast } from "sonner";
+import { persistWrite } from "@/lib/writeHelper";
 import type { StockReturn } from "@/types/pokleh";
-import { getUserFriendlyError } from "@/lib/errors";
 
 export const useStockReturn = (areaId?: string) => {
   const [returns, setReturns] = useState<StockReturn[]>([]);
@@ -39,33 +36,22 @@ export const useStockReturn = (areaId?: string) => {
   }) => {
     if (!userId) return { success: false, error: "Not authenticated" };
 
-    if (!offlineDetector.isOnline) {
-      const tempId = crypto.randomUUID();
-      const offlineData = { ...data, created_by: userId } as Record<string, unknown>;
-      await syncEngine.enqueue({ entity: "stock_return", entityId: tempId, action: "INSERT", payload: offlineData });
-      toast.success("Return queued for sync");
-      return { success: true, offline: true };
-    }
-
-    try {
-      const { data: result, error } = await supabase
-        .from("stock_return")
-        .insert({ ...data, created_by: userId })
-        .select("*, distribution:stock_distribution(*, area:areas(*)), area:areas(*)")
-        .single();
-      if (error) {
-        toast.error(getUserFriendlyError(error, "stock_return"));
-        return { success: false };
-      }
-      const ret = result as unknown as StockReturn;
-      setReturns((prev) => [ret, ...prev]);
-      await db.stockReturns.put(ret as unknown as import("@/lib/db").OfflineStockReturn);
-      toast.success("Stock return recorded");
-      return { success: true, data: ret };
-    } catch (err: any) {
-      toast.error("Connection error. Please try again.");
-      return { success: false };
-    }
+    return persistWrite<StockReturn>({
+      entity: "stock_return",
+      action: "INSERT",
+      userId,
+      data: { ...data, created_by: userId },
+      execute: () =>
+        supabase
+          .from("stock_return")
+          .insert({ ...data, created_by: userId })
+          .select("*, distribution:stock_distribution(*, area:areas(*)), area:areas(*)")
+          .single(),
+      onSuccess: (ret) => setReturns((prev) => [ret, ...prev]),
+      dexiePut: (ret) =>
+        db.stockReturns.put(ret as unknown as import("@/lib/db").OfflineStockReturn),
+      msg: "Stock return recorded",
+    });
   };
 
   useEffect(() => {

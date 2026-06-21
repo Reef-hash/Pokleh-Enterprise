@@ -2,11 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
-import { offlineDetector } from "@/services/offline";
-import { syncEngine } from "@/services/sync";
-import { toast } from "sonner";
+import { persistWrite } from "@/lib/writeHelper";
 import type { StockDistribution } from "@/types/pokleh";
-import { getUserFriendlyError } from "@/lib/errors";
 
 export const useStockDistribution = (intakeId?: string) => {
   const [distributions, setDistributions] = useState<StockDistribution[]>([]);
@@ -37,33 +34,22 @@ export const useStockDistribution = (intakeId?: string) => {
   }) => {
     if (!userId) return { success: false, error: "Not authenticated" };
 
-    if (!offlineDetector.isOnline) {
-      const tempId = crypto.randomUUID();
-      const offlineData = { ...data, created_by: userId } as Record<string, unknown>;
-      await syncEngine.enqueue({ entity: "stock_distribution", entityId: tempId, action: "INSERT", payload: offlineData });
-      toast.success("Distribution queued for sync");
-      return { success: true, offline: true };
-    }
-
-    try {
-      const { data: result, error } = await supabase
-        .from("stock_distribution")
-        .insert({ ...data, created_by: userId })
-        .select("*, intake:stock_intake(*), area:areas(*)")
-        .single();
-      if (error) {
-        toast.error(getUserFriendlyError(error, "stock_distribution"));
-        return { success: false };
-      }
-      const dist = result as unknown as StockDistribution;
-      setDistributions((prev) => [dist, ...prev]);
-      await db.stockDistributions.put(dist as unknown as import("@/lib/db").OfflineStockDistribution);
-      toast.success("Stock distributed");
-      return { success: true, data: dist };
-    } catch (err: any) {
-      toast.error("Connection error. Please try again.");
-      return { success: false };
-    }
+    return persistWrite<StockDistribution>({
+      entity: "stock_distribution",
+      action: "INSERT",
+      userId,
+      data: { ...data, created_by: userId },
+      execute: () =>
+        supabase
+          .from("stock_distribution")
+          .insert({ ...data, created_by: userId })
+          .select("*, intake:stock_intake(*), area:areas(*)")
+          .single(),
+      onSuccess: (dist) => setDistributions((prev) => [dist, ...prev]),
+      dexiePut: (dist) =>
+        db.stockDistributions.put(dist as unknown as import("@/lib/db").OfflineStockDistribution),
+      msg: "Stock distributed",
+    });
   };
 
   useEffect(() => {

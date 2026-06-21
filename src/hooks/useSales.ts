@@ -1,12 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { db } from "@/lib/db";
-import { offlineDetector } from "@/services/offline";
-import { syncEngine } from "@/services/sync";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
 import type { Sale } from "@/types/pokleh";
-import { getUserFriendlyError } from "@/lib/errors";
+import { persistWrite } from "@/lib/writeHelper";
 
 export const useSales = () => {
   const [sales, setSales] = useState<Sale[]>([]);
@@ -39,76 +37,31 @@ export const useSales = () => {
     sale_date: string;
     notes?: string;
   }) => {
-    if (!userId) return { success: false, error: "Not authenticated" };
-
-    if (!offlineDetector.isOnline) {
-      const tempId = crypto.randomUUID();
-      await syncEngine.enqueue({ entity: "sales", entityId: tempId, action: "INSERT", payload: { ...input, staff_id: userId } });
-      const optimistic: Sale = {
-        id: tempId,
-        customer_id: input.customer_id,
-        area_id: input.area_id,
-        quantity: input.quantity,
-        selling_price: input.selling_price,
-        payment_type: input.payment_type,
-        distribution_id: input.distribution_id ?? null,
-        staff_id: userId,
-        sale_date: input.sale_date,
-        notes: input.notes ?? null,
-        correction_of: null,
-        correction_status: null,
-        created_at: new Date().toISOString(),
-        customer: {} as any,
-        area: {} as any,
-        staff: {} as any,
-      };
-      setSales((prev) => [optimistic, ...prev]);
-      toast.success("Sale queued for sync");
-      return { success: true, offline: true };
-    }
-
     const tempId = crypto.randomUUID();
     const optimistic: Sale = {
-      id: tempId,
-      customer_id: input.customer_id,
-      area_id: input.area_id,
-      quantity: input.quantity,
-      selling_price: input.selling_price,
-      payment_type: input.payment_type,
-      distribution_id: input.distribution_id ?? null,
-      staff_id: userId,
-      sale_date: input.sale_date,
-      notes: input.notes ?? null,
-      correction_of: null,
-      correction_status: null,
-      created_at: new Date().toISOString(),
-      customer: {} as any,
-      area: {} as any,
-      staff: {} as any,
+      id: tempId, customer_id: input.customer_id, area_id: input.area_id,
+      quantity: input.quantity, selling_price: input.selling_price,
+      payment_type: input.payment_type, distribution_id: input.distribution_id ?? null,
+      staff_id: userId!, sale_date: input.sale_date, notes: input.notes ?? null,
+      correction_of: null, correction_status: null, created_at: new Date().toISOString(),
+      customer: {} as any, area: {} as any, staff: {} as any,
     };
-    setSales((prev) => [optimistic, ...prev]);
 
-    try {
-      const { data, error } = await supabase
-        .from("sales")
-        .insert({ ...input, staff_id: userId })
-        .select("*, customer:customers(*), area:areas(*), staff:profiles!sales_staff_id_fkey(*)")
-        .single();
-      if (error) {
-        setSales((prev) => prev.filter((s) => s.id !== tempId));
-        toast.error(getUserFriendlyError(error, "sales"));
-        return { success: false };
-      }
-      const sale = data as unknown as Sale;
-      setSales((prev) => prev.map((s) => (s.id === tempId ? sale : s)));
-      await db.sales.put(sale as unknown as import("@/lib/db").OfflineSale);
-      toast.success("Sale recorded");
-      return { success: true, data: sale };
-    } catch (err: any) {
-      setSales((prev) => prev.filter((s) => s.id !== tempId));
-      toast.error("Connection error. Please try again.");
-      return { success: false };
-    }
+    return persistWrite({
+      entity: "sales",
+      action: "INSERT",
+      userId,
+      data: { ...input, staff_id: userId },
+      execute: () => supabase.from("sales").insert({ ...input, staff_id: userId! })
+        .select("*, customer:customers(*), area:areas(*), staff:profiles!sales_staff_id_fkey(*)").single(),
+      optimistic: {
+        add: () => setSales((prev) => [optimistic, ...prev]),
+        remove: () => setSales((prev) => prev.filter((s) => s.id !== tempId)),
+      },
+      onSuccess: (sale: Sale) => setSales((prev) => prev.map((s) => (s.id === tempId ? sale : s))),
+      dexiePut: (sale: Sale) => db.sales.put(sale as unknown as import("@/lib/db").OfflineSale),
+      msg: "Sale recorded",
+    });
   };
 
   useEffect(() => {
