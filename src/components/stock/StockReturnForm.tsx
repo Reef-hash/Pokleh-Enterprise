@@ -23,8 +23,6 @@ export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
   const [distributions, setDistributions] = useState<StockDistribution[]>([]);
   const [form, setForm] = useState({ distribution_id: "", area_id: "", quantity_returned: 0, return_date: new Date().toISOString().split("T")[0] });
 
-  if (loading) return <PageLoader />;
-
   useEffect(() => {
     supabase
       .from("stock_distribution")
@@ -32,6 +30,8 @@ export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
       .order("created_at", { ascending: false })
       .then(({ data }) => setDistributions((data || []) as unknown as StockDistribution[]));
   }, []);
+
+  if (loading) return <PageLoader />;
 
   const handleAdd = async () => {
     if (!form.distribution_id || !form.area_id || form.quantity_returned <= 0) return;
