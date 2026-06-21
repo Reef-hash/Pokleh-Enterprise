@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { staffAssignmentsRepo, profilesRepo } from "@/repositories/staffRepo";
 import { persistWrite } from "@/lib/writeHelper";
 import type { StaffAreaAssignment } from "@/types/pokleh";
 
@@ -9,10 +9,7 @@ export const useStaffAssignments = () => {
 
   const fetchAssignments = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from("staff_area_assignments")
-        .select("*, area:areas(*), profile:profiles!staff_id(*)")
-        .order("assigned_date", { ascending: false });
+      const { data, error } = await staffAssignmentsRepo.fetchAll();
       if (error) throw error;
       const result = (data || []) as unknown as StaffAreaAssignment[];
       setAssignments(result);
@@ -27,12 +24,7 @@ export const useStaffAssignments = () => {
       action: "INSERT",
       userId: "system",
       data: { staff_id: staffId, area_id: areaId },
-      execute: () =>
-        supabase
-          .from("staff_area_assignments")
-          .insert({ staff_id: staffId, area_id: areaId })
-          .select("*, area:areas(*), profile:profiles!staff_id(*)")
-          .single(),
+      execute: () => staffAssignmentsRepo.create({ staff_id: staffId, area_id: areaId }),
       onSuccess: (assignment) => setAssignments((prev) => [assignment, ...prev]),
       msg: "Staff assigned to area",
     });
@@ -47,10 +39,7 @@ export const useStaffAssignments = () => {
       id,
       data: { ended_date: endedDate },
       execute: async () => {
-        const { error } = await supabase
-          .from("staff_area_assignments")
-          .update({ ended_date: endedDate })
-          .eq("id", id);
+        const { error } = await staffAssignmentsRepo.end(id, endedDate);
         if (error) return { data: null, error };
         return { data: { id, ended_date: endedDate } as unknown as StaffAreaAssignment, error: undefined };
       },

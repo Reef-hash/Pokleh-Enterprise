@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { debtLedgerRepo } from "@/repositories/debtRepo";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
@@ -12,10 +12,7 @@ export const useDebtLedger = () => {
 
   const fetchEntries = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from("debt_ledger")
-        .select("*, customer:customers(*)")
-        .order("created_at", { ascending: false });
+      const { data, error } = await debtLedgerRepo.fetchAll();
       if (error) throw error;
       const result = (data || []) as unknown as DebtLedgerEntry[];
       setEntries(result);
@@ -36,11 +33,7 @@ export const useDebtLedger = () => {
     balance_after: number;
   }) => {
     if (!userId) return { success: false, error: "Not authenticated" };
-    const { data, error } = await supabase
-      .from("debt_ledger")
-      .insert({ ...input, created_by: userId })
-      .select("*, customer:customers(*)")
-      .single();
+    const { data, error } = await debtLedgerRepo.create({ ...input, created_by: userId });
     if (error) {
       toast.error(error.message);
       return { success: false };

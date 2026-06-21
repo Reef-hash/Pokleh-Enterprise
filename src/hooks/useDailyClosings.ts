@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { closingRepo } from "@/repositories/closingRepo";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
@@ -12,10 +12,7 @@ export const useDailyClosings = () => {
 
   const fetchClosings = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from("daily_closings")
-        .select("*, area:areas(*)")
-        .order("closing_date", { ascending: false });
+      const { data, error } = await closingRepo.fetchAll();
       if (error) throw error;
       const result = (data || []) as unknown as DailyClosing[];
       setClosings(result);
@@ -28,7 +25,7 @@ export const useDailyClosings = () => {
 
   const closeDay = async (closingDate: string, areaId: string) => {
     if (!userId) return { success: false, error: "Not authenticated" };
-    const { data, error } = await supabase.rpc("perform_daily_closing", {
+    const { data, error } = await closingRepo.closeOrReconcile({
       p_closing_date: closingDate,
       p_area_id: areaId,
       p_user_id: userId,
@@ -50,7 +47,7 @@ export const useDailyClosings = () => {
 
   const reconcileDay = async (closingDate: string, areaId: string) => {
     if (!userId) return { success: false, error: "Not authenticated" };
-    const { data, error } = await supabase.rpc("perform_daily_closing", {
+    const { data, error } = await closingRepo.closeOrReconcile({
       p_closing_date: closingDate,
       p_area_id: areaId,
       p_user_id: userId,

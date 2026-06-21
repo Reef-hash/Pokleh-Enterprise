@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { salesRepo } from "@/repositories/salesRepo";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
@@ -13,10 +13,7 @@ export const useSales = () => {
 
   const fetchSales = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from("sales")
-        .select("*, customer:customers(*), area:areas(*), staff:profiles!sales_staff_id_fkey(*)")
-        .order("sale_date", { ascending: false });
+      const { data, error } = await salesRepo.fetchAll();
       if (error) throw error;
       const result = (data || []) as unknown as Sale[];
       setSales(result);
@@ -52,8 +49,7 @@ export const useSales = () => {
       action: "INSERT",
       userId,
       data: { ...input, staff_id: userId },
-      execute: () => supabase.from("sales").insert({ ...input, staff_id: userId! })
-        .select("*, customer:customers(*), area:areas(*), staff:profiles!sales_staff_id_fkey(*)").single(),
+      execute: () => salesRepo.create({ ...input, staff_id: userId! }),
       optimistic: {
         add: () => setSales((prev) => [optimistic, ...prev]),
         remove: () => setSales((prev) => prev.filter((s) => s.id !== tempId)),

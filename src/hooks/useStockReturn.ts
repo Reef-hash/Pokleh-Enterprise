@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { stockReturnRepo } from "@/repositories/stockRepo";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
 import { persistWrite } from "@/lib/writeHelper";
@@ -12,12 +12,7 @@ export const useStockReturn = (areaId?: string) => {
 
   const fetchReturns = useCallback(async () => {
     try {
-      let query = supabase
-        .from("stock_return")
-        .select("*, distribution:stock_distribution(*, area:areas(*)), area:areas(*)")
-        .order("return_date", { ascending: false });
-      if (areaId) query = query.eq("area_id", areaId);
-      const { data, error } = await query;
+      const { data, error } = await stockReturnRepo.fetchAll(areaId);
       if (error) throw error;
       const result = (data || []) as unknown as StockReturn[];
       setReturns(result);
@@ -41,12 +36,7 @@ export const useStockReturn = (areaId?: string) => {
       action: "INSERT",
       userId,
       data: { ...data, created_by: userId },
-      execute: () =>
-        supabase
-          .from("stock_return")
-          .insert({ ...data, created_by: userId })
-          .select("*, distribution:stock_distribution(*, area:areas(*)), area:areas(*)")
-          .single(),
+      execute: () => stockReturnRepo.create({ ...data, created_by: userId }),
       onSuccess: (ret) => setReturns((prev) => [ret, ...prev]),
       dexiePut: (ret) =>
         db.stockReturns.put(ret as unknown as import("@/lib/db").OfflineStockReturn),

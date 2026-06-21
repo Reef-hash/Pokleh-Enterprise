@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { areasRepo } from "@/repositories/areasRepo";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
@@ -11,10 +11,7 @@ export const useAreas = () => {
 
   const fetchAreas = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from("areas")
-        .select("*")
-        .order("name");
+      const { data, error } = await areasRepo.fetchAll();
       if (error) throw error;
       const result = (data || []) as Area[];
       setAreas(result);
@@ -28,11 +25,7 @@ export const useAreas = () => {
   }, []);
 
   const addArea = async (name: string) => {
-    const { data, error } = await supabase
-      .from("areas")
-      .insert({ name })
-      .select()
-      .single();
+    const { data, error } = await areasRepo.create({ name });
     if (error) {
       toast.error(error.message);
       return { success: false };
@@ -45,7 +38,7 @@ export const useAreas = () => {
   };
 
   const updateArea = async (id: string, name: string) => {
-    const { error } = await supabase.from("areas").update({ name }).eq("id", id);
+    const { error } = await areasRepo.update(id, { name });
     if (error) {
       toast.error(error.message);
       return { success: false };
@@ -57,7 +50,7 @@ export const useAreas = () => {
   };
 
   const deleteArea = async (id: string) => {
-    const { error } = await supabase.from("areas").delete().eq("id", id);
+    const { error } = await areasRepo.delete(id);
     if (error) {
       toast.error(error.message);
       return { success: false };

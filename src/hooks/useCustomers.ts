@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { customersRepo } from "@/repositories/customersRepo";
 import { db } from "@/lib/db";
 import { persistWrite } from "@/lib/writeHelper";
 import type { Customer } from "@/types/pokleh";
@@ -10,9 +10,7 @@ export const useCustomers = (areaId?: string) => {
 
   const fetchCustomers = useCallback(async () => {
     try {
-      let query = supabase.from("customers").select("*, area:areas(*)");
-      if (areaId) query = query.eq("area_id", areaId);
-      const { data, error } = await query.order("name");
+      const { data, error } = await customersRepo.fetchAll(areaId);
       if (error) throw error;
       const result = (data || []) as unknown as Customer[];
       setCustomers(result);
@@ -45,8 +43,7 @@ export const useCustomers = (areaId?: string) => {
       action: "INSERT",
       userId: "system",
       data: data as Record<string, unknown>,
-      execute: () =>
-        supabase.from("customers").insert(data).select("*, area:areas(*)").single(),
+      execute: () => customersRepo.create(data),
       onSuccess: (customer) => setCustomers((prev) => [...prev, customer]),
       dexiePut: (customer) =>
         db.customers.put({
@@ -65,13 +62,7 @@ export const useCustomers = (areaId?: string) => {
       userId: "system",
       id,
       data: updates as Record<string, unknown>,
-      execute: () =>
-        supabase
-          .from("customers")
-          .update(updates)
-          .eq("id", id)
-          .select("*, area:areas(*)")
-          .single(),
+      execute: () => customersRepo.update(id, updates as Record<string, unknown>),
       onSuccess: (updated) =>
         setCustomers((prev) => prev.map((c) => (c.id === id ? updated : c))),
       dexiePut: (updated) =>

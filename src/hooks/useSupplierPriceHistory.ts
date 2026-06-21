@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { priceHistoryRepo } from "@/repositories/suppliersRepo";
 import { db } from "@/lib/db";
 import { toast } from "sonner";
 import type { SupplierPriceHistory } from "@/types/pokleh";
@@ -10,10 +10,7 @@ export const useSupplierPriceHistory = () => {
 
   const fetchHistory = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from("supplier_price_history")
-        .select("*")
-        .order("effective_date", { ascending: false });
+      const { data, error } = await priceHistoryRepo.fetchAll();
       if (error) throw error;
       const result = (data || []) as unknown as SupplierPriceHistory[];
       setHistory(result);

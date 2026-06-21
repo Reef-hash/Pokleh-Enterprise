@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { settlementRepo, settlementRpc } from "@/repositories/settlementRepo";
+import { stockIntakeRepo, stockDistributionRepo } from "@/repositories/stockRepo";
 import { offlineDetector } from "@/services/offline";
 import { syncEngine } from "@/services/sync";
 import { toast } from "sonner";
@@ -14,10 +16,7 @@ export const useSettlements = () => {
 
   const fetchSettlements = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from("supplier_settlements")
-        .select("*, intake:stock_intake(*, supplier:suppliers(*))")
-        .order("created_at", { ascending: false });
+      const { data, error } = await settlementRepo.fetchAll();
       if (error) throw error;
       setSettlements((data || []) as unknown as SupplierSettlement[]);
     } catch {
@@ -29,19 +28,14 @@ export const useSettlements = () => {
     try {
       const intake = settlements.find((s) => s.intake_id === intakeId)?.intake;
       if (!intake) {
-        const { data } = await supabase
-          .from("stock_intake")
-          .select("*, supplier:suppliers(*)")
-          .eq("id", intakeId)
-          .single();
+        const { data } = await stockIntakeRepo.fetchById(intakeId);
         if (!data) {
           toast.error("Intake not found");
           return { success: false };
         }
       }
 
-      const { data: soldData, error: soldError } = await supabase
-        .rpc("get_total_sold_for_intake", { p_intake_id: intakeId });
+      const { data: soldData, error: soldError } = await settlementRpc.getTotalSold(intakeId);
       if (soldError) {
         toast.error("Failed to calculate sold quantity");
         return { success: false };
@@ -56,14 +50,9 @@ export const useSettlements = () => {
         (sum, d) => sum + d.quantity_assigned, 0
       );
 
-      const { data: returnData } = await supabase
-        .rpc("get_total_returned_for_intake", { p_intake_id: intakeId });
+      const { data: returnData } = await settlementRpc.getTotalReturned(intakeId);
       const totalReturned = (returnData as number) || 0;
-      const costPerPax = (await supabase
-        .from("stock_intake")
-        .select("cost_per_pax, quantity_received")
-        .eq("id", intakeId)
-        .single()).data as { cost_per_pax: number; quantity_received: number } | null;
+      const costPerPax = (await stockIntakeRepo.fetchById(intakeId)).data as { cost_per_pax: number; quantity_received: number } | null;
 
       if (!costPerPax) {
         toast.error("Intake not found");
@@ -73,11 +62,7 @@ export const useSettlements = () => {
       const payableQty = totalSold;
       const payableAmount = payableQty * costPerPax.cost_per_pax;
 
-      const { data: existing } = await supabase
-        .from("supplier_settlements")
-        .select("id")
-        .eq("intake_id", intakeId)
-        .maybeSingle();
+      const { data: existing } = await settlementRepo.fetchExisting(intakeId);
 
       let result;
       if (existing) {
@@ -100,19 +85,15 @@ export const useSettlements = () => {
         }
         result = updateData;
       } else {
-        const { data: insertData, error: insertError } = await supabase
-          .from("supplier_settlements")
-          .insert({
-            intake_id: intakeId,
-            total_received: costPerPax.quantity_received,
-            total_sold: totalSold,
-            total_returned: totalReturned,
-            payable_quantity: payableQty,
-            cost_per_pax: costPerPax.cost_per_pax,
-            payable_amount: payableAmount,
-          })
-          .select("*, intake:stock_intake(*, supplier:suppliers(*))")
-          .single();
+        const { data: insertData, error: insertError } = await settlementRepo.upsert({
+          intake_id: intakeId,
+          total_received: costPerPax.quantity_received,
+          total_sold: totalSold,
+          total_returned: totalReturned,
+          payable_quantity: payableQty,
+          cost_per_pax: costPerPax.cost_per_pax,
+          payable_amount: payableAmount,
+        });
         if (insertError) {
           toast.error(getUserFriendlyError(insertError, "supplier_settlements"));
           return { success: false };
@@ -147,10 +128,11 @@ export const useSettlements = () => {
     }
 
     try {
-      const { error } = await supabase
-        .from("supplier_settlements")
-        .update({ status: "settled", settlement_date: new Date().toISOString().split("T")[0], settled_by: userId })
-        .eq("id", id);
+      const { error } = await settlementRepo.markSettled(id, {
+        status: "settled",
+        settlement_date: new Date().toISOString().split("T")[0],
+        settled_by: userId,
+      });
       if (error) {
         toast.error(getUserFriendlyError(error, "supplier_settlements"));
         return { success: false };

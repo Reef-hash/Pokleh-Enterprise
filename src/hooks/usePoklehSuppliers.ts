@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { suppliersRepo } from "@/repositories/suppliersRepo";
 import { db } from "@/lib/db";
 import { persistWrite } from "@/lib/writeHelper";
 import type { Supplier } from "@/types/pokleh";
@@ -10,10 +10,7 @@ export const usePoklehSuppliers = () => {
 
   const fetchSuppliers = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from("suppliers")
-        .select("*")
-        .order("name");
+      const { data, error } = await suppliersRepo.fetchAll();
       if (error) throw error;
       const result = (data || []) as Supplier[];
       setSuppliers(result);
@@ -32,12 +29,7 @@ export const usePoklehSuppliers = () => {
       action: "INSERT",
       userId: "system",
       data: { name, phone: phone || null },
-      execute: () =>
-        supabase
-          .from("suppliers")
-          .insert({ name, phone: phone || null })
-          .select()
-          .single(),
+      execute: () => suppliersRepo.create({ name, phone: phone || null }),
       onSuccess: (supplier) => setSuppliers((prev) => [...prev, supplier]),
       dexiePut: (supplier) =>
         db.suppliers.put({ ...supplier, updatedAt: supplier.updated_at, syncedAt: new Date().toISOString() }),
@@ -52,13 +44,7 @@ export const usePoklehSuppliers = () => {
       userId: "system",
       id,
       data: { name, phone: phone || null },
-      execute: () =>
-        supabase
-          .from("suppliers")
-          .update({ name, phone: phone || null })
-          .eq("id", id)
-          .select()
-          .single(),
+      execute: () => suppliersRepo.update(id, { name, phone: phone || null }),
       onSuccess: (updated) =>
         setSuppliers((prev) => prev.map((s) => (s.id === id ? updated : s))),
       dexiePut: (updated) =>
@@ -74,7 +60,7 @@ export const usePoklehSuppliers = () => {
       userId: "system",
       id,
       execute: async () => {
-        const { error } = await supabase.from("suppliers").delete().eq("id", id);
+        const { error } = await suppliersRepo.delete(id);
         if (error) return { data: null, error };
         return { data: { id } as unknown as Supplier, error: undefined };
       },

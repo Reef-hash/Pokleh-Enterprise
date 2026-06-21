@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { debtCollectionRepo, debtLedgerRepo } from "@/repositories/debtRepo";
+import { customersRepo } from "@/repositories/customersRepo";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
@@ -13,10 +14,7 @@ export const useDebtCollection = () => {
 
   const fetchCollections = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from("debt_collection")
-        .select("*, customer:customers(*), staff:profiles!debt_collection_staff_id_fkey(*)")
-        .order("collection_date", { ascending: false });
+      const { data, error } = await debtCollectionRepo.fetchAll();
       if (error) throw error;
       const result = (data || []) as unknown as DebtCollection[];
       setCollections(result);
@@ -55,12 +53,7 @@ export const useDebtCollection = () => {
       action: "INSERT",
       userId,
       data: { ...input, staff_id: userId },
-      execute: () =>
-        supabase
-          .from("debt_collection")
-          .insert({ ...input, staff_id: userId })
-          .select("*, customer:customers(*), staff:profiles!debt_collection_staff_id_fkey(*)")
-          .single(),
+      execute: () => debtCollectionRepo.create({ ...input, staff_id: userId }),
       optimistic: {
         add: () => setCollections((prev) => [optimistic, ...prev]),
         remove: () => setCollections((prev) => prev.filter((c) => c.id !== tempId)),
@@ -77,15 +70,11 @@ export const useDebtCollection = () => {
     });
 
     if (result.success && collectionResult) {
-      const { data: cust } = await supabase
-        .from("customers")
-        .select("debt_balance")
-        .eq("id", input.customer_id)
-        .single();
+      const { data: cust } = await customersRepo.fetchBalance(input.customer_id);
       const balanceBefore = (cust as { debt_balance: number } | null)?.debt_balance ?? 0;
       const balanceAfter = balanceBefore - input.amount;
 
-      const { error: ledError } = await supabase.from("debt_ledger").insert({
+      const { error: ledError } = await debtLedgerRepo.create({
         customer_id: input.customer_id,
         entry_type: "payment",
         amount: input.amount,

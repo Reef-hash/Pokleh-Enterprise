@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { stockDistributionRepo } from "@/repositories/stockRepo";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
 import { persistWrite } from "@/lib/writeHelper";
@@ -12,11 +12,7 @@ export const useStockDistribution = (intakeId?: string) => {
 
   const fetchDistributions = useCallback(async () => {
     try {
-      let query = supabase
-        .from("stock_distribution")
-        .select("*, intake:stock_intake(*), area:areas(*)");
-      if (intakeId) query = query.eq("intake_id", intakeId);
-      const { data, error } = await query.order("created_at", { ascending: false });
+      const { data, error } = await stockDistributionRepo.fetchAll(intakeId);
       if (error) throw error;
       const result = (data || []) as unknown as StockDistribution[];
       setDistributions(result);
@@ -39,12 +35,7 @@ export const useStockDistribution = (intakeId?: string) => {
       action: "INSERT",
       userId,
       data: { ...data, created_by: userId },
-      execute: () =>
-        supabase
-          .from("stock_distribution")
-          .insert({ ...data, created_by: userId })
-          .select("*, intake:stock_intake(*), area:areas(*)")
-          .single(),
+      execute: () => stockDistributionRepo.create({ ...data, created_by: userId }),
       onSuccess: (dist) => setDistributions((prev) => [dist, ...prev]),
       dexiePut: (dist) =>
         db.stockDistributions.put(dist as unknown as import("@/lib/db").OfflineStockDistribution),

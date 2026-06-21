@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { expensesRepo } from "@/repositories/expensesRepo";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
 import { persistWrite } from "@/lib/writeHelper";
@@ -12,10 +12,7 @@ export const useExpenses = () => {
 
   const fetchExpenses = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from("expenses")
-        .select("*")
-        .order("expense_date", { ascending: false });
+      const { data, error } = await expensesRepo.fetchAll();
       if (error) throw error;
       const result = (data || []) as unknown as Expense[];
       setExpenses(result);
@@ -52,12 +49,7 @@ export const useExpenses = () => {
       action: "INSERT",
       userId,
       data: { ...input, created_by: userId },
-      execute: () =>
-        supabase
-          .from("expenses")
-          .insert({ ...input, created_by: userId })
-          .select("*")
-          .single(),
+      execute: () => expensesRepo.create({ ...input, created_by: userId }),
       optimistic: {
         add: () => setExpenses((prev) => [optimistic, ...prev]),
         remove: () => setExpenses((prev) => prev.filter((e) => e.id !== tempId)),

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { stockIntakeRepo } from "@/repositories/stockRepo";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
 import { persistWrite } from "@/lib/writeHelper";
@@ -12,10 +12,7 @@ export const useStockIntake = () => {
 
   const fetchIntakes = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from("stock_intake")
-        .select("*, supplier:suppliers(*)")
-        .order("intake_date", { ascending: false });
+      const { data, error } = await stockIntakeRepo.fetchAll();
       if (error) throw error;
       const result = (data || []) as unknown as StockIntake[];
       setIntakes(result);
@@ -40,12 +37,7 @@ export const useStockIntake = () => {
       action: "INSERT",
       userId,
       data: { ...data, created_by: userId },
-      execute: () =>
-        supabase
-          .from("stock_intake")
-          .insert({ ...data, created_by: userId })
-          .select("*, supplier:suppliers(*)")
-          .single(),
+      execute: () => stockIntakeRepo.create({ ...data, created_by: userId }),
       onSuccess: (intake) => setIntakes((prev) => [intake, ...prev]),
       dexiePut: (intake) =>
         db.stockIntakes.put(intake as unknown as import("@/lib/db").OfflineStockIntake),
