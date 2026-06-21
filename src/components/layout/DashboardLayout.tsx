@@ -28,6 +28,8 @@ import {
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/lib/i18n";
 import { HelpButton } from "@/components/help/HelpButton";
+import { HelpSlidePanel } from "@/components/help/HelpSlidePanel";
+import { getHelpContent } from "@/lib/help-content";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 
 interface User {
@@ -70,6 +72,8 @@ export const DashboardLayout = ({
     'sales-debt': true,
   });
   const { t } = useLanguage();
+  const [helpOpen, setHelpOpen] = useState(false);
+  const helpContent = getHelpContent(currentPage);
 
   const toggleSection = (key: string) => {
     setExpandedSections(prev => ({ ...prev, [key]: !prev[key] }));
@@ -299,11 +303,21 @@ export const DashboardLayout = ({
           >
             <Menu className="h-4 w-4" />
           </Button>
-          <h1 className="text-xl font-bold capitalize text-foreground">
-            {currentPage === 'dashboard'
-              ? (user.role === 'admin' ? t('dashboard.admin') : t('dashboard.staff'))
-              : itemLabel(currentPage)}
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-bold capitalize text-foreground">
+              {currentPage === 'dashboard'
+                ? (user.role === 'admin' ? t('dashboard.admin') : t('dashboard.staff'))
+                : itemLabel(currentPage)}
+            </h1>
+            <button
+              onClick={() => setHelpOpen(true)}
+              className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-muted hover:bg-muted-foreground/20 text-muted-foreground hover:text-foreground transition-colors text-xs font-bold"
+              aria-label="Page help"
+              title="Help"
+            >
+              ?
+            </button>
+          </div>
           <div className="flex items-center space-x-1">
             <LanguageSwitcher />
             <span className="text-sm text-muted-foreground hidden sm:inline font-medium">
@@ -318,6 +332,15 @@ export const DashboardLayout = ({
           {children}
         </main>
       </div>
+
+      <HelpSlidePanel
+        open={helpOpen}
+        onClose={() => setHelpOpen(false)}
+        title={currentPage === 'dashboard'
+          ? (user.role === 'admin' ? t('dashboard.admin') : t('dashboard.staff'))
+          : itemLabel(currentPage)}
+        content={helpContent}
+      />
 
       {/* Overlay */}
       {sidebarOpen && (

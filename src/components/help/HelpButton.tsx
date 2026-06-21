@@ -7,13 +7,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { HelpCircle, BookOpen, MessageCircleQuestion, Download, ExternalLink } from 'lucide-react';
+import { HelpCircle, BookOpen, MessageCircleQuestion, Download, ExternalLink, BookMarked } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { FAQModal } from './FAQModal';
+import { HelpCenterModal } from './HelpCenterModal';
 import { generateManualPDF } from '@/lib/generatePDF';
 
 export const HelpButton = () => {
   const [faqOpen, setFaqOpen] = useState(false);
+  const [helpCenterOpen, setHelpCenterOpen] = useState(false);
 
   return (
     <>
@@ -25,6 +27,11 @@ export const HelpButton = () => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuItem onClick={() => setHelpCenterOpen(true)} className="cursor-pointer">
+            <BookMarked className="mr-2 h-4 w-4" />
+            <span>Help Center</span>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
             <Link to="/docs" className="flex items-center cursor-pointer">
               <BookOpen className="mr-2 h-4 w-4" />
@@ -54,6 +61,7 @@ export const HelpButton = () => {
       </DropdownMenu>
 
       <FAQModal open={faqOpen} onOpenChange={setFaqOpen} />
+      <HelpCenterModal open={helpCenterOpen} onOpenChange={setHelpCenterOpen} />
     </>
   );
 };
