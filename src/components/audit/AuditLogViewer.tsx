@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
@@ -62,41 +63,67 @@ export const AuditLogViewer = () => {
           <CardDescription>All changes tracked via database triggers</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Timestamp</TableHead>
-                <TableHead>User</TableHead>
-                <TableHead>Action</TableHead>
-                <TableHead>Entity</TableHead>
-                <TableHead>Entity ID</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {logs.map((log) => (
-                <TableRow key={log.id}>
-                  <TableCell className="text-sm">{new Date(log.created_at).toLocaleString()}</TableCell>
-                  <TableCell className="font-medium text-sm">{log.user_id.slice(0, 8)}...</TableCell>
-                  <TableCell>
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Timestamp</TableHead>
+                  <TableHead>User</TableHead>
+                  <TableHead>Action</TableHead>
+                  <TableHead>Entity</TableHead>
+                  <TableHead>Entity ID</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {logs.map((log) => (
+                  <TableRow key={log.id}>
+                    <TableCell className="text-sm">{new Date(log.created_at).toLocaleString()}</TableCell>
+                    <TableCell className="font-medium text-sm">{log.user_id.slice(0, 8)}...</TableCell>
+                    <TableCell>
+                      <span className={`text-sm font-medium ${
+                        log.action === "INSERT" ? "text-green-600" :
+                        log.action === "UPDATE" ? "text-blue-600" :
+                        log.action === "DELETE" ? "text-destructive" : ""
+                      }`}>{log.action}</span>
+                    </TableCell>
+                    <TableCell className="text-sm">{log.entity.replace(/_/g, " ")}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground font-mono">{log.entity_id.slice(0, 8)}...</TableCell>
+                  </TableRow>
+                ))}
+                {logs.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                      No audit logs found
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="block md:hidden space-y-3">
+            {logs.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">No audit logs found</p>
+            ) : (
+              logs.map((log) => (
+                <ResponsiveCard key={log.id}>
+                  <ResponsiveRow label="Timestamp">{new Date(log.created_at).toLocaleString()}</ResponsiveRow>
+                  <ResponsiveRow label="User">{log.user_id.slice(0, 8)}...</ResponsiveRow>
+                  <ResponsiveRow label="Action">
                     <span className={`text-sm font-medium ${
                       log.action === "INSERT" ? "text-green-600" :
                       log.action === "UPDATE" ? "text-blue-600" :
                       log.action === "DELETE" ? "text-destructive" : ""
                     }`}>{log.action}</span>
-                  </TableCell>
-                  <TableCell className="text-sm">{log.entity.replace(/_/g, " ")}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground font-mono">{log.entity_id.slice(0, 8)}...</TableCell>
-                </TableRow>
-              ))}
-              {logs.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                    No audit logs found
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                  </ResponsiveRow>
+                  <ResponsiveRow label="Entity">{log.entity.replace(/_/g, " ")}</ResponsiveRow>
+                  <ResponsiveRow label="Entity ID" className="text-xs text-muted-foreground font-mono">{log.entity_id.slice(0, 8)}...</ResponsiveRow>
+                </ResponsiveCard>
+              ))
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -87,7 +87,8 @@ export const StaffAssignment = ({ userRole }: StaffAssignmentProps) => {
           <CardTitle>Active Assignments ({active.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
+          <div className="overflow-x-auto">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Staff</TableHead>
@@ -118,6 +119,7 @@ export const StaffAssignment = ({ userRole }: StaffAssignmentProps) => {
               )}
             </TableBody>
           </Table>
+          </div>
         </CardContent>
       </Card>
 

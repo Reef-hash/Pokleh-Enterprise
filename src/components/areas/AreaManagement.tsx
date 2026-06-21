@@ -84,7 +84,8 @@ export const AreaManagement = ({ userRole }: AreaManagementProps) => {
           <CardDescription>Areas where ice is distributed</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
+          <div className="overflow-x-auto">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Area Name</TableHead>
@@ -127,6 +128,7 @@ export const AreaManagement = ({ userRole }: AreaManagementProps) => {
               )}
             </TableBody>
           </Table>
+          </div>
         </CardContent>
       </Card>
 

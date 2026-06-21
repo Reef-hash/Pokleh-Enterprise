@@ -43,7 +43,8 @@ export const SupplierPriceHistoryView = () => {
           <CardDescription>Append-only record of supplier pricing</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
+          <div className="overflow-x-auto">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Effective Date</TableHead>
@@ -73,6 +74,7 @@ export const SupplierPriceHistoryView = () => {
               )}
             </TableBody>
           </Table>
+          </div>
         </CardContent>
       </Card>
     </div>

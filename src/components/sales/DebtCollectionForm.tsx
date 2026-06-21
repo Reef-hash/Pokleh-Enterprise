@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -74,35 +75,55 @@ export const DebtCollectionForm = ({ userRole }: DebtCollectionFormProps) => {
           <CardDescription>Debt payment records</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Staff</TableHead>
-                <TableHead>Notes</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {collections.map((c) => (
-                <TableRow key={c.id}>
-                  <TableCell>{new Date(c.collection_date).toLocaleDateString()}</TableCell>
-                  <TableCell className="font-medium">{c.customer?.name || "—"}</TableCell>
-                  <TableCell className="text-green-600 font-medium">{formatCurrency(c.amount)}</TableCell>
-                  <TableCell>{c.staff?.name || "—"}</TableCell>
-                  <TableCell className="text-muted-foreground text-sm">{c.notes || "—"}</TableCell>
-                </TableRow>
-              ))}
-              {collections.length === 0 && (
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                    No collections recorded yet
-                  </TableCell>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Customer</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Staff</TableHead>
+                  <TableHead>Notes</TableHead>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {collections.map((c) => (
+                  <TableRow key={c.id}>
+                    <TableCell>{new Date(c.collection_date).toLocaleDateString()}</TableCell>
+                    <TableCell className="font-medium">{c.customer?.name || "—"}</TableCell>
+                    <TableCell className="text-green-600 font-medium">{formatCurrency(c.amount)}</TableCell>
+                    <TableCell>{c.staff?.name || "—"}</TableCell>
+                    <TableCell className="text-muted-foreground text-sm">{c.notes || "—"}</TableCell>
+                  </TableRow>
+                ))}
+                {collections.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                      No collections recorded yet
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="block md:hidden space-y-3">
+            {collections.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">No collections recorded yet</p>
+            ) : (
+              collections.map((c) => (
+                <ResponsiveCard key={c.id}>
+                  <ResponsiveRow label="Date">{new Date(c.collection_date).toLocaleDateString()}</ResponsiveRow>
+                  <ResponsiveRow label="Customer">{c.customer?.name || "—"}</ResponsiveRow>
+                  <ResponsiveRow label="Amount" className="text-green-600 font-medium">{formatCurrency(c.amount)}</ResponsiveRow>
+                  <ResponsiveRow label="Staff">{c.staff?.name || "—"}</ResponsiveRow>
+                  <ResponsiveRow label="Notes">{c.notes || "—"}</ResponsiveRow>
+                </ResponsiveCard>
+              ))
+            )}
+          </div>
         </CardContent>
       </Card>
 

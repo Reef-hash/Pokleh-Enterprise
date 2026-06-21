@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -84,41 +85,66 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
           <CardDescription>All recorded sales transactions</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Area</TableHead>
-                <TableHead>Qty</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Type</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sales.map((s) => (
-                <TableRow key={s.id}>
-                  <TableCell>{new Date(s.sale_date).toLocaleDateString()}</TableCell>
-                  <TableCell className="font-medium">{s.customer?.name || "—"}</TableCell>
-                  <TableCell>{s.area?.name || "—"}</TableCell>
-                  <TableCell>{s.quantity}</TableCell>
-                  <TableCell>{formatCurrency(s.selling_price)}</TableCell>
-                  <TableCell>
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Customer</TableHead>
+                  <TableHead>Area</TableHead>
+                  <TableHead>Qty</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Type</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sales.map((s) => (
+                  <TableRow key={s.id}>
+                    <TableCell>{new Date(s.sale_date).toLocaleDateString()}</TableCell>
+                    <TableCell className="font-medium">{s.customer?.name || "—"}</TableCell>
+                    <TableCell>{s.area?.name || "—"}</TableCell>
+                    <TableCell>{s.quantity}</TableCell>
+                    <TableCell>{formatCurrency(s.selling_price)}</TableCell>
+                    <TableCell>
+                      <span className={s.payment_type === "debt" ? "text-destructive font-medium" : "text-green-600 font-medium"}>
+                        {s.payment_type}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {sales.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                      No sales recorded yet
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="block md:hidden space-y-3">
+            {sales.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">No sales recorded yet</p>
+            ) : (
+              sales.map((s) => (
+                <ResponsiveCard key={s.id}>
+                  <ResponsiveRow label="Date">{new Date(s.sale_date).toLocaleDateString()}</ResponsiveRow>
+                  <ResponsiveRow label="Customer">{s.customer?.name || "—"}</ResponsiveRow>
+                  <ResponsiveRow label="Area">{s.area?.name || "—"}</ResponsiveRow>
+                  <ResponsiveRow label="Qty">{s.quantity}</ResponsiveRow>
+                  <ResponsiveRow label="Amount">{formatCurrency(s.selling_price)}</ResponsiveRow>
+                  <ResponsiveRow label="Type">
                     <span className={s.payment_type === "debt" ? "text-destructive font-medium" : "text-green-600 font-medium"}>
                       {s.payment_type}
                     </span>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {sales.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                    No sales recorded yet
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                  </ResponsiveRow>
+                </ResponsiveCard>
+              ))
+            )}
+          </div>
         </CardContent>
       </Card>
 

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -84,39 +85,65 @@ export const CustomerManagement = ({ userRole }: CustomerManagementProps) => {
           <CardTitle>Customers ({filtered.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Area</TableHead>
-                <TableHead>Debt Balance</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.length === 0 ? (
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                    {customers.length === 0 ? "No customers yet. Add your first customer." : "No customers match your search or filter."}
-                  </TableCell>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>Area</TableHead>
+                  <TableHead>Debt Balance</TableHead>
+                  <TableHead>Status</TableHead>
                 </TableRow>
-              ) : (
-                filtered.map((c) => (
-                <TableRow key={c.id}>
-                  <TableCell className="font-medium">{c.name}</TableCell>
-                  <TableCell>{c.phone ? <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{c.phone}</span> : "—"}</TableCell>
-                  <TableCell><span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{c.area?.name || "—"}</span></TableCell>
-                  <TableCell className={c.debt_balance > 0 ? "text-destructive font-medium" : ""}>
+              </TableHeader>
+              <TableBody>
+                {filtered.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                      {customers.length === 0 ? "No customers yet. Add your first customer." : "No customers match your search or filter."}
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filtered.map((c) => (
+                  <TableRow key={c.id}>
+                    <TableCell className="font-medium">{c.name}</TableCell>
+                    <TableCell>{c.phone ? <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{c.phone}</span> : "—"}</TableCell>
+                    <TableCell><span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{c.area?.name || "—"}</span></TableCell>
+                    <TableCell className={c.debt_balance > 0 ? "text-destructive font-medium" : ""}>
+                      {formatCurrency(c.debt_balance)}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={c.active ? "secondary" : "outline"}>{c.active ? "Active" : "Inactive"}</Badge>
+                    </TableCell>
+                  </TableRow>
+                )))}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="block md:hidden space-y-3">
+            {filtered.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">
+                {customers.length === 0 ? "No customers yet. Add your first customer." : "No customers match your search or filter."}
+              </p>
+            ) : (
+              filtered.map((c) => (
+                <ResponsiveCard key={c.id}>
+                  <ResponsiveRow label="Name">{c.name}</ResponsiveRow>
+                  <ResponsiveRow label="Phone">{c.phone ? <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{c.phone}</span> : "—"}</ResponsiveRow>
+                  <ResponsiveRow label="Area"><span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{c.area?.name || "—"}</span></ResponsiveRow>
+                  <ResponsiveRow label="Debt Balance" className={c.debt_balance > 0 ? "text-destructive font-medium" : ""}>
                     {formatCurrency(c.debt_balance)}
-                  </TableCell>
-                  <TableCell>
+                  </ResponsiveRow>
+                  <ResponsiveRow label="Status">
                     <Badge variant={c.active ? "secondary" : "outline"}>{c.active ? "Active" : "Inactive"}</Badge>
-                  </TableCell>
-                </TableRow>
-              )))}
-            </TableBody>
-          </Table>
+                  </ResponsiveRow>
+                </ResponsiveCard>
+              ))
+            )}
+          </div>
         </CardContent>
       </Card>
 

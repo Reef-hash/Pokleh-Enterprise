@@ -61,7 +61,8 @@ export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
           <CardTitle>Return Records ({returns.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
+          <div className="overflow-x-auto">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Date</TableHead>
@@ -88,6 +89,7 @@ export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
               )}
             </TableBody>
           </Table>
+          </div>
         </CardContent>
       </Card>
 

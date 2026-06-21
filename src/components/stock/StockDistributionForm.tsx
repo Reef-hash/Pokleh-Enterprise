@@ -77,7 +77,8 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
           <CardTitle>Distribution Records ({distributions.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
+          <div className="overflow-x-auto">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Date</TableHead>
@@ -104,6 +105,7 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
               )}
             </TableBody>
           </Table>
+          </div>
         </CardContent>
       </Card>
 

@@ -85,7 +85,8 @@ export const ExpenseManagement = ({ userRole }: ExpenseManagementProps) => {
           <CardDescription>Recorded expenses</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
+          <div className="overflow-x-auto">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Date</TableHead>
@@ -112,6 +113,7 @@ export const ExpenseManagement = ({ userRole }: ExpenseManagementProps) => {
               )}
             </TableBody>
           </Table>
+          </div>
         </CardContent>
       </Card>
 

@@ -99,7 +99,8 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
           <CardTitle>Suppliers ({filtered.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
+          <div className="overflow-x-auto">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
@@ -137,6 +138,7 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
               )))}
             </TableBody>
           </Table>
+          </div>
         </CardContent>
       </Card>
 
