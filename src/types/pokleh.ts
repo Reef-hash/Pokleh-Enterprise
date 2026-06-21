@@ -2,6 +2,9 @@
 // Pokleh Enterprise Domain Types (Architecture Freeze v1)
 // ============================================================
 
+export type ProductType = 'Air Batu Besar' | 'Air Batu Kecil' | 'Air Batu Hancur';
+export const PRODUCT_TYPES: ProductType[] = ['Air Batu Besar', 'Air Batu Kecil', 'Air Batu Hancur'];
+
 export interface Area {
   id: string;
   name: string;
@@ -52,6 +55,7 @@ export interface StockIntake {
   id: string;
   intake_date: string;
   supplier_id: string;
+  product_type: ProductType;
   quantity_received: number;
   cost_per_pax: number;
   notes: string | null;
@@ -64,6 +68,7 @@ export interface StockDistribution {
   id: string;
   intake_id: string;
   area_id: string;
+  product_type: ProductType;
   quantity_assigned: number;
   created_by: string;
   created_at: string;
@@ -75,6 +80,7 @@ export interface Sale {
   id: string;
   customer_id: string;
   area_id: string;
+  product_type: ProductType;
   quantity: number;
   selling_price: number;
   payment_type: "cash" | "debt";

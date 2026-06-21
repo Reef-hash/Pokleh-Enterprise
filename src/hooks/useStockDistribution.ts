@@ -4,7 +4,7 @@ import { stockDistributionRepo } from "@/repositories/stockRepo";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
 import { persistWrite } from "@/lib/writeHelper";
-import type { StockDistribution } from "@/types/pokleh";
+import type { StockDistribution, ProductType } from "@/types/pokleh";
 
 export const useStockDistribution = (intakeId?: string) => {
   const [distributions, setDistributions] = useState<StockDistribution[]>([]);
@@ -27,6 +27,7 @@ export const useStockDistribution = (intakeId?: string) => {
   const addDistribution = async (data: {
     intake_id: string;
     area_id: string;
+    product_type: ProductType;
     quantity_assigned: number;
   }) => {
     if (!userId) return { success: false, error: "Not authenticated" };
@@ -37,6 +38,7 @@ export const useStockDistribution = (intakeId?: string) => {
       id: tempId,
       intake_id: data.intake_id,
       area_id: data.area_id,
+      product_type: data.product_type,
       quantity_assigned: data.quantity_assigned,
       created_by: userId!,
       created_at: now,

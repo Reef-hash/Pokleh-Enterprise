@@ -52,9 +52,10 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
   const handleAdd = async () => {
     if (!form.intake_id || !form.area_id || form.quantity_assigned <= 0 || submitting) { toast.error("Please select an intake, area, and enter a valid quantity."); return; }
     if (form.quantity_assigned > remaining) return;
+    const product_type = selectedIntake?.product_type ?? "Air Batu Besar";
     setSubmitting(true);
     try {
-      const result = await addDistribution(form);
+      const result = await addDistribution({ ...form, product_type });
       if (result.success) {
         setForm({ intake_id: "", area_id: "", quantity_assigned: 0 });
         setIsOpen(false);
@@ -90,6 +91,7 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
               <TableRow>
                 <TableHead>Date</TableHead>
                 <TableHead>Intake (Supplier)</TableHead>
+                <TableHead>Product</TableHead>
                 <TableHead>Area</TableHead>
                 <TableHead>Qty Assigned</TableHead>
               </TableRow>
@@ -99,13 +101,14 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
                 <TableRow key={d.id}>
                   <TableCell className="text-muted-foreground">{new Date(d.created_at).toLocaleDateString()}</TableCell>
                   <TableCell>{d.intake?.supplier?.name || "—"}</TableCell>
+                  <TableCell className="text-sm font-medium">{d.product_type || d.intake?.product_type || "—"}</TableCell>
                   <TableCell><Badge variant="secondary">{d.area?.name}</Badge></TableCell>
                   <TableCell className="font-medium">{d.quantity_assigned} pax</TableCell>
                 </TableRow>
               ))}
               {distributions.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
                     No distributions yet
                   </TableCell>
                 </TableRow>
@@ -119,8 +122,7 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
             {distributions.map((d) => (
               <ResponsiveCard key={d.id}>
                 <ResponsiveRow label="Date"><span className="text-muted-foreground">{new Date(d.created_at).toLocaleDateString()}</span></ResponsiveRow>
-                <ResponsiveRow label="Intake">{d.intake?.supplier?.name || "—"}</ResponsiveRow>
-                <ResponsiveRow label="Area"><Badge variant="secondary">{d.area?.name}</Badge></ResponsiveRow>
+                <ResponsiveRow label="Intake">{d.intake?.supplier?.name || "—"}</ResponsiveRow>                <ResponsiveRow label="Product">{d.product_type || d.intake?.product_type || "—"}</ResponsiveRow>                <ResponsiveRow label="Area"><Badge variant="secondary">{d.area?.name}</Badge></ResponsiveRow>
                 <ResponsiveRow label="Qty Assigned"><span className="font-medium">{d.quantity_assigned} pax</span></ResponsiveRow>
               </ResponsiveCard>
             ))}
@@ -148,14 +150,14 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
                     const remain = i.quantity_received - assigned;
                     return (
                       <SelectItem key={i.id} value={i.id}>
-                        {i.supplier?.name} — {new Date(i.intake_date).toLocaleDateString()} ({remain} pax left)
+                        {i.supplier?.name} — {i.product_type} — {new Date(i.intake_date).toLocaleDateString()} ({remain} pax left)
                       </SelectItem>
                     );
                   })}
                 </SelectContent>
               </Select>
               {remaining > 0 && (
-                <p className="text-sm text-muted-foreground">Available: {remaining} pax</p>
+                <p className="text-sm text-muted-foreground">Available: {remaining} pax · {selectedIntake?.product_type}</p>
               )}
             </div>
             <div className="space-y-2">

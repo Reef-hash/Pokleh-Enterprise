@@ -15,6 +15,7 @@ import { useAreas } from "@/hooks/useAreas";
 import { useAuthStore } from "@/stores/authStore";
 import { formatCurrency } from "@/lib/currency";
 import { toast } from "sonner";
+import { PRODUCT_TYPES, type ProductType } from "@/types/pokleh";
 
 interface SalesEntryFormProps {
   userRole: "admin" | "staff";
@@ -29,6 +30,7 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
   const [form, setForm] = useState({
     customer_id: "",
     area_id: "",
+    product_type: "Air Batu Besar" as ProductType,
     quantity: 0,
     selling_price: 0,
     payment_type: "cash" as "cash" | "debt",
@@ -45,7 +47,7 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
     try {
       const result = await addSale(form);
       if (result.success) {
-        setForm({ customer_id: "", area_id: "", quantity: 0, selling_price: 0, payment_type: "cash", sale_date: new Date().toISOString().split("T")[0], notes: "" });
+        setForm({ customer_id: "", area_id: "", product_type: "Air Batu Besar", quantity: 0, selling_price: 0, payment_type: "cash", sale_date: new Date().toISOString().split("T")[0], notes: "" });
         setIsOpen(false);
       }
     } finally {
@@ -98,6 +100,7 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
                   <TableHead>Date</TableHead>
                   <TableHead>Customer</TableHead>
                   <TableHead>Area</TableHead>
+                  <TableHead>Product</TableHead>
                   <TableHead>Qty</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Type</TableHead>
@@ -108,8 +111,7 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
                   <TableRow key={s.id}>
                     <TableCell>{new Date(s.sale_date).toLocaleDateString()}</TableCell>
                     <TableCell className="font-medium">{s.customer?.name || "—"}</TableCell>
-                    <TableCell>{s.area?.name || "—"}</TableCell>
-                    <TableCell>{s.quantity}</TableCell>
+                    <TableCell>{s.area?.name || "—"}</TableCell>                    <TableCell className="text-sm">{s.product_type || "—"}</TableCell>                    <TableCell>{s.quantity}</TableCell>
                     <TableCell>{formatCurrency(s.selling_price)}</TableCell>
                     <TableCell>
                       <span className={s.payment_type === "debt" ? "text-destructive font-medium" : "text-green-600 font-medium"}>
@@ -120,7 +122,7 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
                 ))}
                 {sales.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                    <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                       No sales recorded yet
                     </TableCell>
                   </TableRow>
@@ -139,6 +141,7 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
                   <ResponsiveRow label="Date">{new Date(s.sale_date).toLocaleDateString()}</ResponsiveRow>
                   <ResponsiveRow label="Customer">{s.customer?.name || "—"}</ResponsiveRow>
                   <ResponsiveRow label="Area">{s.area?.name || "—"}</ResponsiveRow>
+                  <ResponsiveRow label="Product">{s.product_type || "—"}</ResponsiveRow>
                   <ResponsiveRow label="Qty">{s.quantity}</ResponsiveRow>
                   <ResponsiveRow label="Amount">{formatCurrency(s.selling_price)}</ResponsiveRow>
                   <ResponsiveRow label="Type">
@@ -179,6 +182,15 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
                 <SelectTrigger><SelectValue placeholder="Select area" /></SelectTrigger>
                 <SelectContent>
                   {areas.map((a) => (<SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Jenis Produk</Label>
+              <Select value={form.product_type} onValueChange={(v) => setForm({ ...form, product_type: v as ProductType })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {PRODUCT_TYPES.map((p) => (<SelectItem key={p} value={p}>{p}</SelectItem>))}
                 </SelectContent>
               </Select>
             </div>

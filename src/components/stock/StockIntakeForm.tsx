@@ -12,6 +12,7 @@ import { useStockIntake } from "@/hooks/useStockIntake";
 import { usePoklehSuppliers } from "@/hooks/usePoklehSuppliers";
 import { formatCurrency } from "@/lib/currency";
 import { toast } from "sonner";
+import { PRODUCT_TYPES, type ProductType } from "@/types/pokleh";
 
 interface StockIntakeFormProps {
   userRole: "admin" | "staff";
@@ -24,6 +25,7 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
   const [form, setForm] = useState({
     intake_date: new Date().toISOString().split("T")[0],
     supplier_id: "",
+    product_type: "Air Batu Besar" as ProductType,
     quantity_received: 0,
     cost_per_pax: 0,
     notes: "",
@@ -38,7 +40,7 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
     try {
       const result = await addIntake(form);
       if (result.success) {
-        setForm({ intake_date: new Date().toISOString().split("T")[0], supplier_id: "", quantity_received: 0, cost_per_pax: 0, notes: "" });
+        setForm({ intake_date: new Date().toISOString().split("T")[0], supplier_id: "", product_type: "Air Batu Besar", quantity_received: 0, cost_per_pax: 0, notes: "" });
         setIsOpen(false);
       }
     } finally {
@@ -73,6 +75,7 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
               <TableRow>
                 <TableHead>Date</TableHead>
                 <TableHead>Supplier</TableHead>
+                <TableHead>Product</TableHead>
                 <TableHead>Quantity (pax)</TableHead>
                 <TableHead>Cost/Pax</TableHead>
                 <TableHead>Total Cost</TableHead>
@@ -83,6 +86,7 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
                 <TableRow key={i.id}>
                   <TableCell>{new Date(i.intake_date).toLocaleDateString()}</TableCell>
                   <TableCell className="font-medium">{i.supplier?.name || "—"}</TableCell>
+                  <TableCell><span className="text-sm font-medium">{i.product_type}</span></TableCell>
                   <TableCell>{i.quantity_received}</TableCell>
                   <TableCell>{formatCurrency(i.cost_per_pax)}</TableCell>
                   <TableCell className="font-medium">{formatCurrency(i.quantity_received * i.cost_per_pax)}</TableCell>
@@ -90,7 +94,7 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
               ))}
               {intakes.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                     No stock intake recorded yet
                   </TableCell>
                 </TableRow>
@@ -117,6 +121,15 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
                 <SelectTrigger><SelectValue placeholder="Select supplier" /></SelectTrigger>
                 <SelectContent>
                   {suppliers.map((s) => (<SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Jenis Produk</Label>
+              <Select value={form.product_type} onValueChange={(v) => setForm({ ...form, product_type: v as ProductType })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {PRODUCT_TYPES.map((p) => (<SelectItem key={p} value={p}>{p}</SelectItem>))}
                 </SelectContent>
               </Select>
             </div>

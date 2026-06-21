@@ -4,7 +4,7 @@ import { salesRepo } from "@/repositories/salesRepo";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
-import type { Sale } from "@/types/pokleh";
+import type { Sale, ProductType } from "@/types/pokleh";
 import { persistWrite } from "@/lib/writeHelper";
 
 export const useSales = () => {
@@ -28,6 +28,7 @@ export const useSales = () => {
   const addSale = async (input: {
     customer_id: string;
     area_id: string;
+    product_type: ProductType;
     quantity: number;
     selling_price: number;
     payment_type: "cash" | "debt";
@@ -38,6 +39,7 @@ export const useSales = () => {
     const tempId = crypto.randomUUID();
     const optimistic: Sale = {
       id: tempId, customer_id: input.customer_id, area_id: input.area_id,
+      product_type: input.product_type,
       quantity: input.quantity, selling_price: input.selling_price,
       payment_type: input.payment_type, distribution_id: input.distribution_id ?? null,
       staff_id: userId!, sale_date: input.sale_date, notes: input.notes ?? null,

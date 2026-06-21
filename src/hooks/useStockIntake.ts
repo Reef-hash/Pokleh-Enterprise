@@ -4,7 +4,7 @@ import { stockIntakeRepo } from "@/repositories/stockRepo";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
 import { persistWrite } from "@/lib/writeHelper";
-import type { StockIntake } from "@/types/pokleh";
+import type { StockIntake, ProductType } from "@/types/pokleh";
 
 export const useStockIntake = () => {
   const [intakes, setIntakes] = useState<StockIntake[]>([]);
@@ -27,6 +27,7 @@ export const useStockIntake = () => {
   const addIntake = async (data: {
     intake_date: string;
     supplier_id: string;
+    product_type: ProductType;
     quantity_received: number;
     cost_per_pax: number;
     notes?: string;
@@ -39,6 +40,7 @@ export const useStockIntake = () => {
       id: tempId,
       intake_date: data.intake_date,
       supplier_id: data.supplier_id,
+      product_type: data.product_type,
       quantity_received: data.quantity_received,
       cost_per_pax: data.cost_per_pax,
       notes: data.notes ?? null,
