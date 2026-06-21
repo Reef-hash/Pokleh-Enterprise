@@ -594,24 +594,7 @@ CREATE POLICY "Admins can view audit logs" ON public.audit_logs FOR SELECT
   USING (public.get_current_user_role() = 'admin');
 
 -- ============================================================
--- 22. SEED DATA
--- ============================================================
-
--- Default areas
-INSERT INTO public.areas (name) VALUES
-  ('Area A'),
-  ('Area B'),
-  ('Area C'),
-  ('Area D')
-ON CONFLICT (name) DO NOTHING;
-
--- Default supplier
-INSERT INTO public.suppliers (name) VALUES
-  ('Primary Ice Supplier')
-ON CONFLICT (name) DO NOTHING;
-
--- ============================================================
--- 23. REALTIME PUBLICATION
+-- 22. REALTIME PUBLICATION
 -- ============================================================
 ALTER PUBLICATION supabase_realtime ADD TABLE public.areas;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.customers;
