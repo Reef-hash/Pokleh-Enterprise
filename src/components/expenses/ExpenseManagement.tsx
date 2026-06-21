@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Receipt } from "lucide-react";
+import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
 import { useExpenses } from "@/hooks/useExpenses";
 import { formatCurrency } from "@/lib/currency";
 import { toast } from "sonner";
@@ -85,7 +86,8 @@ export const ExpenseManagement = ({ userRole }: ExpenseManagementProps) => {
           <CardDescription>Recorded expenses</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
             <Table>
             <TableHeader>
               <TableRow>
@@ -113,6 +115,21 @@ export const ExpenseManagement = ({ userRole }: ExpenseManagementProps) => {
               )}
             </TableBody>
           </Table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="block md:hidden space-y-3">
+            {expenses.map((e) => (
+              <ResponsiveCard key={e.id}>
+                <ResponsiveRow label="Date">{new Date(e.expense_date).toLocaleDateString()}</ResponsiveRow>
+                <ResponsiveRow label="Category"><span className="font-medium">{e.category}</span></ResponsiveRow>
+                <ResponsiveRow label="Amount"><span className="text-destructive font-medium">{formatCurrency(e.amount)}</span></ResponsiveRow>
+                <ResponsiveRow label="Notes"><span className="text-muted-foreground text-sm">{e.notes || "—"}</span></ResponsiveRow>
+              </ResponsiveCard>
+            ))}
+            {expenses.length === 0 && (
+              <p className="text-center text-muted-foreground py-4 text-sm">No expenses recorded yet</p>
+            )}
           </div>
         </CardContent>
       </Card>

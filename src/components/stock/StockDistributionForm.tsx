@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Plus, ArrowRight } from "lucide-react";
+import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
 import { useStockDistribution } from "@/hooks/useStockDistribution";
 import { useStockIntake } from "@/hooks/useStockIntake";
 import { useAreas } from "@/hooks/useAreas";
@@ -77,7 +78,8 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
           <CardTitle>Distribution Records ({distributions.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
             <Table>
             <TableHeader>
               <TableRow>
@@ -105,6 +107,21 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
               )}
             </TableBody>
           </Table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="block md:hidden space-y-3">
+            {distributions.map((d) => (
+              <ResponsiveCard key={d.id}>
+                <ResponsiveRow label="Date"><span className="text-muted-foreground">{new Date(d.created_at).toLocaleDateString()}</span></ResponsiveRow>
+                <ResponsiveRow label="Intake">{d.intake?.supplier?.name || "—"}</ResponsiveRow>
+                <ResponsiveRow label="Area"><Badge variant="secondary">{d.area?.name}</Badge></ResponsiveRow>
+                <ResponsiveRow label="Qty Assigned"><span className="font-medium">{d.quantity_assigned} pax</span></ResponsiveRow>
+              </ResponsiveCard>
+            ))}
+            {distributions.length === 0 && (
+              <p className="text-center text-muted-foreground py-4 text-sm">No distributions yet</p>
+            )}
           </div>
         </CardContent>
       </Card>

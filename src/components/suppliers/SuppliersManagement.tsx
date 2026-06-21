@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Plus, Search, Edit, Trash2, Building2, Phone } from "lucide-react";
+import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
 import { usePoklehSuppliers } from "@/hooks/usePoklehSuppliers";
 import { toast } from "sonner";
 
@@ -99,7 +100,8 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
           <CardTitle>Suppliers ({filtered.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
             <Table>
             <TableHeader>
               <TableRow>
@@ -138,6 +140,30 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
               )))}
             </TableBody>
           </Table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="block md:hidden space-y-3">
+            {filtered.map((s) => (
+              <ResponsiveCard key={s.id}>
+                <ResponsiveRow label="Name">
+                  <span className="flex items-center gap-2 font-medium">
+                    <Building2 className="h-4 w-4 text-muted-foreground" /> {s.name}
+                  </span>
+                </ResponsiveRow>
+                <ResponsiveRow label="Phone">{s.phone ? <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{s.phone}</span> : "—"}</ResponsiveRow>
+                <ResponsiveRow label="Added">{new Date(s.created_at).toLocaleDateString()}</ResponsiveRow>
+                {userRole === "admin" && (
+                  <div className="flex justify-end gap-1 pt-2 border-t">
+                    <Button variant="ghost" size="sm" onClick={() => openEdit(s)}><Edit className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="sm" onClick={() => setDeleteConfirmId(s.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                  </div>
+                )}
+              </ResponsiveCard>
+            ))}
+            {filtered.length === 0 && (
+              <p className="text-center text-muted-foreground py-4 text-sm">{suppliers.length === 0 ? "No suppliers yet. Add your first supplier." : "No suppliers match your search."}</p>
+            )}
           </div>
         </CardContent>
       </Card>

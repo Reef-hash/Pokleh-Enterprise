@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Plus, Edit, Trash2, MapPin } from "lucide-react";
+import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
 import { useAreas } from "@/hooks/useAreas";
 import { toast } from "sonner";
 
@@ -84,7 +85,8 @@ export const AreaManagement = ({ userRole }: AreaManagementProps) => {
           <CardDescription>Areas where ice is distributed</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
             <Table>
             <TableHeader>
               <TableRow>
@@ -128,6 +130,34 @@ export const AreaManagement = ({ userRole }: AreaManagementProps) => {
               )}
             </TableBody>
           </Table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="block md:hidden space-y-3">
+            {areas.map((area) => (
+              <ResponsiveCard key={area.id}>
+                <ResponsiveRow label="Area Name">
+                  <span className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-medium">{area.name}</span>
+                  </span>
+                </ResponsiveRow>
+                <ResponsiveRow label="Created"><span className="text-muted-foreground">{new Date(area.created_at).toLocaleDateString()}</span></ResponsiveRow>
+                {userRole === "admin" && (
+                  <div className="flex justify-end gap-1 pt-2 border-t">
+                    <Button variant="ghost" size="sm" onClick={() => openEdit(area)}>
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => setDeleteConfirmId(area.id)} className="text-destructive">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </ResponsiveCard>
+            ))}
+            {areas.length === 0 && (
+              <p className="text-center text-muted-foreground py-4 text-sm">No areas yet. Add your first delivery area.</p>
+            )}
           </div>
         </CardContent>
       </Card>

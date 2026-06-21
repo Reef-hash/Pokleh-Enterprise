@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useSupplierPriceHistory } from "@/hooks/useSupplierPriceHistory";
 import { usePoklehSuppliers } from "@/hooks/usePoklehSuppliers";
 import { formatCurrency } from "@/lib/currency";
+import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
 
 export const SupplierPriceHistoryView = () => {
   const { history, loading } = useSupplierPriceHistory();
@@ -43,7 +44,8 @@ export const SupplierPriceHistoryView = () => {
           <CardDescription>Append-only record of supplier pricing</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
             <Table>
             <TableHeader>
               <TableRow>
@@ -74,6 +76,24 @@ export const SupplierPriceHistoryView = () => {
               )}
             </TableBody>
           </Table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="block md:hidden space-y-3">
+            {filtered.map((h) => {
+              const supplier = suppliers.find((s) => s.id === h.supplier_id);
+              return (
+                <ResponsiveCard key={h.id}>
+                  <ResponsiveRow label="Effective Date">{new Date(h.effective_date).toLocaleDateString()}</ResponsiveRow>
+                  <ResponsiveRow label="Supplier"><span className="font-medium">{supplier?.name || "—"}</span></ResponsiveRow>
+                  <ResponsiveRow label="Cost / Pax"><span className="font-medium">{formatCurrency(h.cost_per_pax)}</span></ResponsiveRow>
+                  <ResponsiveRow label="Recorded At"><span className="text-muted-foreground text-sm">{new Date(h.created_at).toLocaleDateString()}</span></ResponsiveRow>
+                </ResponsiveCard>
+              );
+            })}
+            {filtered.length === 0 && (
+              <p className="text-center text-muted-foreground py-4 text-sm">No price history recorded yet</p>
+            )}
           </div>
         </CardContent>
       </Card>

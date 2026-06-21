@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Plus, RotateCcw } from "lucide-react";
+import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
 import { useStockReturn } from "@/hooks/useStockReturn";
 import { supabase } from "@/integrations/supabase/client";
 import type { StockDistribution } from "@/types/pokleh";
@@ -61,7 +62,8 @@ export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
           <CardTitle>Return Records ({returns.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
             <Table>
             <TableHeader>
               <TableRow>
@@ -89,6 +91,21 @@ export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
               )}
             </TableBody>
           </Table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="block md:hidden space-y-3">
+            {returns.map((r) => (
+              <ResponsiveCard key={r.id}>
+                <ResponsiveRow label="Date"><span className="text-muted-foreground">{new Date(r.return_date).toLocaleDateString()}</span></ResponsiveRow>
+                <ResponsiveRow label="Area"><Badge variant="secondary">{r.area?.name}</Badge></ResponsiveRow>
+                <ResponsiveRow label="Distribution"><span className="text-sm text-muted-foreground">{r.distribution_id.substring(0, 8)}...</span></ResponsiveRow>
+                <ResponsiveRow label="Qty Returned"><span className="font-medium">{r.quantity_returned} pax</span></ResponsiveRow>
+              </ResponsiveCard>
+            ))}
+            {returns.length === 0 && (
+              <p className="text-center text-muted-foreground py-4 text-sm">No returns recorded yet</p>
+            )}
           </div>
         </CardContent>
       </Card>

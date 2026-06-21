@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { UserPlus, X } from "lucide-react";
+import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
 import { useStaffAssignments } from "@/hooks/useStaffAssignments";
 import { useAreas } from "@/hooks/useAreas";
 import { supabase } from "@/integrations/supabase/client";
@@ -87,7 +88,8 @@ export const StaffAssignment = ({ userRole }: StaffAssignmentProps) => {
           <CardTitle>Active Assignments ({active.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
             <Table>
             <TableHeader>
               <TableRow>
@@ -119,6 +121,25 @@ export const StaffAssignment = ({ userRole }: StaffAssignmentProps) => {
               )}
             </TableBody>
           </Table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="block md:hidden space-y-3">
+            {active.map((a) => (
+              <ResponsiveCard key={a.id}>
+                <ResponsiveRow label="Staff"><span className="font-medium">{a.profile?.name || a.staff_id}</span></ResponsiveRow>
+                <ResponsiveRow label="Area"><Badge variant="secondary">{a.area?.name}</Badge></ResponsiveRow>
+                <ResponsiveRow label="Assigned Date"><span className="text-muted-foreground">{new Date(a.assigned_date).toLocaleDateString()}</span></ResponsiveRow>
+                <div className="flex justify-end pt-2 border-t">
+                  <Button variant="ghost" size="sm" onClick={() => setEndConfirmId(a.id)} className="text-destructive">
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </ResponsiveCard>
+            ))}
+            {active.length === 0 && (
+              <p className="text-center text-muted-foreground py-4 text-sm">No active assignments</p>
+            )}
           </div>
         </CardContent>
       </Card>
