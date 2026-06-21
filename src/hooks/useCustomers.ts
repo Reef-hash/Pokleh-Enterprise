@@ -38,13 +38,34 @@ export const useCustomers = (areaId?: string) => {
     address?: string;
     area_id: string;
   }) => {
+    const tempId = crypto.randomUUID();
+    const now = new Date().toISOString();
     return persistWrite<Customer>({
       entity: "customers",
       action: "INSERT",
       userId: "system",
       data: data as Record<string, unknown>,
       execute: () => customersRepo.create(data),
-      onSuccess: (customer) => setCustomers((prev) => [...prev, customer]),
+      optimistic: {
+        add: () =>
+          setCustomers((prev) => [
+            ...prev,
+            {
+              id: tempId,
+              name: data.name,
+              phone: data.phone ?? null,
+              address: data.address ?? null,
+              area_id: data.area_id,
+              debt_balance: 0,
+              active: true,
+              created_at: now,
+              updated_at: now,
+            } as Customer,
+          ]),
+        remove: () => setCustomers((prev) => prev.filter((c) => c.id !== tempId)),
+      },
+      onSuccess: (customer) =>
+        setCustomers((prev) => prev.map((c) => (c.id === tempId ? customer : c))),
       dexiePut: (customer) =>
         db.customers.put({
           ...customer,

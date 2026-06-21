@@ -32,13 +32,33 @@ export const useStockIntake = () => {
   }) => {
     if (!userId) return { success: false, error: "Not authenticated" };
 
+    const tempId = crypto.randomUUID();
+    const now = new Date().toISOString();
     return persistWrite<StockIntake>({
       entity: "stock_intake",
       action: "INSERT",
       userId,
       data: { ...data, created_by: userId },
       execute: () => stockIntakeRepo.create({ ...data, created_by: userId }),
-      onSuccess: (intake) => setIntakes((prev) => [intake, ...prev]),
+      optimistic: {
+        add: () =>
+          setIntakes((prev) => [
+            {
+              id: tempId,
+              intake_date: data.intake_date,
+              supplier_id: data.supplier_id,
+              quantity_received: data.quantity_received,
+              cost_per_pax: data.cost_per_pax,
+              notes: data.notes ?? null,
+              created_by: userId!,
+              created_at: now,
+            } as StockIntake,
+            ...prev,
+          ]),
+        remove: () => setIntakes((prev) => prev.filter((i) => i.id !== tempId)),
+      },
+      onSuccess: (intake) =>
+        setIntakes((prev) => prev.map((i) => (i.id === tempId ? intake : i))),
       dexiePut: (intake) =>
         db.stockIntakes.put(intake as unknown as import("@/lib/db").OfflineStockIntake),
       msg: "Stock intake recorded",

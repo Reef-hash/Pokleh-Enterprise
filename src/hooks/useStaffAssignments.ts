@@ -19,13 +19,32 @@ export const useStaffAssignments = () => {
   }, []);
 
   const assignStaff = async (staffId: string, areaId: string) => {
+    const tempId = crypto.randomUUID();
+    const now = new Date().toISOString();
+    const today = now.split("T")[0];
     return persistWrite<StaffAreaAssignment>({
       entity: "staff_area_assignments",
       action: "INSERT",
       userId: "system",
       data: { staff_id: staffId, area_id: areaId },
       execute: () => staffAssignmentsRepo.create({ staff_id: staffId, area_id: areaId }),
-      onSuccess: (assignment) => setAssignments((prev) => [assignment, ...prev]),
+      optimistic: {
+        add: () =>
+          setAssignments((prev) => [
+            {
+              id: tempId,
+              staff_id: staffId,
+              area_id: areaId,
+              assigned_date: today,
+              ended_date: null,
+              created_at: now,
+            } as StaffAreaAssignment,
+            ...prev,
+          ]),
+        remove: () => setAssignments((prev) => prev.filter((a) => a.id !== tempId)),
+      },
+      onSuccess: (assignment) =>
+        setAssignments((prev) => prev.map((a) => (a.id === tempId ? assignment : a))),
       msg: "Staff assigned to area",
     });
   };

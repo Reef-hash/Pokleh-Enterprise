@@ -31,13 +31,32 @@ export const useStockReturn = (areaId?: string) => {
   }) => {
     if (!userId) return { success: false, error: "Not authenticated" };
 
+    const tempId = crypto.randomUUID();
+    const now = new Date().toISOString();
     return persistWrite<StockReturn>({
       entity: "stock_return",
       action: "INSERT",
       userId,
       data: { ...data, created_by: userId },
       execute: () => stockReturnRepo.create({ ...data, created_by: userId }),
-      onSuccess: (ret) => setReturns((prev) => [ret, ...prev]),
+      optimistic: {
+        add: () =>
+          setReturns((prev) => [
+            {
+              id: tempId,
+              distribution_id: data.distribution_id,
+              area_id: data.area_id,
+              quantity_returned: data.quantity_returned,
+              return_date: data.return_date,
+              created_by: userId!,
+              created_at: now,
+            } as StockReturn,
+            ...prev,
+          ]),
+        remove: () => setReturns((prev) => prev.filter((r) => r.id !== tempId)),
+      },
+      onSuccess: (ret) =>
+        setReturns((prev) => prev.map((r) => (r.id === tempId ? ret : r))),
       dexiePut: (ret) =>
         db.stockReturns.put(ret as unknown as import("@/lib/db").OfflineStockReturn),
       msg: "Stock return recorded",
