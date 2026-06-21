@@ -2,14 +2,12 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
-import { useSyncStore } from "@/stores/syncStore";
 import { toast } from "sonner";
 import type { Area } from "@/types/pokleh";
 
 export const useAreas = () => {
   const [areas, setAreas] = useState<Area[]>([]);
   const [loading, setLoading] = useState(true);
-  const isOnline = useSyncStore((s) => s.status) === "idle";
 
   const fetchAreas = useCallback(async () => {
     try {

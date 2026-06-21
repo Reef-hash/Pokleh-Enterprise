@@ -15,8 +15,8 @@ export const useStaffAssignments = () => {
         .order("assigned_date", { ascending: false });
       if (error) throw error;
       setAssignments((data || []) as unknown as StaffAreaAssignment[]);
-    } catch (err) {
-      console.error("Failed to load staff assignments:", err);
+    } catch {
+      // offline fallback
     }
   }, []);
 

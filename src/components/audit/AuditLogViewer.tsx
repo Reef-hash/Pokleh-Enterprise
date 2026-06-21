@@ -31,7 +31,7 @@ export const AuditLogViewer = () => {
         if (error) throw error;
         setLogs((data || []) as unknown as AuditLog[]);
       } catch {
-        console.warn("Failed to fetch audit logs");
+        // offline fallback
       }
     };
     fetchLogs().finally(() => setLoading(false));

@@ -157,37 +157,8 @@ const Documentation = () => {
                     <li>Sign up for a new account or sign in with existing credentials</li>
                     <li>Complete your profile setup</li>
                     <li>Wait for admin approval (if required)</li>
-                    <li>Start managing your inventory!</li>
+                    <li>Start managing your distribution!</li>
                   </ol>
-
-                  <h3>Demo Accounts</h3>
-                  <p>For testing purposes, you can use the following demo accounts:</p>
-                  <div className="not-prose">
-                    <div className="grid gap-4 md:grid-cols-2 mt-4">
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-sm flex items-center gap-2">
-                            <Badge>Admin</Badge>
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="text-sm">
-                          <p><strong>Email:</strong> admin@pokleh.com</p>
-                          <p><strong>Password:</strong> admin123</p>
-                        </CardContent>
-                      </Card>
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-sm flex items-center gap-2">
-                            <Badge variant="secondary">Staff</Badge>
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="text-sm">
-                          <p><strong>Email:</strong> staff@pokleh.com</p>
-                          <p><strong>Password:</strong> staff123</p>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
             </section>

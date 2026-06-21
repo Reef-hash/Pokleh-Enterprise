@@ -19,7 +19,7 @@ export const useStockDistribution = (intakeId?: string) => {
       if (error) throw error;
       setDistributions((data || []) as unknown as StockDistribution[]);
     } catch {
-      console.warn("Failed to fetch distributions");
+      // offline fallback
     }
   }, [intakeId]);
 

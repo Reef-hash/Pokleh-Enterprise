@@ -144,19 +144,7 @@ export const generateManualPDF = () => {
   addNumberedItem(3, 'Complete your profile setup');
   addNumberedItem(4, 'Wait for admin approval (if required)');
   addNumberedItem(5, 'Start managing your distribution!');
-  
-  addSpace(5);
-  addHeading('Demo Accounts');
-  addParagraph('For testing purposes, you can use the following demo accounts:');
-  addSpace(3);
-  addParagraph('Admin Account:');
-  addBullet('Email: admin@pokleh.com');
-  addBullet('Password: admin123');
-  addSpace(3);
-  addParagraph('Staff Account:');
-  addBullet('Email: staff@pokleh.com');
-  addBullet('Password: staff123');
-  
+
   // Section 3: Authentication
   doc.addPage();
   yPosition = 20;

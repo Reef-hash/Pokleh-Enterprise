@@ -76,20 +76,6 @@ const Auth = () => {
     }
   };
 
-  const fillDemoAccount = (type: 'admin' | 'staff') => {
-    if (type === 'admin') {
-      setSignInData({
-        email: 'admin@pokleh.com',
-        password: 'admin123'
-      });
-    } else {
-      setSignInData({
-        email: 'staff@pokleh.com',
-        password: 'staff123'
-      });
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -122,31 +108,6 @@ const Auth = () => {
               </TabsList>
               
               <TabsContent value="signin" className="space-y-6">
-                {/* Demo Accounts */}
-                <div className="space-y-3">
-                  <Label className="text-sm font-medium">Try Demo Accounts:</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => fillDemoAccount('admin')}
-                      className="text-xs"
-                    >
-                      Admin Demo
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => fillDemoAccount('staff')}
-                      className="text-xs"
-                    >
-                      Staff Demo
-                    </Button>
-                  </div>
-                </div>
-
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>

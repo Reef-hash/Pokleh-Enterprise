@@ -18,7 +18,7 @@ export const useSettlements = () => {
       if (error) throw error;
       setSettlements((data || []) as unknown as SupplierSettlement[]);
     } catch {
-      console.warn("Failed to fetch settlements");
+      // offline fallback
     }
   }, []);
 

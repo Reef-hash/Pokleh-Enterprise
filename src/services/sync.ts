@@ -89,8 +89,6 @@ class SyncEngine {
   }
 
   private async processItem(item: SyncQueueItem): Promise<void> {
-    const entity = item.entity as keyof typeof supabaseFrom;
-
     if (FINANCIAL_TABLES.has(item.entity)) {
       const { data: existing } = await supabase
         .from(item.entity)
@@ -115,5 +113,4 @@ class SyncEngine {
   }
 }
 
-const supabaseFrom = {} as Record<string, unknown>;
 export const syncEngine = new SyncEngine();

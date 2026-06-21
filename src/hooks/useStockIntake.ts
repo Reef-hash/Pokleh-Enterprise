@@ -19,7 +19,7 @@ export const useStockIntake = () => {
       if (error) throw error;
       setIntakes((data || []) as unknown as StockIntake[]);
     } catch {
-      console.warn("Failed to fetch stock intakes");
+      // offline fallback
     }
   }, []);
 

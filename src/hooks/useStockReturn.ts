@@ -20,7 +20,7 @@ export const useStockReturn = (areaId?: string) => {
       if (error) throw error;
       setReturns((data || []) as unknown as StockReturn[]);
     } catch {
-      console.warn("Failed to fetch stock returns");
+      // offline fallback
     }
   }, [areaId]);
 
