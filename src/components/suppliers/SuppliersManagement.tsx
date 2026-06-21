@@ -123,6 +123,7 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add Supplier</DialogTitle>
+            <DialogDescription>Add a new ice supplier</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
@@ -145,6 +146,7 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit Supplier</DialogTitle>
+            <DialogDescription>Update supplier information</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">

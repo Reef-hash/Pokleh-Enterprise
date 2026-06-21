@@ -110,6 +110,7 @@ export const CustomerManagement = ({ userRole }: CustomerManagementProps) => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add Customer</DialogTitle>
+            <DialogDescription>Add a new ice customer</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">

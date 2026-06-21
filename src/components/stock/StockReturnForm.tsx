@@ -88,6 +88,7 @@ export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Record Stock Return</DialogTitle>
+            <DialogDescription>Record unsold stock returned from an area</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">

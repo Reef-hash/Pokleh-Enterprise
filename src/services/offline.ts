@@ -1,6 +1,7 @@
 type OfflineListener = (online: boolean) => void;
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://gsieirprrkuyfzxqcizb.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "";
 
 class OfflineDetector {
   private listeners: Set<OfflineListener> = new Set();
@@ -28,7 +29,11 @@ class OfflineDetector {
       try {
         const resp = await fetch(
           `${SUPABASE_URL}/rest/v1/`,
-          { method: "HEAD", signal: AbortSignal.timeout(5000) }
+          {
+            method: "HEAD",
+            headers: SUPABASE_PUBLISHABLE_KEY ? { apikey: SUPABASE_PUBLISHABLE_KEY } : undefined,
+            signal: AbortSignal.timeout(5000),
+          }
         );
         this.setOnline(resp.ok);
       } catch {

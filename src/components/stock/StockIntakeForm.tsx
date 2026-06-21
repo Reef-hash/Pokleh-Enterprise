@@ -92,6 +92,7 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Record Stock Intake</DialogTitle>
+            <DialogDescription>Record incoming ice stock from supplier</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">

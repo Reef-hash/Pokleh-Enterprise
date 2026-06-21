@@ -116,6 +116,7 @@ export const StaffAssignment = ({ userRole }: StaffAssignmentProps) => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Assign Staff to Area</DialogTitle>
+            <DialogDescription>Assign a staff member to a delivery area</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">

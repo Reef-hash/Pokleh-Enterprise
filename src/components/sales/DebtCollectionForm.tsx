@@ -103,6 +103,7 @@ export const DebtCollectionForm = ({ userRole }: DebtCollectionFormProps) => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Record Debt Collection</DialogTitle>
+            <DialogDescription>Record a debt payment from a customer</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">

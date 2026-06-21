@@ -104,6 +104,7 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Distribute Stock</DialogTitle>
+            <DialogDescription>Assign stock to a delivery area</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">

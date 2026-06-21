@@ -115,6 +115,7 @@ export const ExpenseManagement = ({ userRole }: ExpenseManagementProps) => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add Expense</DialogTitle>
+            <DialogDescription>Record a new operational expense</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">

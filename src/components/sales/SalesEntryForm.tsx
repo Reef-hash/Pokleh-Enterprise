@@ -119,6 +119,7 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Record Sale</DialogTitle>
+            <DialogDescription>Record an ice sale to a customer</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
