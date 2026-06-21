@@ -110,6 +110,7 @@ export const DashboardLayout = ({
       'pokleh-reports': t('nav.pokleh-reports'),
       'daily-closing': t('nav.daily-closing'),
       'audit-logs': t('nav.audit-logs'),
+      'staff-accounts': t('nav.staff-accounts'),
     };
     return map[id] ?? id;
   };
@@ -157,6 +158,7 @@ export const DashboardLayout = ({
     {
       label: 'Admin', key: 'admin',
       items: [
+        { id: 'staff-accounts', label: 'Staff Accounts', icon: Users },
         { id: 'audit-logs', label: 'Audit Logs', icon: Shield },
       ]
     },

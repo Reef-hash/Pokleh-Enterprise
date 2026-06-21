@@ -20,6 +20,7 @@ import { SupplierPriceHistoryView } from "@/components/suppliers/SupplierPriceHi
 import { PoklehReports } from "@/components/reports/PoklehReports";
 import { DailyClosingWorkflow } from "@/components/closings/DailyClosingWorkflow";
 import { AuditLogViewer } from "@/components/audit/AuditLogViewer";
+import { StaffAccountManagement } from "@/components/admin/StaffAccountManagement";
 
 interface User {
   id: string;
@@ -109,6 +110,8 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
         return <DailyClosingWorkflow userRole={user.role} />;
       case 'audit-logs':
         return user.role === "admin" ? <AuditLogViewer /> : <div className="text-center py-12"><h3 className="text-lg font-semibold mb-2">Access Denied</h3><p className="text-muted-foreground">Only administrators can view audit logs.</p></div>;
+      case 'staff-accounts':
+        return user.role === "admin" ? <StaffAccountManagement /> : <div className="text-center py-12"><h3 className="text-lg font-semibold mb-2">Access Denied</h3><p className="text-muted-foreground">Only administrators can manage staff accounts.</p></div>;
       default:
         return (
           <div className="text-center py-12">
