@@ -8,6 +8,7 @@ export interface UserProfile {
   email: string;
   name: string;
   role: "admin" | "staff";
+  onboarding_completed?: boolean;
 }
 
 interface AuthState {
@@ -16,6 +17,8 @@ interface AuthState {
   profile: UserProfile | null;
   loading: boolean;
   initialized: boolean;
+  restartTour: () => void;
+  _restartTourFn: (() => void) | null;
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signUp: (email: string, password: string, name: string, role: "admin" | "staff") => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
@@ -31,6 +34,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   profile: null,
   loading: true,
   initialized: false,
+  _restartTourFn: null,
+
+  restartTour: () => {
+    const fn = get()._restartTourFn;
+    if (fn) fn();
+  },
 
   isAuthenticated: () => !!get().user && !!get().profile,
   isAdmin: () => get().profile?.role === "admin",

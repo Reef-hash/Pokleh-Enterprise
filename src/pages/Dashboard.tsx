@@ -1,6 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PoklehDashboard } from "@/components/dashboard/PoklehDashboard";
+import { GuidedTour } from "@/components/help/GuidedTour";
+import { useAuthStore } from "@/stores/authStore";
+import { supabase } from "@/integrations/supabase/client";
 import { AreaManagement } from "@/components/areas/AreaManagement";
 import { CustomerManagement } from "@/components/customers/CustomerManagement";
 import { StaffAssignment } from "@/components/staff/StaffAssignment";
@@ -32,6 +35,39 @@ interface DashboardProps {
 
 export const Dashboard = ({ user, onLogout }: DashboardProps) => {
   const [currentPage, setCurrentPage] = useState('dashboard');
+  const profile = useAuthStore((s) => s.profile);
+  const [tourOpen, setTourOpen] = useState(false);
+
+  useEffect(() => {
+    if (profile && !profile.onboarding_completed) {
+      setTourOpen(true);
+    }
+  }, [profile]);
+
+  // Register restart callback for HelpButton
+  useEffect(() => {
+    useAuthStore.setState({ _restartTourFn: () => setTourOpen(true) });
+    return () => useAuthStore.setState({ _restartTourFn: null });
+  }, []);
+
+  const handleTourComplete = async () => {
+    setTourOpen(false);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ onboarding_completed: true })
+      .eq("user_id", user.id);
+    if (!error) {
+      useAuthStore.setState((s) => s.profile ? { profile: { ...s.profile, onboarding_completed: true } } : {});
+    }
+  };
+
+  const handleTourSkip = async () => {
+    setTourOpen(false);
+    await supabase
+      .from("profiles")
+      .update({ onboarding_completed: true })
+      .eq("user_id", user.id);
+  };
 
   const handleNavigate = (page: string) => {
     setCurrentPage(page);
@@ -84,13 +120,21 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
   };
 
   return (
-    <DashboardLayout
-      user={user}
-      onLogout={onLogout}
-      currentPage={currentPage}
-      onNavigate={handleNavigate}
-    >
-      {renderContent()}
-    </DashboardLayout>
+    <>
+      <DashboardLayout
+        user={user}
+        onLogout={onLogout}
+        currentPage={currentPage}
+        onNavigate={handleNavigate}
+      >
+        {renderContent()}
+      </DashboardLayout>
+      <GuidedTour
+        open={tourOpen}
+        onComplete={handleTourComplete}
+        onSkip={handleTourSkip}
+        onNavigate={handleNavigate}
+      />
+    </>
   );
 };

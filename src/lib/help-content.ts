@@ -295,3 +295,49 @@ export function getAllHelpTopics(): { id: string; title: string; content: HelpCo
     content,
   }));
 }
+
+export interface TourStep {
+  targetId: string;
+  title: string;
+  description: string;
+  position: "bottom" | "top" | "left" | "right";
+}
+
+export const tourSteps: TourStep[] = [
+  {
+    targetId: "tour-dashboard",
+    title: "Dashboard",
+    description: "Welcome to Pokleh Enterprise! This is your home screen showing key metrics — active customers, service areas, outstanding debt — and quick action cards to jump into any module.",
+    position: "bottom",
+  },
+  {
+    targetId: "tour-customers",
+    title: "Customers",
+    description: "Add and manage your ice customers here. Each customer is assigned to a delivery area, and their debt balance is tracked automatically.",
+    position: "right",
+  },
+  {
+    targetId: "tour-stock-intake",
+    title: "Stock Intake",
+    description: "Record incoming ice stock from your suppliers. Enter the quantity received and cost per pax — the system calculates total cost automatically.",
+    position: "right",
+  },
+  {
+    targetId: "tour-sales",
+    title: "Sales Entry",
+    description: "Record ice sales to customers. Select the customer, enter quantity and price, and choose payment type: Cash (immediate) or Debt (credit). Debt sales update the customer's balance automatically.",
+    position: "right",
+  },
+  {
+    targetId: "tour-debt-collection",
+    title: "Debt Collection",
+    description: "Track and collect outstanding customer debts. Select a debtor, enter the payment amount, and the system updates their balance and ledger instantly.",
+    position: "right",
+  },
+  {
+    targetId: "tour-reports",
+    title: "Reports",
+    description: "View reports on sales, expenses, profit, and collections. Use the charts to spot trends and make informed business decisions.",
+    position: "right",
+  },
+];

@@ -7,15 +7,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { HelpCircle, BookOpen, MessageCircleQuestion, Download, ExternalLink, BookMarked } from 'lucide-react';
+import { HelpCircle, BookOpen, MessageCircleQuestion, Download, ExternalLink, BookMarked, RotateCcw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { FAQModal } from './FAQModal';
 import { HelpCenterModal } from './HelpCenterModal';
 import { generateManualPDF } from '@/lib/generatePDF';
+import { useAuthStore } from '@/stores/authStore';
 
 export const HelpButton = () => {
   const [faqOpen, setFaqOpen] = useState(false);
   const [helpCenterOpen, setHelpCenterOpen] = useState(false);
+  const restartTour = useAuthStore((s) => s.restartTour);
 
   return (
     <>
@@ -46,6 +48,11 @@ export const HelpButton = () => {
           <DropdownMenuItem onClick={generateManualPDF} className="cursor-pointer">
             <Download className="mr-2 h-4 w-4" />
             <span>Download Manual (PDF)</span>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={restartTour} className="cursor-pointer">
+            <RotateCcw className="mr-2 h-4 w-4" />
+            <span>Restart Tour</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
