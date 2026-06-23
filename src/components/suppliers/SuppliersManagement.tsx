@@ -8,6 +8,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Label } from "@/components/ui/label";
 import { Plus, Search, Edit, Trash2, Building2, Phone } from "lucide-react";
 import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { usePoklehSuppliers } from "@/hooks/usePoklehSuppliers";
 import { toast } from "sonner";
 
@@ -91,17 +92,17 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Supplier Management</h2>
-          <p className="text-muted-foreground">Manage ice suppliers</p>
-        </div>
+      <PageHeader
+        title="Supplier Management"
+        subtitle="Manage ice suppliers"
+      >
         {userRole === "admin" && (
           <Button onClick={() => setIsAddOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> Add Supplier
+            <Plus className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Add Supplier</span>
           </Button>
         )}
-      </div>
+      </PageHeader>
 
       <Card>
         <CardContent className="pt-6">

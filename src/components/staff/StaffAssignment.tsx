@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { UserPlus, X } from "lucide-react";
 import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { useStaffAssignments } from "@/hooks/useStaffAssignments";
 import { useAreas } from "@/hooks/useAreas";
 import { supabase } from "@/integrations/supabase/client";
@@ -88,15 +89,13 @@ export const StaffAssignment = ({ userRole }: StaffAssignmentProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Staff Assignments</h2>
-          <p className="text-muted-foreground">Assign staff members to delivery areas</p>
-        </div>
-        <Button onClick={() => setIsOpen(true)}>
-          <UserPlus className="mr-2 h-4 w-4" /> Assign Staff
-        </Button>
-      </div>
+      <PageHeader
+        title="Staff Assignments"
+        subtitle="Assign staff members to delivery areas"
+        actionLabel="Assign Staff"
+        actionIcon={UserPlus}
+        onAction={() => setIsOpen(true)}
+      />
 
       <Card>
         <CardHeader>

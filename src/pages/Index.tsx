@@ -1,22 +1,25 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, Package, BarChart3, Users, Shield, Loader2 } from "lucide-react";
+import { ArrowRight, Package, BarChart3, Users, Shield } from "lucide-react";
 import { Dashboard } from "@/pages/Dashboard";
 import { useAuth } from "@/hooks/useAuth";
+import { useAppBootstrap } from "@/hooks/useAppBootstrap";
 import { useNavigate } from "react-router-dom";
+import { SplashScreen } from "@/components/ui/PageLoader";
 
 const Index = () => {
-  const { user, profile, loading, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
+  const { bootPhase, statusMessage, loading } = useAppBootstrap();
   const navigate = useNavigate();
 
+  // Show branded splash screen during boot
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
+      <SplashScreen
+        status={statusMessage}
+        userName={profile?.name}
+        isAdmin={profile?.role === "admin"}
+      />
     );
   }
 

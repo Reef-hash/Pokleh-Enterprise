@@ -32,7 +32,7 @@ export const SupplierSettlementView = ({ userRole }: SupplierSettlementViewProps
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Supplier Settlements</h2>
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Supplier Settlements</h2>
           <p className="text-muted-foreground">Calculate and manage supplier payables</p>
         </div>
       </div>

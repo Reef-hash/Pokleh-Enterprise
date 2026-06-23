@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Package } from "lucide-react";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { useStockIntake } from "@/hooks/useStockIntake";
 import { usePoklehSuppliers } from "@/hooks/usePoklehSuppliers";
 import { formatCurrency } from "@/lib/currency";
@@ -52,17 +53,17 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Stock Intake</h2>
-          <p className="text-muted-foreground">Record incoming stock from suppliers</p>
-        </div>
+      <PageHeader
+        title="Stock Intake"
+        subtitle="Record incoming stock from suppliers"
+      >
         {userRole === "admin" && (
           <Button onClick={() => setIsOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> Record Intake
+            <Plus className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Record Intake</span>
           </Button>
         )}
-      </div>
+      </PageHeader>
 
       <Card>
         <CardHeader>

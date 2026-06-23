@@ -8,6 +8,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Label } from "@/components/ui/label";
 import { Plus, Edit, Trash2, MapPin } from "lucide-react";
 import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { useAreas } from "@/hooks/useAreas";
 import { toast } from "sonner";
 
@@ -82,17 +83,17 @@ export const AreaManagement = ({ userRole }: AreaManagementProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Area Management</h2>
-          <p className="text-muted-foreground">Manage delivery areas</p>
-        </div>
+      <PageHeader
+        title="Area Management"
+        subtitle="Manage delivery areas"
+      >
         {userRole === "admin" && (
           <Button onClick={() => setIsAddOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> Add Area
+            <Plus className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Add Area</span>
           </Button>
         )}
-      </div>
+      </PageHeader>
 
       <Card>
         <CardHeader>

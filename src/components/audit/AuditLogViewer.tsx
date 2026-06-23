@@ -41,7 +41,7 @@ export const AuditLogViewer = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Audit Logs</h2>
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Audit Logs</h2>
         <p className="text-muted-foreground">Immutable record of all data changes (admin only)</p>
       </div>
 

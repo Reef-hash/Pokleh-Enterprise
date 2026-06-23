@@ -218,7 +218,7 @@ export const DashboardLayout = ({
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
       <div className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-card border-r transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0 flex flex-col",
+        "fixed inset-y-0 left-0 z-50 w-64 bg-card border-r transform transition-[transform] duration-200 ease-out lg:translate-x-0 lg:static lg:inset-0 flex flex-col shadow-2xl lg:shadow-none",
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex items-center justify-between h-16 px-4 border-b">
@@ -258,22 +258,25 @@ export const DashboardLayout = ({
                 {group.items.map((item) => {
                   const Icon = item.icon;
                   return (
-                    <Button
+                    <button
                       key={item.id}
-                      variant={currentPage === item.id ? "secondary" : "ghost"}
-                      size="sm"
-                      className={cn(
-                        "w-full justify-start font-medium",
-                        currentPage === item.id && "bg-primary/10 text-primary hover:bg-primary/20 font-semibold"
-                      )}
                       onClick={() => {
                         onNavigate(item.id);
                         setSidebarOpen(false);
                       }}
+                      className={cn(
+                        "group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-[background-color,color,transform] duration-150 ease-out active:scale-[0.98]",
+                        currentPage === item.id
+                          ? "bg-primary/10 text-primary font-semibold"
+                          : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
+                      )}
                     >
-                      <Icon className="mr-2 h-4 w-4" />
+                      <Icon className={cn(
+                        "h-4 w-4 shrink-0 transition-transform duration-150",
+                        currentPage === item.id && "text-primary"
+                      )} />
                       {itemLabel(item.id)}
-                    </Button>
+                    </button>
                   );
                 })}
               </div>
@@ -308,31 +311,34 @@ export const DashboardLayout = ({
       {/* Main content */}
       <div className="flex-1 flex flex-col lg:ml-0">
         {/* Header */}
-        <header className="h-16 bg-card border-b flex items-center justify-between px-4">
+        <header className="h-auto sm:h-16 bg-card/95 backdrop-blur-sm border-b flex flex-wrap items-center justify-between px-3 sm:px-4 gap-2 py-2 sm:py-0 sticky top-0 z-30 transition-[background] duration-200 min-h-[3.5rem]">
           <Button
             variant="ghost"
             size="sm"
-            className="lg:hidden"
+            className="lg:hidden transition-[transform] duration-150 ease-out active:scale-90 shrink-0"
             onClick={() => setSidebarOpen(true)}
           >
-            <Menu className="h-4 w-4" />
+            <Menu className={cn(
+              "h-4 w-4 transition-transform duration-200 ease-out",
+              sidebarOpen && "rotate-90"
+            )} />
           </Button>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold capitalize text-foreground">
+          <div className="flex items-center gap-2 min-w-0 flex-1 sm:flex-none">
+            <h1 className="text-base sm:text-xl font-bold capitalize text-foreground truncate">
               {currentPage === 'dashboard'
                 ? (user.role === 'admin' ? t('dashboard.admin') : t('dashboard.staff'))
                 : itemLabel(currentPage)}
             </h1>
             <button
               onClick={() => setHelpOpen(true)}
-              className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-muted hover:bg-muted-foreground/20 text-muted-foreground hover:text-foreground transition-colors text-xs font-bold"
+              className="inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-muted hover:bg-muted-foreground/20 text-muted-foreground hover:text-foreground transition-colors text-xs font-bold shrink-0"
               aria-label="Page help"
               title="Help"
             >
               ?
             </button>
           </div>
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center gap-0.5 sm:gap-1 shrink-0 ml-auto sm:ml-0">
             <LanguageSwitcher />
             <Button
               variant="ghost"
@@ -340,20 +346,19 @@ export const DashboardLayout = ({
               onClick={handleSync}
               disabled={syncing}
               title="Sync data dengan server"
-              className="px-2"
+              className="px-1.5 sm:px-2"
             >
               <RefreshCw className={cn("h-4 w-4", syncing && "animate-spin")} />
             </Button>
-            <span className="text-sm text-muted-foreground hidden sm:inline font-medium">
-              {t('common.welcome')}, {user.name}
-            </span>
             <HelpButton />
           </div>
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-auto p-4">
-          {children}
+        <main className="flex-1 overflow-auto p-4 content-scroll">
+          <div className="animate-fade-in-up">
+            {children}
+          </div>
         </main>
       </div>
 
@@ -369,7 +374,7 @@ export const DashboardLayout = ({
       {/* Overlay */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden animate-fade-in"
           onClick={() => setSidebarOpen(false)}
         />
       )}

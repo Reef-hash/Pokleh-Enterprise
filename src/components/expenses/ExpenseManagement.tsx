@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Receipt } from "lucide-react";
 import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { useExpenses } from "@/hooks/useExpenses";
 import { formatCurrency } from "@/lib/currency";
 import { toast } from "sonner";
@@ -54,17 +55,17 @@ export const ExpenseManagement = ({ userRole }: ExpenseManagementProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Expenses</h2>
-          <p className="text-muted-foreground">Track operational expenses</p>
-        </div>
+      <PageHeader
+        title="Expenses"
+        subtitle="Track operational expenses"
+      >
         {userRole === "admin" && (
           <Button onClick={() => setIsOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> Add Expense
+            <Plus className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Add Expense</span>
           </Button>
         )}
-      </div>
+      </PageHeader>
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>

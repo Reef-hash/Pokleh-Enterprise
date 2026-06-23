@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Plus, RotateCcw } from "lucide-react";
 import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { useStockReturn } from "@/hooks/useStockReturn";
 import { supabase } from "@/integrations/supabase/client";
 import type { StockDistribution } from "@/types/pokleh";
@@ -52,15 +53,13 @@ export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Stock Returns</h2>
-          <p className="text-muted-foreground">Record unsold stock returned from areas</p>
-        </div>
-        <Button onClick={() => setIsOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Record Return
-        </Button>
-      </div>
+      <PageHeader
+        title="Stock Returns"
+        subtitle="Record unsold stock returned from areas"
+        actionLabel="Record Return"
+        actionIcon={Plus}
+        onAction={() => setIsOpen(true)}
+      />
 
       <Card>
         <CardHeader>

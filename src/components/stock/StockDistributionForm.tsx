@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Plus, ArrowRight } from "lucide-react";
 import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { useStockDistribution } from "@/hooks/useStockDistribution";
 import { useStockIntake } from "@/hooks/useStockIntake";
 import { useAreas } from "@/hooks/useAreas";
@@ -67,17 +68,17 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Stock Distribution</h2>
-          <p className="text-muted-foreground">Distribute stock to delivery areas</p>
-        </div>
+      <PageHeader
+        title="Stock Distribution"
+        subtitle="Distribute stock to delivery areas"
+      >
         {userRole === "admin" && (
           <Button onClick={() => setIsOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> Distribute
+            <Plus className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Distribute</span>
           </Button>
         )}
-      </div>
+      </PageHeader>
 
       <Card>
         <CardHeader>

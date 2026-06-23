@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Wallet } from "lucide-react";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { useDebtCollection } from "@/hooks/useDebtCollection";
 import { useCustomers } from "@/hooks/useCustomers";
 import { formatCurrency } from "@/lib/currency";
@@ -53,15 +54,13 @@ export const DebtCollectionForm = ({ userRole }: DebtCollectionFormProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Debt Collection</h2>
-          <p className="text-muted-foreground">Record payments received from debtors</p>
-        </div>
-        <Button onClick={() => setIsOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Record Collection
-        </Button>
-      </div>
+      <PageHeader
+        title="Debt Collection"
+        subtitle="Record payments received from debtors"
+        actionLabel="Record Collection"
+        actionIcon={Plus}
+        onAction={() => setIsOpen(true)}
+      />
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>

@@ -34,8 +34,9 @@ export const PoklehDashboard = ({ user, onNavigate }: PoklehDashboardProps) => {
         </p>
       </div>
 
+      {/* Stat cards with staggered entry */}
       <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-2 md:grid-cols-4">
-        <Card className="order-1">
+        <Card className="order-1 animate-fade-in-up animate-delay-1">
           <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6">
             <CardTitle className="text-xs sm:text-sm font-medium">Outstanding Debt</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -44,7 +45,7 @@ export const PoklehDashboard = ({ user, onNavigate }: PoklehDashboardProps) => {
             <p className="text-lg sm:text-2xl font-bold text-destructive">{formatCurrency(totalDebt)}</p>
           </CardContent>
         </Card>
-        <Card className="order-3 sm:order-2">
+        <Card className="order-3 sm:order-2 animate-fade-in-up animate-delay-2">
           <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6">
             <CardTitle className="text-xs sm:text-sm font-medium">Active Customers</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
@@ -53,7 +54,7 @@ export const PoklehDashboard = ({ user, onNavigate }: PoklehDashboardProps) => {
             <p className="text-lg sm:text-2xl font-bold">{activeCustomers}</p>
           </CardContent>
         </Card>
-        <Card className="order-4 sm:order-3">
+        <Card className="order-4 sm:order-3 animate-fade-in-up animate-delay-3">
           <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6">
             <CardTitle className="text-xs sm:text-sm font-medium">Service Areas</CardTitle>
             <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -62,7 +63,7 @@ export const PoklehDashboard = ({ user, onNavigate }: PoklehDashboardProps) => {
             <p className="text-lg sm:text-2xl font-bold">{areas.length}</p>
           </CardContent>
         </Card>
-        <Card className="order-2 sm:order-4">
+        <Card className="order-2 sm:order-4 animate-fade-in-up animate-delay-4">
           <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6">
             <CardTitle className="text-xs sm:text-sm font-medium">Total Customers</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
@@ -73,14 +74,19 @@ export const PoklehDashboard = ({ user, onNavigate }: PoklehDashboardProps) => {
         </Card>
       </div>
 
-      <div className="px-1 sm:px-0">
+      {/* Quick actions with staggered entry */}
+      <div className="px-1 sm:px-0 animate-fade-in-up animate-delay-5">
         <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Quick Actions</h3>
         <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {quickLinks.map((link) => (
-            <Card key={link.id} className="cursor-pointer hover:bg-accent transition-colors active:bg-accent" onClick={() => onNavigate(link.id)}>
+          {quickLinks.map((link, i) => (
+            <Card
+              key={link.id}
+              className="cursor-pointer transition-[transform,background-color] duration-150 ease-out active:scale-[0.98] hover:bg-accent/50 group"
+              onClick={() => onNavigate(link.id)}
+            >
               <CardHeader className="p-3 sm:p-6">
                 <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary/10 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-150 ease-out">
                     <link.icon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                   </div>
                   <div className="min-w-0">

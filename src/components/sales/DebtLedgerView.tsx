@@ -26,7 +26,7 @@ export const DebtLedgerView = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Debt Ledger</h2>
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Debt Ledger</h2>
         <p className="text-muted-foreground">Audit trail of all debt movements</p>
       </div>
 

@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, DollarSign, RotateCcw } from "lucide-react";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { useSales } from "@/hooks/useSales";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useAreas } from "@/hooks/useAreas";
@@ -84,15 +85,13 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Sales Entry</h2>
-          <p className="text-muted-foreground">Record sales (cash or debt)</p>
-        </div>
-        <Button onClick={() => setIsOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Record Sale
-        </Button>
-      </div>
+      <PageHeader
+        title="Sales Entry"
+        subtitle="Record sales (cash or debt)"
+        actionLabel="Record Sale"
+        actionIcon={Plus}
+        onAction={() => setIsOpen(true)}
+      />
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>

@@ -66,7 +66,7 @@ export const StaffAccountManagement = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Staff Accounts</h2>
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Staff Accounts</h2>
         <p className="text-muted-foreground">Manage all user accounts in the system</p>
       </div>
 

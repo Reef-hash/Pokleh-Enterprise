@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Search, Phone, MapPin } from "lucide-react";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useAreas } from "@/hooks/useAreas";
 import type { Customer } from "@/types/pokleh";
@@ -54,15 +55,13 @@ export const CustomerManagement = ({ userRole }: CustomerManagementProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Customer Management</h2>
-          <p className="text-muted-foreground">Manage customers and their debt balances</p>
-        </div>
-        <Button onClick={() => setIsAddOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Add Customer
-        </Button>
-      </div>
+      <PageHeader
+        title="Customer Management"
+        subtitle="Manage customers and their debt balances"
+        actionLabel="Add Customer"
+        actionIcon={Plus}
+        onAction={() => setIsAddOpen(true)}
+      />
 
       <Card>
         <CardContent className="pt-6">

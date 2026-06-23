@@ -72,7 +72,7 @@ export const PoklehReports = ({ userRole }: PoklehReportsProps) => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Pokleh Reports</h2>
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Pokleh Reports</h2>
         <p className="text-muted-foreground">Sales, expenses, collections and profit analytics</p>
       </div>
 

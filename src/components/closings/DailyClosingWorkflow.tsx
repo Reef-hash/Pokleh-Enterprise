@@ -58,7 +58,7 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Daily Closing</h2>
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Daily Closing</h2>
         <p className="text-muted-foreground">Close and reconcile daily operations</p>
       </div>
 
