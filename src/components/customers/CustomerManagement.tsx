@@ -5,10 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FormModal } from "@/components/ui/FormModal";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { PhoneInput } from "@/components/ui/MobileOptimizedInputs";
 import { Plus, Search, Phone, MapPin } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { useCustomers } from "@/hooks/useCustomers";
@@ -152,41 +153,56 @@ export const CustomerManagement = ({ userRole }: CustomerManagementProps) => {
         </CardContent>
       </Card>
 
-      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add Customer</DialogTitle>
-            <DialogDescription>Add a new ice customer</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Name *</Label>
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Customer name" />
-            </div>
-            <div className="space-y-2">
-              <Label>Phone</Label>
-              <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="Phone number" />
-            </div>
-            <div className="space-y-2">
-              <Label>Address</Label>
-              <Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Address" />
-            </div>
-            <div className="space-y-2">
-              <Label>Truck *</Label>
-              <Select value={form.truck_id} onValueChange={(v) => setForm({ ...form, truck_id: v })}>
-                <SelectTrigger><SelectValue placeholder="Select truck" /></SelectTrigger>
-                <SelectContent>
-                  {trucks.map((t) => (<SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>))}
-                </SelectContent>
-              </Select>
-            </div>
+      <FormModal
+        open={isAddOpen}
+        onOpenChange={setIsAddOpen}
+        title="Add Customer"
+        description="Add a new ice customer"
+        submitLabel="Add Customer"
+        submitDisabled={!form.name || !form.truck_id}
+        isSubmitting={submitting}
+        onSubmit={handleAdd}
+        onCancel={() => setForm({ name: "", phone: "", address: "", truck_id: "" })}
+      >
+        <div className="space-y-3">
+          <div>
+            <Label htmlFor="name" className="text-sm font-medium">Name *</Label>
+            <Input
+              id="name"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              placeholder="Customer name"
+            />
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddOpen(false)}>Cancel</Button>
-            <Button onClick={handleAdd} disabled={submitting}>{submitting ? "Saving..." : "Save"}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+          <PhoneInput
+            label="Phone"
+            value={form.phone}
+            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            placeholder="Phone number"
+          />
+
+          <div>
+            <Label htmlFor="address" className="text-sm font-medium">Address</Label>
+            <Input
+              id="address"
+              value={form.address}
+              onChange={(e) => setForm({ ...form, address: e.target.value })}
+              placeholder="Address"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="truck" className="text-sm font-medium">Truck *</Label>
+            <Select value={form.truck_id} onValueChange={(v) => setForm({ ...form, truck_id: v })}>
+              <SelectTrigger id="truck"><SelectValue placeholder="Select truck" /></SelectTrigger>
+              <SelectContent>
+                {trucks.map((t) => (<SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </FormModal>
     </div>
   );
 };

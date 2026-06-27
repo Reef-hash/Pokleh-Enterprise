@@ -19,6 +19,9 @@ export default {
 			}
 		},
 		extend: {
+			spacing: {
+				'safe-inset-bottom': 'max(0.5rem, env(safe-area-inset-bottom))',
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',

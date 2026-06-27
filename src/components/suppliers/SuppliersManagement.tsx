@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FormModal } from "@/components/ui/FormModal";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
+import { PhoneInput } from "@/components/ui/MobileOptimizedInputs";
 import { Plus, Search, Edit, Trash2, Building2, Phone } from "lucide-react";
 import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -186,51 +187,45 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
         </CardContent>
       </Card>
 
-      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add Supplier</DialogTitle>
-            <DialogDescription>Add a new ice supplier</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Name *</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Supplier name" />
-            </div>
-            <div className="space-y-2">
-              <Label>Phone</Label>
-              <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone number" />
-            </div>
+      <FormModal
+        open={isAddOpen}
+        onOpenChange={setIsAddOpen}
+        title="Add Supplier"
+        description="Add a new ice supplier"
+        submitLabel="Add Supplier"
+        submitDisabled={!name.trim()}
+        isSubmitting={submitting}
+        onSubmit={handleAdd}
+        onCancel={() => { setName(""); setPhone(""); }}
+      >
+        <div className="space-y-3">
+          <div>
+            <Label htmlFor="add_supplier_name" className="text-sm font-medium">Name *</Label>
+            <Input id="add_supplier_name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Supplier name" />
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddOpen(false)}>Cancel</Button>
-            <Button onClick={handleAdd} disabled={submitting}>{submitting ? "Saving..." : "Save"}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          <PhoneInput label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone number" />
+        </div>
+      </FormModal>
 
-      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Supplier</DialogTitle>
-            <DialogDescription>Update supplier information</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Name *</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Phone</Label>
-              <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
-            </div>
+      <FormModal
+        open={isEditOpen}
+        onOpenChange={setIsEditOpen}
+        title="Edit Supplier"
+        description="Update supplier information"
+        submitLabel="Update Supplier"
+        submitDisabled={!name.trim()}
+        isSubmitting={submitting}
+        onSubmit={handleEdit}
+        onCancel={() => { setName(""); setPhone(""); setEditingId(null); }}
+      >
+        <div className="space-y-3">
+          <div>
+            <Label htmlFor="edit_supplier_name" className="text-sm font-medium">Name *</Label>
+            <Input id="edit_supplier_name" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditOpen(false)}>Cancel</Button>
-            <Button onClick={handleEdit} disabled={submitting}>{submitting ? "Saving..." : "Save"}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          <PhoneInput label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
+        </div>
+      </FormModal>
 
       <AlertDialog open={!!deleteConfirmId} onOpenChange={(o) => { if (!o) setDeleteConfirmId(null); }}>
         <AlertDialogContent>

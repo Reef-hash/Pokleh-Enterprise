@@ -5,9 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FormModal } from "@/components/ui/FormModal";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CurrencyInput } from "@/components/ui/MobileOptimizedInputs";
 import { Plus, Wallet } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { useDebtCollection } from "@/hooks/useDebtCollection";
@@ -131,48 +132,63 @@ export const DebtCollectionForm = ({ userRole }: DebtCollectionFormProps) => {
         </CardContent>
       </Card>
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Record Debt Collection</DialogTitle>
-            <DialogDescription>Record a debt payment from a customer</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Customer</Label>
-              <Select value={form.customer_id} onValueChange={(v) => setForm({ ...form, customer_id: v })}>
-                <SelectTrigger><SelectValue placeholder="Select debtor" /></SelectTrigger>
-                <SelectContent>
-                  {activeDebtors.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name} ({formatCurrency(c.debt_balance)})
-                    </SelectItem>
-                  ))}
-                  {activeDebtors.length === 0 && (
-                    <SelectItem value="__none__" disabled>No debtors</SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Amount (RM)</Label>
-              <Input type="number" step="0.01" min={0.01} value={form.amount || ""} onChange={(e) => setForm({ ...form, amount: parseFloat(e.target.value) || 0 })} />
-            </div>
-            <div className="space-y-2">
-              <Label>Date</Label>
-              <Input type="date" value={form.collection_date} onChange={(e) => setForm({ ...form, collection_date: e.target.value })} />
-            </div>
-            <div className="space-y-2">
-              <Label>Notes</Label>
-              <Input value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Optional" />
-            </div>
+      <FormModal
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        title="Record Debt Collection"
+        description="Record a debt payment from a customer"
+        submitLabel="Record Payment"
+        submitDisabled={!form.customer_id || form.amount <= 0}
+        isSubmitting={submitting}
+        onSubmit={handleAdd}
+        onCancel={() => setForm({ customer_id: "", amount: 0, collection_date: new Date().toISOString().split("T")[0], notes: "" })}
+      >
+        <div className="space-y-3">
+          <div>
+            <Label htmlFor="customer" className="text-sm font-medium">Customer</Label>
+            <Select value={form.customer_id} onValueChange={(v) => setForm({ ...form, customer_id: v })}>
+              <SelectTrigger id="customer"><SelectValue placeholder="Select debtor" /></SelectTrigger>
+              <SelectContent>
+                {activeDebtors.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name} ({formatCurrency(c.debt_balance)})
+                  </SelectItem>
+                ))}
+                {activeDebtors.length === 0 && (
+                  <SelectItem value="__none__" disabled>No debtors</SelectItem>
+                )}
+              </SelectContent>
+            </Select>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-            <Button onClick={handleAdd} disabled={submitting}>{submitting ? "Saving..." : "Save"}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+          <CurrencyInput
+            label="Amount"
+            currency="RM"
+            value={form.amount || ""}
+            onChange={(e) => setForm({ ...form, amount: parseFloat(e.target.value) || 0 })}
+          />
+
+          <div>
+            <Label htmlFor="collection_date" className="text-sm font-medium">Date</Label>
+            <Input
+              id="collection_date"
+              type="date"
+              value={form.collection_date}
+              onChange={(e) => setForm({ ...form, collection_date: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="notes" className="text-sm font-medium">Notes (Optional)</Label>
+            <Input
+              id="notes"
+              value={form.notes}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              placeholder="Add any notes..."
+            />
+          </div>
+        </div>
+      </FormModal>
     </div>
   );
 };

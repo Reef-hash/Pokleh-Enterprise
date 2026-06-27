@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FormModal } from "@/components/ui/FormModal";
+import { CurrencyInput, NumberInput, PhoneInput } from "@/components/ui/MobileOptimizedInputs";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Receipt } from "lucide-react";
@@ -140,41 +141,43 @@ export const ExpenseManagement = ({ userRole }: ExpenseManagementProps) => {
         </CardContent>
       </Card>
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add Expense</DialogTitle>
-            <DialogDescription>Record a new operational expense</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Category</Label>
-              <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
-                <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
-                <SelectContent>
-                  {EXPENSE_CATEGORIES.map((cat) => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Amount (RM)</Label>
-              <Input type="number" step="0.01" min={0.01} value={form.amount || ""} onChange={(e) => setForm({ ...form, amount: parseFloat(e.target.value) || 0 })} />
-            </div>
-            <div className="space-y-2">
-              <Label>Date</Label>
-              <Input type="date" value={form.expense_date} onChange={(e) => setForm({ ...form, expense_date: e.target.value })} />
-            </div>
-            <div className="space-y-2">
-              <Label>Notes</Label>
-              <Input value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Optional" />
-            </div>
+      <FormModal
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        title="Add Expense"
+        description="Record a new operational expense"
+        submitLabel="Add Expense"
+        submitDisabled={!form.category || form.amount <= 0}
+        isSubmitting={submitting}
+        onSubmit={handleAdd}
+        onCancel={() => setForm({ category: "", amount: 0, expense_date: new Date().toISOString().split("T")[0], notes: "" })}
+      >
+        <div className="space-y-3">
+          <div>
+            <Label htmlFor="category" className="text-sm font-medium">Category</Label>
+            <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
+              <SelectTrigger id="category"><SelectValue placeholder="Select category" /></SelectTrigger>
+              <SelectContent>
+                {EXPENSE_CATEGORIES.map((cat) => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}
+              </SelectContent>
+            </Select>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-            <Button onClick={handleAdd} disabled={submitting}>{submitting ? "Saving..." : "Save"}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          <CurrencyInput
+            label="Amount"
+            currency="RM"
+            value={form.amount || ""}
+            onChange={(e) => setForm({ ...form, amount: parseFloat(e.target.value) || 0 })}
+          />
+          <div>
+            <Label htmlFor="expense_date" className="text-sm font-medium">Date</Label>
+            <Input id="expense_date" type="date" value={form.expense_date} onChange={(e) => setForm({ ...form, expense_date: e.target.value })} />
+          </div>
+          <div>
+            <Label htmlFor="notes" className="text-sm font-medium">Notes (Optional)</Label>
+            <Input id="notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Add any notes..." />
+          </div>
+        </div>
+      </FormModal>
     </div>
   );
 };

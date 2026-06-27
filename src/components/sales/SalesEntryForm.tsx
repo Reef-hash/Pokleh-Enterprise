@@ -5,9 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FormModal } from "@/components/ui/FormModal";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { QuantityInput, CurrencyInput } from "@/components/ui/MobileOptimizedInputs";
 import { Plus, DollarSign, RotateCcw } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { useSales } from "@/hooks/useSales";
@@ -178,85 +179,110 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
         </CardContent>
       </Card>
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Record Sale</DialogTitle>
-            <DialogDescription>Record an ice sale to a customer</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Date</Label>
-              <Input type="date" value={form.sale_date} onChange={(e) => setForm({ ...form, sale_date: e.target.value })} />
-            </div>
-            <div className="space-y-2">
-              <Label>Customer</Label>
-              <Select value={form.customer_id} onValueChange={(v) => setForm({ ...form, customer_id: v })}>
-                <SelectTrigger><SelectValue placeholder="Select customer" /></SelectTrigger>
-                <SelectContent>
-                  {customers.filter((c) => c.active).map((c) => (<SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Truck</Label>
-              <Select value={form.truck_id} onValueChange={(v) => setForm({ ...form, truck_id: v })}>
-                <SelectTrigger><SelectValue placeholder="Select truck" /></SelectTrigger>
-                <SelectContent>
-                  {trucks.map((t) => (<SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Jenis Produk</Label>
-              <Select value={form.product_type} onValueChange={(v) => setForm({ ...form, product_type: v as ProductType })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {PRODUCT_TYPES.map((p) => (<SelectItem key={p} value={p}>{p}</SelectItem>))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Quantity (pax)</Label>
-              <Input type="number" min={1} value={form.quantity || ""} onChange={(e) => setForm({ ...form, quantity: parseInt(e.target.value) || 0 })} />
-            </div>
-            <div className="space-y-2">
-              <Label>Selling Price (RM)</Label>
-              <Input type="number" step="0.01" min={0} value={form.selling_price || ""} onChange={(e) => setForm({ ...form, selling_price: parseFloat(e.target.value) || 0 })} />
-              {suggested && (
-                <div className="flex items-center gap-2 text-sm">
-                  <span className={suggested.isCustomerSpecific ? "text-amber-600 font-medium" : "text-muted-foreground"}>
-                    {suggested.isCustomerSpecific ? "Harga khusus" : "Harga biasa"}: {formatCurrency(suggested.perPax)}/pax = {formatCurrency(suggested.total)}
-                  </span>
-                  {form.selling_price !== suggested.total && (
-                    <button type="button" onClick={applysuggested} className="inline-flex items-center gap-1 text-primary hover:underline">
-                      <RotateCcw className="h-3 w-3" /> Guna harga ini
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label>Payment Type</Label>
-              <Select value={form.payment_type} onValueChange={(v) => setForm({ ...form, payment_type: v as "cash" | "debt" })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="cash">Cash</SelectItem>
-                  <SelectItem value="debt">Debt</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Notes</Label>
-              <Input value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Optional" />
-            </div>
+      <FormModal
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        title="Record Sale"
+        description="Record an ice sale to a customer"
+        submitLabel="Save Sale"
+        submitDisabled={!form.customer_id || !form.truck_id || form.quantity <= 0 || form.selling_price <= 0}
+        isSubmitting={submitting}
+        onSubmit={handleAdd}
+        onCancel={() => setForm({ customer_id: "", truck_id: "", product_type: "Air Batu Besar", quantity: 0, selling_price: 0, payment_type: "cash", sale_date: new Date().toISOString().split("T")[0], notes: "" })}
+      >
+        <div className="space-y-3">
+          <div>
+            <Label htmlFor="sale_date" className="text-sm font-medium">Date</Label>
+            <Input
+              id="sale_date"
+              type="date"
+              value={form.sale_date}
+              onChange={(e) => setForm({ ...form, sale_date: e.target.value })}
+            />
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-            <Button onClick={handleAdd} disabled={submitting}>{submitting ? "Saving..." : "Save"}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+          <div>
+            <Label htmlFor="customer" className="text-sm font-medium">Customer</Label>
+            <Select value={form.customer_id} onValueChange={(v) => setForm({ ...form, customer_id: v })}>
+              <SelectTrigger id="customer"><SelectValue placeholder="Select customer" /></SelectTrigger>
+              <SelectContent>
+                {customers.filter((c) => c.active).map((c) => (<SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="truck" className="text-sm font-medium">Truck</Label>
+            <Select value={form.truck_id} onValueChange={(v) => setForm({ ...form, truck_id: v })}>
+              <SelectTrigger id="truck"><SelectValue placeholder="Select truck" /></SelectTrigger>
+              <SelectContent>
+                {trucks.map((t) => (<SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="product" className="text-sm font-medium">Jenis Produk</Label>
+            <Select value={form.product_type} onValueChange={(v) => setForm({ ...form, product_type: v as ProductType })}>
+              <SelectTrigger id="product"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {PRODUCT_TYPES.map((p) => (<SelectItem key={p} value={p}>{p}</SelectItem>))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <QuantityInput
+            label="Quantity (pax)"
+            value={form.quantity || ""}
+            onChange={(e) => setForm({ ...form, quantity: parseInt(e.target.value) || 0 })}
+            min={1}
+          />
+
+          <CurrencyInput
+            label="Selling Price"
+            currency="RM"
+            value={form.selling_price || ""}
+            onChange={(e) => setForm({ ...form, selling_price: parseFloat(e.target.value) || 0 })}
+          />
+
+          {suggested && (
+            <div className="bg-accent/30 p-2.5 rounded-lg">
+              <div className="flex items-center justify-between gap-2 text-sm">
+                <span className={suggested.isCustomerSpecific ? "text-amber-600 font-medium" : "text-muted-foreground"}>
+                  {suggested.isCustomerSpecific ? "Harga khusus" : "Harga biasa"}: {formatCurrency(suggested.perPax)}/pax
+                </span>
+                {form.selling_price !== suggested.total && (
+                  <button type="button" onClick={applysuggested} className="inline-flex items-center gap-1 text-primary text-xs hover:underline font-medium">
+                    <RotateCcw className="h-3 w-3" /> Guna
+                  </button>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Total: {formatCurrency(suggested.total)}</p>
+            </div>
+          )}
+
+          <div>
+            <Label htmlFor="payment" className="text-sm font-medium">Payment Type</Label>
+            <Select value={form.payment_type} onValueChange={(v) => setForm({ ...form, payment_type: v as "cash" | "debt" })}>
+              <SelectTrigger id="payment"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="cash">Cash</SelectItem>
+                <SelectItem value="debt">Debt</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="notes" className="text-sm font-medium">Notes (Optional)</Label>
+            <Input
+              id="notes"
+              value={form.notes}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              placeholder="Add any notes..."
+            />
+          </div>
+        </div>
+      </FormModal>
     </div>
   );
 };

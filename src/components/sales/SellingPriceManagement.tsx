@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -154,61 +153,65 @@ export const SellingPriceManagement = ({ userRole }: SellingPriceManagementProps
         </CardContent>
       </Card>
 
-      {/* Edit default price dialog */}
-      <Dialog open={editDefault.open} onOpenChange={(o) => setEditDefault((s) => ({ ...s, open: o }))}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Edit Harga Lalai — {editDefault.product_type}</DialogTitle></DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Harga Per Pax (RM)</Label>
-              <Input type="number" step="0.01" min={0} value={editDefault.price || ""} onChange={(e) => setEditDefault((s) => ({ ...s, price: parseFloat(e.target.value) || 0 }))} />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditDefault((s) => ({ ...s, open: false }))}>Batal</Button>
-            <Button onClick={handleSaveDefault} disabled={submitting}>{submitting ? "Menyimpan..." : "Simpan"}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <FormModal
+        open={editDefault.open}
+        onOpenChange={(o) => setEditDefault((s) => ({ ...s, open: o }))}
+        title={`Edit Harga Lalai — ${editDefault.product_type}`}
+        submitLabel="Simpan"
+        submitDisabled={editDefault.price <= 0}
+        isSubmitting={submitting}
+        onSubmit={handleSaveDefault}
+        onCancel={() => setEditDefault((s) => ({ ...s, open: false }))}
+      >
+        <CurrencyInput
+          label="Harga Per Pax"
+          currency="RM"
+          value={editDefault.price || ""}
+          onChange={(e) => setEditDefault((s) => ({ ...s, price: parseFloat(e.target.value) || 0 }))}
+        />
+      </FormModal>
 
-      {/* Add/edit customer override dialog */}
-      <Dialog open={editCustomer.open} onOpenChange={(o) => setEditCustomer((s) => ({ ...s, open: o }))}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>{editCustomer.id ? "Edit" : "Tambah"} Harga Khusus</DialogTitle></DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Pelanggan</Label>
-              <Select value={editCustomer.customer_id} onValueChange={(v) => setEditCustomer((s) => ({ ...s, customer_id: v }))} disabled={!!editCustomer.id}>
-                <SelectTrigger><SelectValue placeholder="Pilih pelanggan" /></SelectTrigger>
-                <SelectContent>
-                  {customers.filter((c) => c.active).map((c) => (<SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Jenis Produk</Label>
-              <Select value={editCustomer.product_type} onValueChange={(v) => setEditCustomer((s) => ({ ...s, product_type: v as ProductType }))} disabled={!!editCustomer.id}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {PRODUCT_TYPES.map((p) => (<SelectItem key={p} value={p}>{p}</SelectItem>))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Harga Per Pax (RM)</Label>
-              <Input type="number" step="0.01" min={0} value={editCustomer.price || ""} onChange={(e) => setEditCustomer((s) => ({ ...s, price: parseFloat(e.target.value) || 0 }))} />
-            </div>
-            <div className="space-y-2">
-              <Label>Nota (pilihan)</Label>
-              <Input value={editCustomer.notes} onChange={(e) => setEditCustomer((s) => ({ ...s, notes: e.target.value }))} placeholder="Contoh: Diskaun regular" />
-            </div>
+      <FormModal
+        open={editCustomer.open}
+        onOpenChange={(o) => setEditCustomer((s) => ({ ...s, open: o }))}
+        title={`${editCustomer.id ? "Edit" : "Tambah"} Harga Khusus`}
+        submitLabel="Simpan"
+        submitDisabled={!editCustomer.customer_id || editCustomer.price <= 0}
+        isSubmitting={submitting}
+        onSubmit={handleSaveCustomer}
+        onCancel={() => setEditCustomer((s) => ({ ...s, open: false }))}
+      >
+        <div className="space-y-3">
+          <div>
+            <Label htmlFor="customer" className="text-sm font-medium">Pelanggan</Label>
+            <Select value={editCustomer.customer_id} onValueChange={(v) => setEditCustomer((s) => ({ ...s, customer_id: v }))} disabled={!!editCustomer.id}>
+              <SelectTrigger id="customer"><SelectValue placeholder="Pilih pelanggan" /></SelectTrigger>
+              <SelectContent>
+                {customers.filter((c) => c.active).map((c) => (<SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>))}
+              </SelectContent>
+            </Select>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditCustomer((s) => ({ ...s, open: false }))}>Batal</Button>
-            <Button onClick={handleSaveCustomer} disabled={submitting || !editCustomer.customer_id}>{submitting ? "Menyimpan..." : "Simpan"}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          <div>
+            <Label htmlFor="product" className="text-sm font-medium">Jenis Produk</Label>
+            <Select value={editCustomer.product_type} onValueChange={(v) => setEditCustomer((s) => ({ ...s, product_type: v as ProductType }))} disabled={!!editCustomer.id}>
+              <SelectTrigger id="product"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {PRODUCT_TYPES.map((p) => (<SelectItem key={p} value={p}>{p}</SelectItem>))}
+              </SelectContent>
+            </Select>
+          </div>
+          <CurrencyInput
+            label="Harga Per Pax"
+            currency="RM"
+            value={editCustomer.price || ""}
+            onChange={(e) => setEditCustomer((s) => ({ ...s, price: parseFloat(e.target.value) || 0 }))}
+          />
+          <div>
+            <Label htmlFor="notes" className="text-sm font-medium">Nota (pilihan)</Label>
+            <Input id="notes" value={editCustomer.notes} onChange={(e) => setEditCustomer((s) => ({ ...s, notes: e.target.value }))} placeholder="Contoh: Diskaun regular" />
+          </div>
+        </div>
+      </FormModal>
     </div>
   );
 };

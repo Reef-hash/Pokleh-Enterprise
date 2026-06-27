@@ -1,10 +1,10 @@
 import { ReactNode, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { 
+import {
   Package,
-  Users, 
-  LogOut, 
+  Users,
+  LogOut,
   Menu,
   X,
   Home,
@@ -35,6 +35,7 @@ import { Logo } from "@/components/ui/Logo";
 import { getHelpContent } from "@/lib/help-content";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { useSyncStore } from "@/stores/syncStore";
+import { BottomNavigation } from "./BottomNavigation";
 
 interface User {
   id: string;
@@ -355,7 +356,7 @@ export const DashboardLayout = ({
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-auto p-4 content-scroll">
+        <main className="flex-1 overflow-auto p-4 pb-24 lg:pb-4 content-scroll">
           <div className="animate-fade-in-up">
             {children}
           </div>
@@ -373,11 +374,17 @@ export const DashboardLayout = ({
 
       {/* Overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden animate-fade-in"
           onClick={() => setSidebarOpen(false)}
         />
       )}
+
+      {/* Bottom Navigation (Mobile only) */}
+      <BottomNavigation
+        currentPage={currentPage}
+        onNavigate={onNavigate}
+      />
     </div>
   );
 };

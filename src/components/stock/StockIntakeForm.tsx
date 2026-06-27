@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FormModal } from "@/components/ui/FormModal";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { NumberInput, CurrencyInput } from "@/components/ui/MobileOptimizedInputs";
 import { Plus, Package } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { useStockIntake } from "@/hooks/useStockIntake";
@@ -141,78 +142,85 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
         </CardContent>
       </Card>
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Record Stock Intake</DialogTitle>
-            <DialogDescription>Record incoming ice stock from supplier. Enter quantity and cost for each product type collected on this trip.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Date</Label>
-              <Input type="date" value={intakeDate} onChange={(e) => setIntakeDate(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Truck</Label>
-              <Select value={truckId} onValueChange={setTruckId}>
-                <SelectTrigger><SelectValue placeholder="Select truck" /></SelectTrigger>
-                <SelectContent>
-                  {trucks.map((t) => (<SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Supplier</Label>
-              <Select value={supplierId} onValueChange={setSupplierId}>
-                <SelectTrigger><SelectValue placeholder="Select supplier" /></SelectTrigger>
-                <SelectContent>
-                  {suppliers.map((s) => (<SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-3 rounded-md border p-3">
-              <div className="flex items-center gap-2 text-sm font-medium">
-                <Package className="h-4 w-4" />
-                Products (leave blank to skip)
-              </div>
-              {PRODUCT_TYPES.map((p) => (
-                <div key={p} className="grid grid-cols-3 items-end gap-2">
-                  <Label className="col-span-3 text-xs text-muted-foreground">{p}</Label>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Qty (pax)</Label>
-                    <Input
-                      type="number"
-                      min={0}
-                      value={lines[p].quantity_received}
-                      onChange={(e) => updateLine(p, "quantity_received", e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-1 col-span-2">
-                    <Label className="text-xs">Cost/Pax (RM)</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min={0}
-                      value={lines[p].cost_per_pax}
-                      onChange={(e) => updateLine(p, "cost_per_pax", e.target.value)}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="space-y-2">
-              <Label>Notes</Label>
-              <Input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional notes" />
-            </div>
+      <FormModal
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        title="Record Stock Intake"
+        description="Enter quantity and cost for each product type"
+        submitLabel="Save Intake"
+        submitDisabled={!supplierId || !truckId}
+        isSubmitting={submitting}
+        onSubmit={handleAdd}
+        onCancel={resetForm}
+      >
+        <div className="space-y-3">
+          <div>
+            <Label htmlFor="intake_date" className="text-sm font-medium">Date</Label>
+            <Input
+              id="intake_date"
+              type="date"
+              value={intakeDate}
+              onChange={(e) => setIntakeDate(e.target.value)}
+            />
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-            <Button onClick={handleAdd} disabled={submitting}>{submitting ? "Saving..." : "Save"}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+          <div>
+            <Label htmlFor="truck" className="text-sm font-medium">Truck</Label>
+            <Select value={truckId} onValueChange={setTruckId}>
+              <SelectTrigger id="truck"><SelectValue placeholder="Select truck" /></SelectTrigger>
+              <SelectContent>
+                {trucks.map((t) => (<SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="supplier" className="text-sm font-medium">Supplier</Label>
+            <Select value={supplierId} onValueChange={setSupplierId}>
+              <SelectTrigger id="supplier"><SelectValue placeholder="Select supplier" /></SelectTrigger>
+              <SelectContent>
+                {suppliers.map((s) => (<SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2 pt-1">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <Package className="h-4 w-4" />
+              Products (leave blank to skip)
+            </div>
+            {PRODUCT_TYPES.map((p) => (
+              <div key={p} className="space-y-1.5 pb-2">
+                <p className="text-xs text-muted-foreground font-medium">{p}</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <NumberInput
+                    label="Qty (pax)"
+                    min={0}
+                    value={lines[p].quantity_received}
+                    onChange={(e) => updateLine(p, "quantity_received", e.target.value)}
+                  />
+                  <CurrencyInput
+                    label="Cost/Pax"
+                    currency="RM"
+                    value={lines[p].cost_per_pax}
+                    onChange={(e) => updateLine(p, "cost_per_pax", e.target.value)}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div>
+            <Label htmlFor="notes" className="text-sm font-medium">Notes (Optional)</Label>
+            <Input
+              id="notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Add any notes..."
+            />
+          </div>
+        </div>
+      </FormModal>
     </div>
   );
 };

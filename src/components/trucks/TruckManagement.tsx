@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FormModal } from "@/components/ui/FormModal";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Plus, Edit, Trash2, Truck as TruckIcon } from "lucide-react";
@@ -178,43 +178,48 @@ export const TruckManagement = ({ userRole }: TruckManagementProps) => {
         </CardContent>
       </Card>
 
-      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add Truck</DialogTitle>
-            <DialogDescription>Register a new lorry</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Truck Name</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Lori A" />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddOpen(false)}>Cancel</Button>
-            <Button onClick={handleAdd} disabled={submitting}>{submitting ? "Creating..." : "Create"}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <FormModal
+        open={isAddOpen}
+        onOpenChange={setIsAddOpen}
+        title="Add Truck"
+        description="Register a new lorry"
+        submitLabel="Create Truck"
+        submitDisabled={!name.trim()}
+        isSubmitting={submitting}
+        onSubmit={handleAdd}
+        onCancel={() => setName("")}
+      >
+        <div>
+          <Label htmlFor="add_truck_name" className="text-sm font-medium">Truck Name</Label>
+          <Input
+            id="add_truck_name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="e.g. Lori A"
+          />
+        </div>
+      </FormModal>
 
-      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Truck</DialogTitle>
-            <DialogDescription>Update the truck name</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Truck Name</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditOpen(false)}>Cancel</Button>
-            <Button onClick={handleEdit} disabled={submitting}>{submitting ? "Updating..." : "Update"}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <FormModal
+        open={isEditOpen}
+        onOpenChange={setIsEditOpen}
+        title="Edit Truck"
+        description="Update the truck name"
+        submitLabel="Update Truck"
+        submitDisabled={!name.trim()}
+        isSubmitting={submitting}
+        onSubmit={handleEdit}
+        onCancel={() => { setName(""); setEditingId(null); }}
+      >
+        <div>
+          <Label htmlFor="edit_truck_name" className="text-sm font-medium">Truck Name</Label>
+          <Input
+            id="edit_truck_name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
+      </FormModal>
 
       <AlertDialog open={!!deleteConfirmId} onOpenChange={(o) => { if (!o) setDeleteConfirmId(null); }}>
         <AlertDialogContent>

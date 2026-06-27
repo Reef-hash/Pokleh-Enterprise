@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FormModal } from "@/components/ui/FormModal";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { QuantityInput } from "@/components/ui/MobileOptimizedInputs";
 import { Plus, ArrowRight } from "lucide-react";
 import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -154,80 +154,85 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
         </CardContent>
       </Card>
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Distribute Stock</DialogTitle>
-            <DialogDescription>Transfer stock from one truck to another</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>From Truck</Label>
-              <Select value={form.from_truck_id} onValueChange={(v) => setForm({ ...form, from_truck_id: v, intake_id: "" })}>
-                <SelectTrigger><SelectValue placeholder="Select source truck" /></SelectTrigger>
-                <SelectContent>
-                  {trucks.map((t) => (<SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>To Truck</Label>
-              <Select value={form.to_truck_id} onValueChange={(v) => setForm({ ...form, to_truck_id: v })}>
-                <SelectTrigger><SelectValue placeholder="Select destination truck" /></SelectTrigger>
-                <SelectContent>
-                  {trucks.filter((t) => t.id !== form.from_truck_id).map((t) => (<SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Product</Label>
-              <Select value={form.product_type} onValueChange={(v) => setForm({ ...form, product_type: v as ProductType })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {PRODUCT_TYPES.map((p) => (<SelectItem key={p} value={p}>{p}</SelectItem>))}
-                </SelectContent>
-              </Select>
-              {form.from_truck_id && (
-                <p className="text-sm text-muted-foreground">
-                  {checkingAvailable ? "Checking available stock…" : available !== null ? `Available: ${available} pax` : ""}
-                </p>
-              )}
-            </div>
-            {truckIntakes.length > 0 && (
-              <div className="space-y-2">
-                <Label>Intake Reference (optional)</Label>
-                <Select value={form.intake_id || "none"} onValueChange={(v) => setForm({ ...form, intake_id: v === "none" ? "" : v })}>
-                  <SelectTrigger><SelectValue placeholder="Tag to a specific intake batch" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    {truckIntakes.map((i) => (
-                      <SelectItem key={i.id} value={i.id}>
-                        {i.product_type} — {new Date(i.intake_date).toLocaleDateString()} ({i.quantity_received} pax)
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-            <div className="space-y-2">
-              <Label>Quantity (pax)</Label>
-              <Input
-                type="number"
-                min={1}
-                value={form.quantity_assigned || ""}
-                onChange={(e) => setForm({ ...form, quantity_assigned: parseInt(e.target.value) || 0 })}
-              />
-              {overLimit && (
-                <p className="text-sm text-destructive">Cannot exceed available stock ({available} pax)</p>
-              )}
-            </div>
+      <FormModal
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        title="Distribute Stock"
+        description="Transfer stock from one truck to another"
+        submitLabel="Distribute"
+        submitDisabled={!form.from_truck_id || !form.to_truck_id || form.quantity_assigned <= 0 || overLimit}
+        isSubmitting={submitting}
+        onSubmit={handleAdd}
+        onCancel={() => setForm({ from_truck_id: "", to_truck_id: "", product_type: "Air Batu Besar", quantity_assigned: 0, intake_id: "" })}
+      >
+        <div className="space-y-3">
+          <div>
+            <Label htmlFor="from_truck" className="text-sm font-medium">From Truck</Label>
+            <Select value={form.from_truck_id} onValueChange={(v) => setForm({ ...form, from_truck_id: v, intake_id: "" })}>
+              <SelectTrigger id="from_truck"><SelectValue placeholder="Select source truck" /></SelectTrigger>
+              <SelectContent>
+                {trucks.map((t) => (<SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>))}
+              </SelectContent>
+            </Select>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-            <Button onClick={handleAdd} disabled={submitting || overLimit}>{submitting ? "Saving..." : "Save"}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+          <div>
+            <Label htmlFor="to_truck" className="text-sm font-medium">To Truck</Label>
+            <Select value={form.to_truck_id} onValueChange={(v) => setForm({ ...form, to_truck_id: v })}>
+              <SelectTrigger id="to_truck"><SelectValue placeholder="Select destination truck" /></SelectTrigger>
+              <SelectContent>
+                {trucks.filter((t) => t.id !== form.from_truck_id).map((t) => (<SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="product" className="text-sm font-medium">Product</Label>
+            <Select value={form.product_type} onValueChange={(v) => setForm({ ...form, product_type: v as ProductType })}>
+              <SelectTrigger id="product"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {PRODUCT_TYPES.map((p) => (<SelectItem key={p} value={p}>{p}</SelectItem>))}
+              </SelectContent>
+            </Select>
+            {form.from_truck_id && (
+              <p className="text-xs text-muted-foreground mt-1.5">
+                {checkingAvailable ? "Checking available stock…" : available !== null ? `Available: ${available} pax` : ""}
+              </p>
+            )}
+          </div>
+
+          {truckIntakes.length > 0 && (
+            <div>
+              <Label htmlFor="intake_ref" className="text-sm font-medium">Intake Reference (optional)</Label>
+              <Select value={form.intake_id || "none"} onValueChange={(v) => setForm({ ...form, intake_id: v === "none" ? "" : v })}>
+                <SelectTrigger id="intake_ref"><SelectValue placeholder="Tag to a specific intake batch" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
+                  {truckIntakes.map((i) => (
+                    <SelectItem key={i.id} value={i.id}>
+                      {i.product_type} — {new Date(i.intake_date).toLocaleDateString()} ({i.quantity_received} pax)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          <QuantityInput
+            label="Quantity (pax)"
+            value={form.quantity_assigned || ""}
+            onChange={(e) => setForm({ ...form, quantity_assigned: parseInt(e.target.value) || 0 })}
+            min={1}
+            max={available || undefined}
+          />
+
+          {overLimit && (
+            <div className="bg-destructive/10 text-destructive text-xs p-2 rounded">
+              Cannot exceed available stock ({available} pax)
+            </div>
+          )}
+        </div>
+      </FormModal>
     </div>
   );
 };

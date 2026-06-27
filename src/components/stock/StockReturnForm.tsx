@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FormModal } from "@/components/ui/FormModal";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { QuantityInput } from "@/components/ui/MobileOptimizedInputs";
 import { Plus } from "lucide-react";
 import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -124,69 +125,80 @@ export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
         </CardContent>
       </Card>
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Record Stock Return</DialogTitle>
-            <DialogDescription>Record unsold stock returned from a truck</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Date</Label>
-              <Input type="date" value={form.return_date} onChange={(e) => setForm({ ...form, return_date: e.target.value })} />
-            </div>
-            <div className="space-y-2">
-              <Label>Truck</Label>
-              <Select value={form.truck_id} onValueChange={(v) => setForm({ ...form, truck_id: v, distribution_id: "", intake_id: "" })}>
-                <SelectTrigger><SelectValue placeholder="Select truck" /></SelectTrigger>
+      <FormModal
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        title="Record Stock Return"
+        description="Record unsold stock returned from a truck"
+        submitLabel="Record Return"
+        submitDisabled={!form.truck_id || form.quantity_returned <= 0}
+        isSubmitting={submitting}
+        onSubmit={handleAdd}
+        onCancel={() => setForm({ truck_id: "", distribution_id: "", intake_id: "", quantity_returned: 0, return_date: new Date().toISOString().split("T")[0] })}
+      >
+        <div className="space-y-3">
+          <div>
+            <Label htmlFor="return_date" className="text-sm font-medium">Date</Label>
+            <Input
+              id="return_date"
+              type="date"
+              value={form.return_date}
+              onChange={(e) => setForm({ ...form, return_date: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="truck" className="text-sm font-medium">Truck</Label>
+            <Select value={form.truck_id} onValueChange={(v) => setForm({ ...form, truck_id: v, distribution_id: "", intake_id: "" })}>
+              <SelectTrigger id="truck"><SelectValue placeholder="Select truck" /></SelectTrigger>
+              <SelectContent>
+                {trucks.map((t) => (<SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {truckDistributions.length > 0 && (
+            <div>
+              <Label htmlFor="distribution" className="text-sm font-medium">Distribution (optional)</Label>
+              <Select value={form.distribution_id || "none"} onValueChange={(v) => setForm({ ...form, distribution_id: v === "none" ? "" : v })}>
+                <SelectTrigger id="distribution"><SelectValue placeholder="Tag to a specific transfer" /></SelectTrigger>
                 <SelectContent>
-                  {trucks.map((t) => (<SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>))}
+                  <SelectItem value="none">None</SelectItem>
+                  {truckDistributions.map((d) => (
+                    <SelectItem key={d.id} value={d.id}>
+                      {d.from_truck?.name} → {d.to_truck?.name} — {d.product_type} ({d.quantity_assigned} pax)
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
-            {truckDistributions.length > 0 && (
-              <div className="space-y-2">
-                <Label>Distribution (optional)</Label>
-                <Select value={form.distribution_id || "none"} onValueChange={(v) => setForm({ ...form, distribution_id: v === "none" ? "" : v })}>
-                  <SelectTrigger><SelectValue placeholder="Tag to a specific transfer" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    {truckDistributions.map((d) => (
-                      <SelectItem key={d.id} value={d.id}>
-                        {d.from_truck?.name} → {d.to_truck?.name} — {d.product_type} ({d.quantity_assigned} pax)
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-            {truckIntakes.length > 0 && (
-              <div className="space-y-2">
-                <Label>Intake (optional, for supplier settlement credit)</Label>
-                <Select value={form.intake_id || "none"} onValueChange={(v) => setForm({ ...form, intake_id: v === "none" ? "" : v })}>
-                  <SelectTrigger><SelectValue placeholder="Tag to a specific intake batch" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    {truckIntakes.map((i) => (
-                      <SelectItem key={i.id} value={i.id}>
-                        {i.product_type} — {new Date(i.intake_date).toLocaleDateString()} ({i.quantity_received} pax)
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-            <div className="space-y-2">
-              <Label>Quantity Returned (pax)</Label>
-              <Input type="number" min={0} value={form.quantity_returned || ""} onChange={(e) => setForm({ ...form, quantity_returned: parseInt(e.target.value) || 0 })} />
+          )}
+
+          {truckIntakes.length > 0 && (
+            <div>
+              <Label htmlFor="intake" className="text-sm font-medium">Intake (optional, for supplier settlement credit)</Label>
+              <Select value={form.intake_id || "none"} onValueChange={(v) => setForm({ ...form, intake_id: v === "none" ? "" : v })}>
+                <SelectTrigger id="intake"><SelectValue placeholder="Tag to a specific intake batch" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
+                  {truckIntakes.map((i) => (
+                    <SelectItem key={i.id} value={i.id}>
+                      {i.product_type} — {new Date(i.intake_date).toLocaleDateString()} ({i.quantity_received} pax)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-            <Button onClick={handleAdd} disabled={submitting}>{submitting ? "Saving..." : "Save"}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          )}
+
+          <QuantityInput
+            label="Quantity Returned (pax)"
+            value={form.quantity_returned || ""}
+            onChange={(e) => setForm({ ...form, quantity_returned: parseInt(e.target.value) || 0 })}
+            min={0}
+          />
+        </div>
+      </FormModal>
     </div>
   );
 };
