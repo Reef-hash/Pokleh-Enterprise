@@ -14,14 +14,14 @@ export interface OfflineCustomer {
   name: string;
   phone?: string;
   address?: string;
-  area_id: string;
+  truck_id: string;
   debt_balance: number;
   active: boolean;
   updatedAt: string;
   syncedAt?: string;
 }
 
-export interface OfflineArea {
+export interface OfflineTruck {
   id: string;
   name: string;
   syncedAt?: string;
@@ -37,8 +37,11 @@ export interface OfflineSupplier {
 
 export interface OfflineStockIntake {
   id: string;
+  intake_date: string;
   supplier_id: string;
-  quantity: number;
+  truck_id: string;
+  product_type: string;
+  quantity_received: number;
   cost_per_pax: number;
   notes?: string;
   created_by: string;
@@ -48,19 +51,23 @@ export interface OfflineStockIntake {
 
 export interface OfflineStockDistribution {
   id: string;
-  intake_id: string;
-  staff_id: string;
-  area_id: string;
-  quantity: number;
-  notes?: string;
+  intake_id?: string;
+  from_truck_id: string;
+  to_truck_id: string;
+  product_type: string;
+  quantity_assigned: number;
+  created_by: string;
   created_at: string;
   syncedAt?: string;
 }
 
 export interface OfflineStockReturn {
   id: string;
-  distribution_id: string;
+  distribution_id?: string;
+  intake_id?: string;
+  truck_id: string;
   quantity_returned: number;
+  return_date: string;
   notes?: string;
   created_by: string;
   created_at: string;
@@ -82,7 +89,8 @@ export interface OfflineSupplierSettlement {
 export interface OfflineSale {
   id: string;
   customer_id: string;
-  area_id: string;
+  truck_id: string;
+  product_type: string;
   quantity: number;
   selling_price: number;
   payment_type: "cash" | "debt";
@@ -165,11 +173,15 @@ export interface OfflineSupplierPriceHistory {
 export interface OfflineDailyClosing {
   id: string;
   closing_date: string;
-  area_id: string;
+  truck_id: string;
+  product_type: string;
   status: "open" | "closed" | "reconciled";
-  total_assigned: number;
+  total_intake: number;
   total_sold: number;
   total_returned: number;
+  total_transfer_in: number;
+  total_transfer_out: number;
+  closing_balance: number;
   cash_sales: number;
   debt_sales: number;
   debt_collections: number;
@@ -187,7 +199,7 @@ export interface OfflineDailyClosing {
 export class PoklehDB extends Dexie {
   profiles!: Table<OfflineProfile, number>;
   customers!: Table<OfflineCustomer, string>;
-  areas!: Table<OfflineArea, string>;
+  trucks!: Table<OfflineTruck, string>;
   suppliers!: Table<OfflineSupplier, string>;
   stockIntakes!: Table<OfflineStockIntake, string>;
   stockDistributions!: Table<OfflineStockDistribution, string>;
@@ -219,6 +231,25 @@ export class PoklehDB extends Dexie {
       expenses: "id, category, expense_date, created_at",
       supplierPriceHistory: "id, supplier_id, effective_date",
       dailyClosings: "id, closing_date, area_id, status",
+      syncQueue: "++id, entity, entityId, createdAt",
+      auditLogs: "++id, entity, entity_id, created_at",
+    });
+    this.version(6).stores({
+      profiles: "++id, user_id, role",
+      customers: "id, name, truck_id, active",
+      areas: null,
+      trucks: "id, name",
+      suppliers: "id, name",
+      stockIntakes: "id, supplier_id, truck_id, product_type, intake_date, created_at",
+      stockDistributions: "id, intake_id, from_truck_id, to_truck_id, product_type, created_at",
+      stockReturns: "id, distribution_id, intake_id, truck_id, return_date, created_at",
+      supplierSettlements: "id, intake_id, settled_date",
+      sales: "id, customer_id, truck_id, staff_id, sale_date, payment_type, product_type",
+      debtLedger: "id, customer_id, entry_type, created_at",
+      debtCollections: "id, customer_id, staff_id, collection_date",
+      expenses: "id, category, expense_date, created_at",
+      supplierPriceHistory: "id, supplier_id, effective_date",
+      dailyClosings: "id, closing_date, truck_id, product_type, status",
       syncQueue: "++id, entity, entityId, createdAt",
       auditLogs: "++id, entity, entity_id, created_at",
     });

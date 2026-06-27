@@ -6,7 +6,7 @@ import { useSales } from "@/hooks/useSales";
 import { useExpenses } from "@/hooks/useExpenses";
 import { useDebtCollection } from "@/hooks/useDebtCollection";
 import { useStockIntake } from "@/hooks/useStockIntake";
-import { useAreas } from "@/hooks/useAreas";
+import { useTrucks } from "@/hooks/useTrucks";
 import { formatCurrency } from "@/lib/currency";
 
 const COLORS = ["#2563eb", "#16a34a", "#dc2626", "#f59e0b", "#8b5cf6", "#ec4899"];
@@ -20,7 +20,7 @@ export const PoklehReports = ({ userRole }: PoklehReportsProps) => {
   const { expenses } = useExpenses();
   const { collections } = useDebtCollection();
   const { intakes } = useStockIntake();
-  const { areas } = useAreas();
+  const { trucks } = useTrucks();
 
   const dailyData = useMemo(() => {
     const map = new Map<string, { date: string; sold: number; cash: number; debt: number; collected: number; expenses: number; received: number }>();
@@ -32,14 +32,14 @@ export const PoklehReports = ({ userRole }: PoklehReportsProps) => {
     return Array.from(map.values()).sort((a, b) => a.date.localeCompare(b.date)).slice(-30);
   }, [sales, collections, expenses, intakes]);
 
-  const areaData = useMemo(() => {
-    const map = new Map<string, { area: string; sold: number; revenue: number }>();
-    areas.forEach((a) => { if (!map.has(a.id)) map.set(a.id, { area: a.name, sold: 0, revenue: 0 }); });
+  const truckData = useMemo(() => {
+    const map = new Map<string, { truck: string; sold: number; revenue: number }>();
+    trucks.forEach((t) => { if (!map.has(t.id)) map.set(t.id, { truck: t.name, sold: 0, revenue: 0 }); });
     sales.forEach((s) => {
-      if (map.has(s.area_id)) { const d = map.get(s.area_id)!; d.sold += s.quantity; d.revenue += s.selling_price; }
+      if (map.has(s.truck_id)) { const d = map.get(s.truck_id)!; d.sold += s.quantity; d.revenue += s.selling_price; }
     });
     return Array.from(map.values());
-  }, [sales, areas]);
+  }, [sales, trucks]);
 
   const totalRevenue = useMemo(() => sales.reduce((s, x) => s + x.selling_price, 0), [sales]);
   const totalExpenses = useMemo(() => expenses.reduce((s, x) => s + x.amount, 0), [expenses]);
@@ -88,7 +88,7 @@ export const PoklehReports = ({ userRole }: PoklehReportsProps) => {
       <Tabs defaultValue="daily">
         <TabsList>
           <TabsTrigger value="daily">Daily Trends</TabsTrigger>
-          {userRole === "admin" && <TabsTrigger value="area">By Area</TabsTrigger>}
+          {userRole === "admin" && <TabsTrigger value="truck">By Truck</TabsTrigger>}
           {userRole === "admin" && <TabsTrigger value="staff">By Staff</TabsTrigger>}
           {userRole === "admin" && <TabsTrigger value="company">Company Overview</TabsTrigger>}
         </TabsList>
@@ -131,14 +131,14 @@ export const PoklehReports = ({ userRole }: PoklehReportsProps) => {
         </TabsContent>
 
         {userRole === "admin" && (
-          <TabsContent value="area" className="space-y-4 mt-4">
+          <TabsContent value="truck" className="space-y-4 mt-4">
             <Card>
-              <CardHeader><CardTitle>Sales by Area</CardTitle><CardDescription>Comparison across all areas</CardDescription></CardHeader>
+              <CardHeader><CardTitle>Sales by Truck</CardTitle><CardDescription>Comparison across all trucks</CardDescription></CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={350}>
-                  <BarChart data={areaData}>
+                  <BarChart data={truckData}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="area" />
+                    <XAxis dataKey="truck" />
                     <YAxis />
                     <Tooltip />
                     <Legend />

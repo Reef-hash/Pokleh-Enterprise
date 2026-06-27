@@ -25,8 +25,9 @@ export const useStockDistribution = (intakeId?: string) => {
   }, [intakeId]);
 
   const addDistribution = async (data: {
-    intake_id: string;
-    area_id: string;
+    intake_id?: string;
+    from_truck_id: string;
+    to_truck_id: string;
     product_type: ProductType;
     quantity_assigned: number;
   }) => {
@@ -36,8 +37,9 @@ export const useStockDistribution = (intakeId?: string) => {
     const now = new Date().toISOString();
     const optimistic: StockDistribution = {
       id: tempId,
-      intake_id: data.intake_id,
-      area_id: data.area_id,
+      intake_id: data.intake_id ?? null,
+      from_truck_id: data.from_truck_id,
+      to_truck_id: data.to_truck_id,
       product_type: data.product_type,
       quantity_assigned: data.quantity_assigned,
       created_by: userId!,
@@ -47,8 +49,8 @@ export const useStockDistribution = (intakeId?: string) => {
       entity: "stock_distribution",
       action: "INSERT",
       userId,
-      data: { ...data, created_by: userId },
-      execute: () => stockDistributionRepo.create({ ...data, created_by: userId }),
+      data: { ...data, intake_id: data.intake_id ?? null, created_by: userId },
+      execute: () => stockDistributionRepo.create({ ...data, intake_id: data.intake_id ?? null, created_by: userId }),
       optimistic: {
         add: () => setDistributions((prev) => [optimistic, ...prev]),
         remove: () => setDistributions((prev) => prev.filter((d) => d.id !== tempId)),

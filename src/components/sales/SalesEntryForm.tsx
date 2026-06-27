@@ -12,7 +12,7 @@ import { Plus, DollarSign, RotateCcw } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { useSales } from "@/hooks/useSales";
 import { useCustomers } from "@/hooks/useCustomers";
-import { useAreas } from "@/hooks/useAreas";
+import { useTrucks } from "@/hooks/useTrucks";
 import { useSellingPrices } from "@/hooks/useSellingPrices";
 import { useAuthStore } from "@/stores/authStore";
 import { formatCurrency } from "@/lib/currency";
@@ -26,13 +26,13 @@ interface SalesEntryFormProps {
 export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
   const { sales, loading, addSale } = useSales();
   const { customers } = useCustomers();
-  const { areas } = useAreas();
+  const { trucks } = useTrucks();
   const { lookupPrice } = useSellingPrices();
   const user = useAuthStore((s) => s.user);
   const [isOpen, setIsOpen] = useState(false);
   const [form, setForm] = useState({
     customer_id: "",
-    area_id: "",
+    truck_id: "",
     product_type: "Air Batu Besar" as ProductType,
     quantity: 0,
     selling_price: 0,
@@ -66,12 +66,12 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
   if (loading) return <PageLoader />;
 
   const handleAdd = async () => {
-    if (!form.customer_id || !form.area_id || form.quantity <= 0 || form.selling_price <= 0 || submitting) { toast.error("Please select a customer, area, and enter valid quantity and price."); return; }
+    if (!form.customer_id || !form.truck_id || form.quantity <= 0 || form.selling_price <= 0 || submitting) { toast.error("Please select a customer, truck, and enter valid quantity and price."); return; }
     setSubmitting(true);
     try {
       const result = await addSale(form);
       if (result.success) {
-        setForm({ customer_id: "", area_id: "", product_type: "Air Batu Besar", quantity: 0, selling_price: 0, payment_type: "cash", sale_date: new Date().toISOString().split("T")[0], notes: "" });
+        setForm({ customer_id: "", truck_id: "", product_type: "Air Batu Besar", quantity: 0, selling_price: 0, payment_type: "cash", sale_date: new Date().toISOString().split("T")[0], notes: "" });
         setIsOpen(false);
       }
     } finally {
@@ -121,7 +121,7 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
                 <TableRow>
                   <TableHead>Date</TableHead>
                   <TableHead>Customer</TableHead>
-                  <TableHead>Area</TableHead>
+                  <TableHead>Truck</TableHead>
                   <TableHead>Product</TableHead>
                   <TableHead>Qty</TableHead>
                   <TableHead>Amount</TableHead>
@@ -133,7 +133,7 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
                   <TableRow key={s.id}>
                     <TableCell>{new Date(s.sale_date).toLocaleDateString()}</TableCell>
                     <TableCell className="font-medium">{s.customer?.name || "—"}</TableCell>
-                    <TableCell>{s.area?.name || "—"}</TableCell>                    <TableCell className="text-sm">{s.product_type || "—"}</TableCell>                    <TableCell>{s.quantity}</TableCell>
+                    <TableCell>{s.truck?.name || "—"}</TableCell>                    <TableCell className="text-sm">{s.product_type || "—"}</TableCell>                    <TableCell>{s.quantity}</TableCell>
                     <TableCell>{formatCurrency(s.selling_price)}</TableCell>
                     <TableCell>
                       <span className={s.payment_type === "debt" ? "text-destructive font-medium" : "text-green-600 font-medium"}>
@@ -162,7 +162,7 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
                 <ResponsiveCard key={s.id}>
                   <ResponsiveRow label="Date">{new Date(s.sale_date).toLocaleDateString()}</ResponsiveRow>
                   <ResponsiveRow label="Customer">{s.customer?.name || "—"}</ResponsiveRow>
-                  <ResponsiveRow label="Area">{s.area?.name || "—"}</ResponsiveRow>
+                  <ResponsiveRow label="Truck">{s.truck?.name || "—"}</ResponsiveRow>
                   <ResponsiveRow label="Product">{s.product_type || "—"}</ResponsiveRow>
                   <ResponsiveRow label="Qty">{s.quantity}</ResponsiveRow>
                   <ResponsiveRow label="Amount">{formatCurrency(s.selling_price)}</ResponsiveRow>
@@ -199,11 +199,11 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Area</Label>
-              <Select value={form.area_id} onValueChange={(v) => setForm({ ...form, area_id: v })}>
-                <SelectTrigger><SelectValue placeholder="Select area" /></SelectTrigger>
+              <Label>Truck</Label>
+              <Select value={form.truck_id} onValueChange={(v) => setForm({ ...form, truck_id: v })}>
+                <SelectTrigger><SelectValue placeholder="Select truck" /></SelectTrigger>
                 <SelectContent>
-                  {areas.map((a) => (<SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>))}
+                  {trucks.map((t) => (<SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>))}
                 </SelectContent>
               </Select>
             </div>

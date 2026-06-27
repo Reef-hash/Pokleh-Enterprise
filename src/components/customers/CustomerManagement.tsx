@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Search, Phone, MapPin } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { useCustomers } from "@/hooks/useCustomers";
-import { useAreas } from "@/hooks/useAreas";
+import { useTrucks } from "@/hooks/useTrucks";
 import type { Customer } from "@/types/pokleh";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/currency";
@@ -22,30 +22,30 @@ interface CustomerManagementProps {
 }
 
 export const CustomerManagement = ({ userRole }: CustomerManagementProps) => {
-  const { areas } = useAreas();
+  const { trucks } = useTrucks();
   const { customers, loading, addCustomer, updateCustomer, toggleActive } = useCustomers();
   const [search, setSearch] = useState("");
-  const [areaFilter, setAreaFilter] = useState("all");
+  const [truckFilter, setTruckFilter] = useState("all");
   const [isAddOpen, setIsAddOpen] = useState(false);
-  const [form, setForm] = useState({ name: "", phone: "", address: "", area_id: "" });
+  const [form, setForm] = useState({ name: "", phone: "", address: "", truck_id: "" });
   const [submitting, setSubmitting] = useState(false);
 
   if (loading) return <PageLoader />;
 
   const filtered = customers.filter((c) => {
     const matchSearch = c.name.toLowerCase().includes(search.toLowerCase()) || c.phone?.includes(search);
-    const matchArea = areaFilter === "all" || c.area_id === areaFilter;
-    return matchSearch && matchArea;
+    const matchTruck = truckFilter === "all" || c.truck_id === truckFilter;
+    return matchSearch && matchTruck;
   });
 
   const handleAdd = async () => {
-    if (!form.name || !form.area_id || submitting) { toast.error("Please enter a customer name and select an area."); return; }
+    if (!form.name || !form.truck_id || submitting) { toast.error("Please enter a customer name and select a truck."); return; }
     setSubmitting(true);
     try {
-      const selectedArea = areas.find((a) => a.id === form.area_id);
-      const result = await addCustomer({ ...form, area: selectedArea });
+      const selectedTruck = trucks.find((t) => t.id === form.truck_id);
+      const result = await addCustomer({ ...form, truck: selectedTruck });
       if (result.success) {
-        setForm({ name: "", phone: "", address: "", area_id: "" });
+        setForm({ name: "", phone: "", address: "", truck_id: "" });
         setIsAddOpen(false);
       }
     } finally {
@@ -70,14 +70,14 @@ export const CustomerManagement = ({ userRole }: CustomerManagementProps) => {
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input className="pl-10" placeholder="Search by name or phone..." value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
-            <Select value={areaFilter} onValueChange={setAreaFilter}>
+            <Select value={truckFilter} onValueChange={setTruckFilter}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="All Areas" />
+                <SelectValue placeholder="All Trucks" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Areas</SelectItem>
-                {areas.map((a) => (
-                  <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+                <SelectItem value="all">All Trucks</SelectItem>
+                {trucks.map((t) => (
+                  <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -97,7 +97,7 @@ export const CustomerManagement = ({ userRole }: CustomerManagementProps) => {
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Phone</TableHead>
-                  <TableHead>Area</TableHead>
+                  <TableHead>Truck</TableHead>
                   <TableHead>Debt Balance</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
@@ -114,7 +114,7 @@ export const CustomerManagement = ({ userRole }: CustomerManagementProps) => {
                   <TableRow key={c.id}>
                     <TableCell className="font-medium">{c.name}</TableCell>
                     <TableCell>{c.phone ? <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{c.phone}</span> : "—"}</TableCell>
-                    <TableCell><span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{c.area?.name || "—"}</span></TableCell>
+                    <TableCell><span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{c.truck?.name || "—"}</span></TableCell>
                     <TableCell className={c.debt_balance > 0 ? "text-destructive font-medium" : ""}>
                       {formatCurrency(c.debt_balance)}
                     </TableCell>
@@ -138,7 +138,7 @@ export const CustomerManagement = ({ userRole }: CustomerManagementProps) => {
                 <ResponsiveCard key={c.id}>
                   <ResponsiveRow label="Name">{c.name}</ResponsiveRow>
                   <ResponsiveRow label="Phone">{c.phone ? <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{c.phone}</span> : "—"}</ResponsiveRow>
-                  <ResponsiveRow label="Area"><span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{c.area?.name || "—"}</span></ResponsiveRow>
+                  <ResponsiveRow label="Truck"><span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{c.truck?.name || "—"}</span></ResponsiveRow>
                   <ResponsiveRow label="Debt Balance" className={c.debt_balance > 0 ? "text-destructive font-medium" : ""}>
                     {formatCurrency(c.debt_balance)}
                   </ResponsiveRow>
@@ -172,11 +172,11 @@ export const CustomerManagement = ({ userRole }: CustomerManagementProps) => {
               <Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Address" />
             </div>
             <div className="space-y-2">
-              <Label>Area *</Label>
-              <Select value={form.area_id} onValueChange={(v) => setForm({ ...form, area_id: v })}>
-                <SelectTrigger><SelectValue placeholder="Select area" /></SelectTrigger>
+              <Label>Truck *</Label>
+              <Select value={form.truck_id} onValueChange={(v) => setForm({ ...form, truck_id: v })}>
+                <SelectTrigger><SelectValue placeholder="Select truck" /></SelectTrigger>
                 <SelectContent>
-                  {areas.map((a) => (<SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>))}
+                  {trucks.map((t) => (<SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>))}
                 </SelectContent>
               </Select>
             </div>

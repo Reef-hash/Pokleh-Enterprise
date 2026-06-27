@@ -9,10 +9,10 @@ import {
   X,
   Home,
   Building2,
-  MapPin,
   UserCheck,
   ClipboardList,
   Truck,
+  ArrowLeftRight,
   RotateCcw,
   FileSpreadsheet,
   DollarSign,
@@ -112,7 +112,7 @@ export const DashboardLayout = ({
       'debt-ledger': t('nav.debt-ledger'),
       'debt-collection': t('nav.debt-collection'),
       settlements: t('nav.settlements'),
-      areas: t('nav.areas'),
+      trucks: t('nav.trucks'),
       customers: t('nav.customers'),
       suppliers: t('nav.suppliers'),
       'staff-assignments': t('nav.staff-assignments'),
@@ -136,7 +136,7 @@ export const DashboardLayout = ({
       label: 'Stock', key: 'stock',
       items: [
         { id: 'stock-intake', label: 'Stock Intake', icon: ClipboardList },
-        { id: 'stock-distribution', label: 'Stock Distribution', icon: Truck },
+        { id: 'stock-distribution', label: 'Stock Distribution', icon: ArrowLeftRight },
         { id: 'stock-return', label: 'Stock Returns', icon: RotateCcw },
       ]
     },
@@ -152,7 +152,7 @@ export const DashboardLayout = ({
     {
       label: 'Management', key: 'management',
       items: [
-        { id: 'areas', label: 'Areas', icon: MapPin },
+        { id: 'trucks', label: 'Trucks', icon: Truck },
         { id: 'customers', label: 'Customers', icon: Users },
         { id: 'suppliers', label: 'Suppliers', icon: Building2 },
         { id: 'staff-assignments', label: 'Staff Assignments', icon: UserCheck },
@@ -185,7 +185,7 @@ export const DashboardLayout = ({
     {
       label: 'Stock', key: 'stock',
       items: [
-        { id: 'stock-distribution', label: 'Stock Distribution', icon: Truck },
+        { id: 'stock-distribution', label: 'Stock Distribution', icon: ArrowLeftRight },
         { id: 'stock-return', label: 'Stock Returns', icon: RotateCcw },
       ]
     },

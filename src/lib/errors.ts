@@ -22,8 +22,8 @@ const SPECIFIC_MAP: Record<string, Record<string, string>> = {
   suppliers: {
     "23503": "Cannot delete this supplier — they have existing stock intake records.",
   },
-  areas: {
-    "23503": "Cannot delete this area — it has customers or staff assigned.",
+  trucks: {
+    "23503": "Cannot delete this truck — it has customers or staff assigned.",
   },
 };
 

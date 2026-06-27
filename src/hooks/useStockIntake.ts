@@ -3,7 +3,10 @@ import { useSyncStore } from "@/stores/syncStore";
 import { stockIntakeRepo } from "@/repositories/stockRepo";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
-import { persistWrite } from "@/lib/writeHelper";
+import { offlineDetector } from "@/services/offline";
+import { syncEngine } from "@/services/sync";
+import { toast } from "sonner";
+import { getUserFriendlyError } from "@/lib/errors";
 import type { StockIntake, ProductType } from "@/types/pokleh";
 
 export const useStockIntake = () => {
@@ -24,46 +27,56 @@ export const useStockIntake = () => {
     }
   }, []);
 
+  /** One trip can collect several product types at once; each becomes its own stock_intake row sharing truck/supplier/date. */
   const addIntake = async (data: {
     intake_date: string;
     supplier_id: string;
-    product_type: ProductType;
-    quantity_received: number;
-    cost_per_pax: number;
+    truck_id: string;
+    lines: { product_type: ProductType; quantity_received: number; cost_per_pax: number }[];
     notes?: string;
   }) => {
     if (!userId) return { success: false, error: "Not authenticated" };
+    if (data.lines.length === 0) return { success: false, error: "No product lines" };
 
-    const tempId = crypto.randomUUID();
     const now = new Date().toISOString();
-    const optimistic: StockIntake = {
-      id: tempId,
+    const rows = data.lines.map((line) => ({
       intake_date: data.intake_date,
       supplier_id: data.supplier_id,
-      product_type: data.product_type,
-      quantity_received: data.quantity_received,
-      cost_per_pax: data.cost_per_pax,
+      truck_id: data.truck_id,
+      product_type: line.product_type,
+      quantity_received: line.quantity_received,
+      cost_per_pax: line.cost_per_pax,
       notes: data.notes ?? null,
-      created_by: userId!,
+      created_by: userId,
+    }));
+    const optimistic: StockIntake[] = rows.map((row) => ({
+      ...row,
+      id: crypto.randomUUID(),
       created_at: now,
-    } as StockIntake;
-    return persistWrite<StockIntake>({
-      entity: "stock_intake",
-      action: "INSERT",
-      userId,
-      data: { ...data, created_by: userId },
-      execute: () => stockIntakeRepo.create({ ...data, created_by: userId }),
-      optimistic: {
-        add: () => setIntakes((prev) => [optimistic, ...prev]),
-        remove: () => setIntakes((prev) => prev.filter((i) => i.id !== tempId)),
-      },
-      onSuccess: (intake) =>
-        setIntakes((prev) => prev.map((i) => (i.id === tempId ? intake : i))),
-      dexiePut: (intake) =>
-        db.stockIntakes.put(intake as unknown as import("@/lib/db").OfflineStockIntake),
-      cacheOffline: async () => db.stockIntakes.put(optimistic as unknown as import("@/lib/db").OfflineStockIntake),
-      msg: "Stock intake recorded",
-    });
+    }) as StockIntake);
+
+    if (!offlineDetector.isOnline) {
+      for (let i = 0; i < rows.length; i++) {
+        await syncEngine.enqueue({ entity: "stock_intake", entityId: optimistic[i].id, action: "INSERT", payload: rows[i] as Record<string, unknown> });
+      }
+      setIntakes((prev) => [...optimistic, ...prev]);
+      await db.stockIntakes.bulkPut(optimistic as unknown as import("@/lib/db").OfflineStockIntake[]);
+      toast.success("Saved offline — will sync when connected");
+      return { success: true, offline: true };
+    }
+
+    setIntakes((prev) => [...optimistic, ...prev]);
+    const { data: created, error } = await stockIntakeRepo.createMany(rows);
+    if (error) {
+      toast.error(getUserFriendlyError(error, "stock_intake"));
+      setIntakes((prev) => prev.filter((i) => !optimistic.some((o) => o.id === i.id)));
+      return { success: false };
+    }
+    const result = (created || []) as unknown as StockIntake[];
+    setIntakes((prev) => [...result, ...prev.filter((i) => !optimistic.some((o) => o.id === i.id))]);
+    await db.stockIntakes.bulkPut(result as unknown as import("@/lib/db").OfflineStockIntake[]);
+    toast.success("Stock intake recorded");
+    return { success: true, data: result };
   };
 
   const refreshTick = useSyncStore((s) => s.refreshTick);

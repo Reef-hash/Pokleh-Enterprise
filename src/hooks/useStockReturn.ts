@@ -6,14 +6,14 @@ import { useAuthStore } from "@/stores/authStore";
 import { persistWrite } from "@/lib/writeHelper";
 import type { StockReturn } from "@/types/pokleh";
 
-export const useStockReturn = (areaId?: string) => {
+export const useStockReturn = (truckId?: string) => {
   const [returns, setReturns] = useState<StockReturn[]>([]);
   const [loading, setLoading] = useState(true);
   const userId = useAuthStore((s) => s.user?.id);
 
   const fetchReturns = useCallback(async () => {
     try {
-      const { data, error } = await stockReturnRepo.fetchAll(areaId);
+      const { data, error } = await stockReturnRepo.fetchAll(truckId);
       if (error) throw error;
       const result = (data || []) as unknown as StockReturn[];
       setReturns(result);
@@ -22,11 +22,12 @@ export const useStockReturn = (areaId?: string) => {
       const cached = await db.stockReturns.orderBy("return_date").reverse().toArray();
       if (cached.length > 0) setReturns(cached as unknown as StockReturn[]);
     }
-  }, [areaId]);
+  }, [truckId]);
 
   const addReturn = async (data: {
-    distribution_id: string;
-    area_id: string;
+    distribution_id?: string;
+    intake_id?: string;
+    truck_id: string;
     quantity_returned: number;
     return_date: string;
   }) => {
@@ -36,8 +37,9 @@ export const useStockReturn = (areaId?: string) => {
     const now = new Date().toISOString();
     const optimistic: StockReturn = {
       id: tempId,
-      distribution_id: data.distribution_id,
-      area_id: data.area_id,
+      distribution_id: data.distribution_id ?? null,
+      intake_id: data.intake_id ?? null,
+      truck_id: data.truck_id,
       quantity_returned: data.quantity_returned,
       return_date: data.return_date,
       created_by: userId!,
@@ -47,8 +49,8 @@ export const useStockReturn = (areaId?: string) => {
       entity: "stock_return",
       action: "INSERT",
       userId,
-      data: { ...data, created_by: userId },
-      execute: () => stockReturnRepo.create({ ...data, created_by: userId }),
+      data: { ...data, distribution_id: data.distribution_id ?? null, intake_id: data.intake_id ?? null, created_by: userId },
+      execute: () => stockReturnRepo.create({ ...data, distribution_id: data.distribution_id ?? null, intake_id: data.intake_id ?? null, created_by: userId }),
       optimistic: {
         add: () => setReturns((prev) => [optimistic, ...prev]),
         remove: () => setReturns((prev) => prev.filter((r) => r.id !== tempId)),

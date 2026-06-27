@@ -11,6 +11,7 @@ import { Plus, Package } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { useStockIntake } from "@/hooks/useStockIntake";
 import { usePoklehSuppliers } from "@/hooks/usePoklehSuppliers";
+import { useTrucks } from "@/hooks/useTrucks";
 import { formatCurrency } from "@/lib/currency";
 import { toast } from "sonner";
 import { PRODUCT_TYPES, type ProductType } from "@/types/pokleh";
@@ -19,29 +20,62 @@ interface StockIntakeFormProps {
   userRole: "admin" | "staff";
 }
 
+type LineState = Record<ProductType, { quantity_received: string; cost_per_pax: string }>;
+
+const emptyLines = (): LineState =>
+  PRODUCT_TYPES.reduce((acc, p) => {
+    acc[p] = { quantity_received: "", cost_per_pax: "" };
+    return acc;
+  }, {} as LineState);
+
 export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
   const { intakes, loading, addIntake } = useStockIntake();
   const { suppliers } = usePoklehSuppliers();
+  const { trucks } = useTrucks();
   const [isOpen, setIsOpen] = useState(false);
-  const [form, setForm] = useState({
-    intake_date: new Date().toISOString().split("T")[0],
-    supplier_id: "",
-    product_type: "Air Batu Besar" as ProductType,
-    quantity_received: 0,
-    cost_per_pax: 0,
-    notes: "",
-  });
+  const [intakeDate, setIntakeDate] = useState(new Date().toISOString().split("T")[0]);
+  const [supplierId, setSupplierId] = useState("");
+  const [truckId, setTruckId] = useState("");
+  const [notes, setNotes] = useState("");
+  const [lines, setLines] = useState<LineState>(emptyLines());
   const [submitting, setSubmitting] = useState(false);
 
   if (loading) return <PageLoader />;
 
+  const resetForm = () => {
+    setIntakeDate(new Date().toISOString().split("T")[0]);
+    setSupplierId("");
+    setTruckId("");
+    setNotes("");
+    setLines(emptyLines());
+  };
+
+  const updateLine = (product: ProductType, field: "quantity_received" | "cost_per_pax", value: string) => {
+    setLines((prev) => ({ ...prev, [product]: { ...prev[product], [field]: value } }));
+  };
+
   const handleAdd = async () => {
-    if (!form.supplier_id || form.quantity_received <= 0 || form.cost_per_pax <= 0 || submitting) { toast.error("Please select a supplier and enter valid quantity and cost."); return; }
+    const activeLines = PRODUCT_TYPES.map((p) => ({
+      product_type: p,
+      quantity_received: parseInt(lines[p].quantity_received) || 0,
+      cost_per_pax: parseFloat(lines[p].cost_per_pax) || 0,
+    })).filter((l) => l.quantity_received > 0 && l.cost_per_pax > 0);
+
+    if (!supplierId || !truckId || activeLines.length === 0 || submitting) {
+      toast.error("Please select a supplier, a truck, and enter quantity and cost for at least one product.");
+      return;
+    }
     setSubmitting(true);
     try {
-      const result = await addIntake(form);
+      const result = await addIntake({
+        intake_date: intakeDate,
+        supplier_id: supplierId,
+        truck_id: truckId,
+        lines: activeLines,
+        notes: notes || undefined,
+      });
       if (result.success) {
-        setForm({ intake_date: new Date().toISOString().split("T")[0], supplier_id: "", product_type: "Air Batu Besar", quantity_received: 0, cost_per_pax: 0, notes: "" });
+        resetForm();
         setIsOpen(false);
       }
     } finally {
@@ -75,6 +109,7 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
             <TableHeader>
               <TableRow>
                 <TableHead>Date</TableHead>
+                <TableHead>Truck</TableHead>
                 <TableHead>Supplier</TableHead>
                 <TableHead>Product</TableHead>
                 <TableHead>Quantity (pax)</TableHead>
@@ -86,6 +121,7 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
               {intakes.map((i) => (
                 <TableRow key={i.id}>
                   <TableCell>{new Date(i.intake_date).toLocaleDateString()}</TableCell>
+                  <TableCell>{i.truck?.name || "—"}</TableCell>
                   <TableCell className="font-medium">{i.supplier?.name || "—"}</TableCell>
                   <TableCell><span className="text-sm font-medium">{i.product_type}</span></TableCell>
                   <TableCell>{i.quantity_received}</TableCell>
@@ -95,7 +131,7 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
               ))}
               {intakes.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                     No stock intake recorded yet
                   </TableCell>
                 </TableRow>
@@ -106,45 +142,69 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
       </Card>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Record Stock Intake</DialogTitle>
-            <DialogDescription>Record incoming ice stock from supplier</DialogDescription>
+            <DialogDescription>Record incoming ice stock from supplier. Enter quantity and cost for each product type collected on this trip.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label>Date</Label>
-              <Input type="date" value={form.intake_date} onChange={(e) => setForm({ ...form, intake_date: e.target.value })} />
+              <Input type="date" value={intakeDate} onChange={(e) => setIntakeDate(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Truck</Label>
+              <Select value={truckId} onValueChange={setTruckId}>
+                <SelectTrigger><SelectValue placeholder="Select truck" /></SelectTrigger>
+                <SelectContent>
+                  {trucks.map((t) => (<SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label>Supplier</Label>
-              <Select value={form.supplier_id} onValueChange={(v) => setForm({ ...form, supplier_id: v })}>
+              <Select value={supplierId} onValueChange={setSupplierId}>
                 <SelectTrigger><SelectValue placeholder="Select supplier" /></SelectTrigger>
                 <SelectContent>
                   {suppliers.map((s) => (<SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>))}
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label>Jenis Produk</Label>
-              <Select value={form.product_type} onValueChange={(v) => setForm({ ...form, product_type: v as ProductType })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {PRODUCT_TYPES.map((p) => (<SelectItem key={p} value={p}>{p}</SelectItem>))}
-                </SelectContent>
-              </Select>
+
+            <div className="space-y-3 rounded-md border p-3">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <Package className="h-4 w-4" />
+                Products (leave blank to skip)
+              </div>
+              {PRODUCT_TYPES.map((p) => (
+                <div key={p} className="grid grid-cols-3 items-end gap-2">
+                  <Label className="col-span-3 text-xs text-muted-foreground">{p}</Label>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Qty (pax)</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={lines[p].quantity_received}
+                      onChange={(e) => updateLine(p, "quantity_received", e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1 col-span-2">
+                    <Label className="text-xs">Cost/Pax (RM)</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min={0}
+                      value={lines[p].cost_per_pax}
+                      onChange={(e) => updateLine(p, "cost_per_pax", e.target.value)}
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
-            <div className="space-y-2">
-              <Label>Quantity Received (pax)</Label>
-              <Input type="number" min={1} value={form.quantity_received || ""} onChange={(e) => setForm({ ...form, quantity_received: parseInt(e.target.value) || 0 })} />
-            </div>
-            <div className="space-y-2">
-              <Label>Cost Per Pax (RM)</Label>
-              <Input type="number" step="0.01" min={0} value={form.cost_per_pax || ""} onChange={(e) => setForm({ ...form, cost_per_pax: parseFloat(e.target.value) || 0 })} />
-            </div>
+
             <div className="space-y-2">
               <Label>Notes</Label>
-              <Input value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Optional notes" />
+              <Input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional notes" />
             </div>
           </div>
           <DialogFooter>
@@ -156,4 +216,3 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
     </div>
   );
 };
-

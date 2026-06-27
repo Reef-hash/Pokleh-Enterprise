@@ -11,7 +11,7 @@ import { UserPlus, X } from "lucide-react";
 import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { useStaffAssignments } from "@/hooks/useStaffAssignments";
-import { useAreas } from "@/hooks/useAreas";
+import { useTrucks } from "@/hooks/useTrucks";
 import { supabase } from "@/integrations/supabase/client";
 import type { Profile } from "@/types/pokleh";
 import { toast } from "sonner";
@@ -22,11 +22,11 @@ interface StaffAssignmentProps {
 
 export const StaffAssignment = ({ userRole }: StaffAssignmentProps) => {
   const { assignments, loading, assignStaff, endAssignment } = useStaffAssignments();
-  const { areas } = useAreas();
+  const { trucks } = useTrucks();
   const [staffList, setStaffList] = useState<Profile[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState("");
-  const [selectedArea, setSelectedArea] = useState("");
+  const [selectedTruck, setSelectedTruck] = useState("");
   const [endConfirmId, setEndConfirmId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -55,13 +55,13 @@ export const StaffAssignment = ({ userRole }: StaffAssignmentProps) => {
   const active = assignments.filter((a) => !a.ended_date);
 
   const handleAssign = async () => {
-    if (!selectedStaff || !selectedArea || submitting) { toast.error("Please select a staff member and an area."); return; }
+    if (!selectedStaff || !selectedTruck || submitting) { toast.error("Please select a staff member and a truck."); return; }
     setSubmitting(true);
     try {
-      const result = await assignStaff(selectedStaff, selectedArea);
+      const result = await assignStaff(selectedStaff, selectedTruck);
       if (result.success) {
         setSelectedStaff("");
-        setSelectedArea("");
+        setSelectedTruck("");
         setIsOpen(false);
       }
     } finally {
@@ -73,15 +73,11 @@ export const StaffAssignment = ({ userRole }: StaffAssignmentProps) => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>My Areas</CardTitle>
-          <CardDescription>Areas you are assigned to</CardDescription>
+          <CardTitle>My Trucks</CardTitle>
+          <CardDescription>Trucks you are assigned to</CardDescription>
         </CardHeader>
         <CardContent>
-          {active
-            .filter((a) => a.staff_id === "") // Will be populated by the hook
-            .length === 0 ? (
-            <p className="text-muted-foreground">Loading assignments...</p>
-          ) : null}
+          {loading ? <p className="text-muted-foreground">Loading assignments...</p> : null}
         </CardContent>
       </Card>
     );
@@ -91,7 +87,7 @@ export const StaffAssignment = ({ userRole }: StaffAssignmentProps) => {
     <div className="space-y-6">
       <PageHeader
         title="Staff Assignments"
-        subtitle="Assign staff members to delivery areas"
+        subtitle="Assign staff members to trucks"
         actionLabel="Assign Staff"
         actionIcon={UserPlus}
         onAction={() => setIsOpen(true)}
@@ -108,7 +104,7 @@ export const StaffAssignment = ({ userRole }: StaffAssignmentProps) => {
             <TableHeader>
               <TableRow>
                 <TableHead>Staff</TableHead>
-                <TableHead>Area</TableHead>
+                <TableHead>Truck</TableHead>
                 <TableHead>Assigned Date</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -117,7 +113,7 @@ export const StaffAssignment = ({ userRole }: StaffAssignmentProps) => {
               {active.map((a) => (
                 <TableRow key={a.id}>
                   <TableCell className="font-medium">{a.profile?.name || a.staff_id}</TableCell>
-                  <TableCell><Badge variant="secondary">{a.area?.name}</Badge></TableCell>
+                  <TableCell><Badge variant="secondary">{a.truck?.name}</Badge></TableCell>
                   <TableCell className="text-muted-foreground">{new Date(a.assigned_date).toLocaleDateString()}</TableCell>
                   <TableCell>
                     <Button variant="ghost" size="sm" onClick={() => setEndConfirmId(a.id)} className="text-destructive">
@@ -142,7 +138,7 @@ export const StaffAssignment = ({ userRole }: StaffAssignmentProps) => {
             {active.map((a) => (
               <ResponsiveCard key={a.id}>
                 <ResponsiveRow label="Staff"><span className="font-medium">{a.profile?.name || a.staff_id}</span></ResponsiveRow>
-                <ResponsiveRow label="Area"><Badge variant="secondary">{a.area?.name}</Badge></ResponsiveRow>
+                <ResponsiveRow label="Truck"><Badge variant="secondary">{a.truck?.name}</Badge></ResponsiveRow>
                 <ResponsiveRow label="Assigned Date"><span className="text-muted-foreground">{new Date(a.assigned_date).toLocaleDateString()}</span></ResponsiveRow>
                 <div className="flex justify-end pt-2 border-t">
                   <Button variant="ghost" size="sm" onClick={() => setEndConfirmId(a.id)} className="text-destructive">
@@ -161,8 +157,8 @@ export const StaffAssignment = ({ userRole }: StaffAssignmentProps) => {
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Assign Staff to Area</DialogTitle>
-            <DialogDescription>Assign a staff member to a delivery area</DialogDescription>
+            <DialogTitle>Assign Staff to Truck</DialogTitle>
+            <DialogDescription>Assign a staff member to a truck</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
@@ -177,12 +173,12 @@ export const StaffAssignment = ({ userRole }: StaffAssignmentProps) => {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Area</Label>
-              <Select value={selectedArea} onValueChange={setSelectedArea}>
-                <SelectTrigger><SelectValue placeholder="Select area" /></SelectTrigger>
+              <Label>Truck</Label>
+              <Select value={selectedTruck} onValueChange={setSelectedTruck}>
+                <SelectTrigger><SelectValue placeholder="Select truck" /></SelectTrigger>
                 <SelectContent>
-                  {areas.map((a) => (
-                    <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+                  {trucks.map((t) => (
+                    <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -200,7 +196,7 @@ export const StaffAssignment = ({ userRole }: StaffAssignmentProps) => {
           <AlertDialogHeader>
             <AlertDialogTitle>End Assignment</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to end this staff assignment? The staff member will no longer have access to this area.
+              Are you sure you want to end this staff assignment? The staff member will no longer have access to this truck.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

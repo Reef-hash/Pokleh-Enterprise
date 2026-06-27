@@ -5,20 +5,22 @@
 export type ProductType = 'Air Batu Besar' | 'Air Batu Kecil' | 'Air Batu Hancur';
 export const PRODUCT_TYPES: ProductType[] = ['Air Batu Besar', 'Air Batu Kecil', 'Air Batu Hancur'];
 
-export interface Area {
+export type CorrectionStatus = "correction" | "reversal";
+
+export interface Truck {
   id: string;
   name: string;
   created_at: string;
 }
 
-export interface StaffAreaAssignment {
+export interface StaffTruckAssignment {
   id: string;
   staff_id: string;
-  area_id: string;
+  truck_id: string;
   assigned_date: string;
   ended_date: string | null;
   created_at: string;
-  area?: Area;
+  truck?: Truck;
   profile?: Profile;
 }
 
@@ -27,12 +29,12 @@ export interface Customer {
   name: string;
   phone: string | null;
   address: string | null;
-  area_id: string;
+  truck_id: string;
   debt_balance: number;
   active: boolean;
   created_at: string;
   updated_at: string;
-  area?: Area;
+  truck?: Truck;
 }
 
 export interface Supplier {
@@ -55,31 +57,39 @@ export interface StockIntake {
   id: string;
   intake_date: string;
   supplier_id: string;
+  truck_id: string;
   product_type: ProductType;
   quantity_received: number;
   cost_per_pax: number;
   notes: string | null;
   created_by: string;
   created_at: string;
+  correction_of: string | null;
+  correction_status: CorrectionStatus | null;
   supplier?: Supplier;
+  truck?: Truck;
 }
 
 export interface StockDistribution {
   id: string;
-  intake_id: string;
-  area_id: string;
+  intake_id: string | null;
+  from_truck_id: string;
+  to_truck_id: string;
   product_type: ProductType;
   quantity_assigned: number;
   created_by: string;
   created_at: string;
+  correction_of: string | null;
+  correction_status: CorrectionStatus | null;
   intake?: StockIntake;
-  area?: Area;
+  from_truck?: Truck;
+  to_truck?: Truck;
 }
 
 export interface Sale {
   id: string;
   customer_id: string;
-  area_id: string;
+  truck_id: string;
   product_type: ProductType;
   quantity: number;
   selling_price: number;
@@ -89,8 +99,10 @@ export interface Sale {
   sale_date: string;
   notes: string | null;
   created_at: string;
+  correction_of: string | null;
+  correction_status: CorrectionStatus | null;
   customer?: Customer;
-  area?: Area;
+  truck?: Truck;
   staff?: Profile;
   distribution?: StockDistribution;
 }
@@ -117,20 +129,26 @@ export interface DebtCollection {
   staff_id: string;
   notes: string | null;
   created_at: string;
+  correction_of: string | null;
+  correction_status: CorrectionStatus | null;
   customer?: Customer;
   staff?: Profile;
 }
 
 export interface StockReturn {
   id: string;
-  distribution_id: string;
-  area_id: string;
+  distribution_id: string | null;
+  intake_id: string | null;
+  truck_id: string;
   quantity_returned: number;
   return_date: string;
   created_by: string;
   created_at: string;
+  correction_of: string | null;
+  correction_status: CorrectionStatus | null;
   distribution?: StockDistribution;
-  area?: Area;
+  intake?: StockIntake;
+  truck?: Truck;
 }
 
 export interface SupplierSettlement {
@@ -147,6 +165,8 @@ export interface SupplierSettlement {
   settled_by: string | null;
   created_at: string;
   updated_at: string;
+  correction_of: string | null;
+  correction_status: CorrectionStatus | null;
   intake?: StockIntake;
 }
 
@@ -158,16 +178,22 @@ export interface Expense {
   notes: string | null;
   created_by: string;
   created_at: string;
+  correction_of: string | null;
+  correction_status: CorrectionStatus | null;
 }
 
 export interface DailyClosing {
   id: string;
   closing_date: string;
-  area_id: string;
+  truck_id: string;
+  product_type: ProductType;
   status: "open" | "closed" | "reconciled";
-  total_assigned: number;
+  total_intake: number;
   total_sold: number;
   total_returned: number;
+  total_transfer_in: number;
+  total_transfer_out: number;
+  closing_balance: number;
   cash_sales: number;
   debt_sales: number;
   debt_collections: number;
@@ -179,7 +205,7 @@ export interface DailyClosing {
   reconciled_by: string | null;
   reconciled_at: string | null;
   created_at: string;
-  area?: Area;
+  truck?: Truck;
 }
 
 export interface AuditLog {
