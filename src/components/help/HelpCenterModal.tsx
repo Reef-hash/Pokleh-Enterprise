@@ -22,7 +22,7 @@ const CATEGORIES = [
 
 const topicCategory: Record<string, string> = {
   dashboard: "all",
-  areas: "management",
+  trucks: "management",
   customers: "management",
   suppliers: "management",
   "staff-assignments": "management",

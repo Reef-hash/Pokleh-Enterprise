@@ -124,7 +124,7 @@ export const generateManualPDF = () => {
   addBullet('Daily Closing: Automated end-of-day reconciliation with profit calculation');
   addBullet('Supplier Management: Price history, cost tracking, and settlement management');
   addBullet('Reports: Generate insights and export data');
-  addBullet('Area-Based Operations: Assign staff to coverage areas with role-based access');
+  addBullet('Truck-Based Operations: Assign staff to trucks with role-based access');
   
   addSpace(5);
   addHeading('System Requirements');

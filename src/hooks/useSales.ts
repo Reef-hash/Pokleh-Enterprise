@@ -27,7 +27,7 @@ export const useSales = () => {
 
   const addSale = async (input: {
     customer_id: string;
-    area_id: string;
+    truck_id: string;
     product_type: ProductType;
     quantity: number;
     selling_price: number;
@@ -38,13 +38,13 @@ export const useSales = () => {
   }) => {
     const tempId = crypto.randomUUID();
     const optimistic: Sale = {
-      id: tempId, customer_id: input.customer_id, area_id: input.area_id,
+      id: tempId, customer_id: input.customer_id, truck_id: input.truck_id,
       product_type: input.product_type,
       quantity: input.quantity, selling_price: input.selling_price,
       payment_type: input.payment_type, distribution_id: input.distribution_id ?? null,
       staff_id: userId!, sale_date: input.sale_date, notes: input.notes ?? null,
       correction_of: null, correction_status: null, created_at: new Date().toISOString(),
-      customer: {} as any, area: {} as any, staff: {} as any,
+      customer: {} as any, truck: {} as any, staff: {} as any,
     };
 
     return persistWrite({

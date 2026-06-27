@@ -12,24 +12,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      areas: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-        }
-        Relationships: []
-      }
       audit_logs: {
         Row: {
           action: string
@@ -81,113 +63,125 @@ export type Database = {
         Row: {
           active: boolean
           address: string | null
-          area_id: string
           created_at: string
           debt_balance: number
           id: string
           name: string
           phone: string | null
+          truck_id: string
           updated_at: string
         }
         Insert: {
           active?: boolean
           address?: string | null
-          area_id: string
           created_at?: string
           debt_balance?: number
           id?: string
           name: string
           phone?: string | null
+          truck_id: string
           updated_at?: string
         }
         Update: {
           active?: boolean
           address?: string | null
-          area_id?: string
           created_at?: string
           debt_balance?: number
           id?: string
           name?: string
           phone?: string | null
+          truck_id?: string
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "customers_area_id_fkey"
-            columns: ["area_id"]
+            foreignKeyName: "customers_truck_id_fkey"
+            columns: ["truck_id"]
             isOneToOne: false
-            referencedRelation: "areas"
+            referencedRelation: "trucks"
             referencedColumns: ["id"]
           },
         ]
       }
       daily_closings: {
         Row: {
-          area_id: string
           cash_sales: number
           closed_at: string | null
           closed_by: string | null
+          closing_balance: number
           closing_date: string
           created_at: string
           debt_collections: number
           debt_sales: number
           expenses_total: number
           id: string
+          product_type: string
           profit_estimate: number
           reconciled_at: string | null
           reconciled_by: string | null
           status: string
           supplier_payable: number
-          total_assigned: number
+          total_intake: number
           total_returned: number
           total_sold: number
+          total_transfer_in: number
+          total_transfer_out: number
+          truck_id: string
         }
         Insert: {
-          area_id: string
           cash_sales?: number
           closed_at?: string | null
           closed_by?: string | null
+          closing_balance?: number
           closing_date: string
           created_at?: string
           debt_collections?: number
           debt_sales?: number
           expenses_total?: number
           id?: string
+          product_type?: string
           profit_estimate?: number
           reconciled_at?: string | null
           reconciled_by?: string | null
           status?: string
           supplier_payable?: number
-          total_assigned?: number
+          total_intake?: number
           total_returned?: number
           total_sold?: number
+          total_transfer_in?: number
+          total_transfer_out?: number
+          truck_id: string
         }
         Update: {
-          area_id?: string
           cash_sales?: number
           closed_at?: string | null
           closed_by?: string | null
+          closing_balance?: number
           closing_date?: string
           created_at?: string
           debt_collections?: number
           debt_sales?: number
           expenses_total?: number
           id?: string
+          product_type?: string
           profit_estimate?: number
           reconciled_at?: string | null
           reconciled_by?: string | null
           status?: string
           supplier_payable?: number
-          total_assigned?: number
+          total_intake?: number
           total_returned?: number
           total_sold?: number
+          total_transfer_in?: number
+          total_transfer_out?: number
+          truck_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "daily_closings_area_id_fkey"
-            columns: ["area_id"]
+            foreignKeyName: "daily_closings_truck_id_fkey"
+            columns: ["truck_id"]
             isOneToOne: false
-            referencedRelation: "areas"
+            referencedRelation: "trucks"
             referencedColumns: ["id"]
           },
           {
@@ -375,6 +369,7 @@ export type Database = {
           email: string
           id: string
           name: string
+          onboarding_completed: boolean
           role: string
           updated_at: string
           user_id: string
@@ -384,6 +379,7 @@ export type Database = {
           email: string
           id?: string
           name: string
+          onboarding_completed?: boolean
           role: string
           updated_at?: string
           user_id: string
@@ -393,6 +389,7 @@ export type Database = {
           email?: string
           id?: string
           name?: string
+          onboarding_completed?: boolean
           role?: string
           updated_at?: string
           user_id?: string
@@ -401,7 +398,6 @@ export type Database = {
       }
       sales: {
         Row: {
-          area_id: string
           correction_of: string | null
           correction_status: string | null
           created_at: string
@@ -410,13 +406,14 @@ export type Database = {
           id: string
           notes: string | null
           payment_type: string
+          product_type: string
           quantity: number
           sale_date: string
           selling_price: number
           staff_id: string
+          truck_id: string
         }
         Insert: {
-          area_id: string
           correction_of?: string | null
           correction_status?: string | null
           created_at?: string
@@ -425,13 +422,14 @@ export type Database = {
           id?: string
           notes?: string | null
           payment_type: string
+          product_type?: string
           quantity: number
           sale_date: string
           selling_price: number
           staff_id: string
+          truck_id: string
         }
         Update: {
-          area_id?: string
           correction_of?: string | null
           correction_status?: string | null
           created_at?: string
@@ -440,17 +438,19 @@ export type Database = {
           id?: string
           notes?: string | null
           payment_type?: string
+          product_type?: string
           quantity?: number
           sale_date?: string
           selling_price?: number
           staff_id?: string
+          truck_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "sales_area_id_fkey"
-            columns: ["area_id"]
+            foreignKeyName: "sales_truck_id_fkey"
+            columns: ["truck_id"]
             isOneToOne: false
-            referencedRelation: "areas"
+            referencedRelation: "trucks"
             referencedColumns: ["id"]
           },
           {
@@ -483,41 +483,79 @@ export type Database = {
           },
         ]
       }
-      staff_area_assignments: {
+      selling_price_list: {
         Row: {
-          area_id: string
+          created_at: string
+          created_by: string | null
+          customer_id: string | null
+          id: string
+          notes: string | null
+          price_per_pax: number
+          product_type: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          id?: string
+          notes?: string | null
+          price_per_pax: number
+          product_type: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          id?: string
+          notes?: string | null
+          price_per_pax?: number
+          product_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "selling_price_list_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_truck_assignments: {
+        Row: {
           assigned_date: string
           created_at: string
           ended_date: string | null
           id: string
           staff_id: string
+          truck_id: string
         }
         Insert: {
-          area_id: string
           assigned_date?: string
           created_at?: string
           ended_date?: string | null
           id?: string
           staff_id: string
+          truck_id: string
         }
         Update: {
-          area_id?: string
           assigned_date?: string
           created_at?: string
           ended_date?: string | null
           id?: string
           staff_id?: string
+          truck_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "staff_area_assignments_area_id_fkey"
-            columns: ["area_id"]
+            foreignKeyName: "staff_truck_assignments_truck_id_fkey"
+            columns: ["truck_id"]
             isOneToOne: false
-            referencedRelation: "areas"
+            referencedRelation: "trucks"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "staff_area_assignments_staff_id_fkey"
+            foreignKeyName: "staff_truck_assignments_staff_id_fkey"
             columns: ["staff_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -527,41 +565,54 @@ export type Database = {
       }
       stock_distribution: {
         Row: {
-          area_id: string
           correction_of: string | null
           correction_status: string | null
           created_at: string
           created_by: string
+          from_truck_id: string
           id: string
-          intake_id: string
+          intake_id: string | null
+          product_type: string
           quantity_assigned: number
+          to_truck_id: string
         }
         Insert: {
-          area_id: string
           correction_of?: string | null
           correction_status?: string | null
           created_at?: string
           created_by: string
+          from_truck_id: string
           id?: string
-          intake_id: string
+          intake_id?: string | null
+          product_type?: string
           quantity_assigned: number
+          to_truck_id: string
         }
         Update: {
-          area_id?: string
           correction_of?: string | null
           correction_status?: string | null
           created_at?: string
           created_by?: string
+          from_truck_id?: string
           id?: string
-          intake_id?: string
+          intake_id?: string | null
+          product_type?: string
           quantity_assigned?: number
+          to_truck_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "stock_distribution_area_id_fkey"
-            columns: ["area_id"]
+            foreignKeyName: "stock_distribution_from_truck_id_fkey"
+            columns: ["from_truck_id"]
             isOneToOne: false
-            referencedRelation: "areas"
+            referencedRelation: "trucks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_distribution_to_truck_id_fkey"
+            columns: ["to_truck_id"]
+            isOneToOne: false
+            referencedRelation: "trucks"
             referencedColumns: ["id"]
           },
           {
@@ -597,8 +648,10 @@ export type Database = {
           id: string
           intake_date: string
           notes: string | null
+          product_type: string
           quantity_received: number
           supplier_id: string
+          truck_id: string
         }
         Insert: {
           correction_of?: string | null
@@ -609,8 +662,10 @@ export type Database = {
           id?: string
           intake_date: string
           notes?: string | null
+          product_type?: string
           quantity_received: number
           supplier_id: string
+          truck_id: string
         }
         Update: {
           correction_of?: string | null
@@ -621,10 +676,19 @@ export type Database = {
           id?: string
           intake_date?: string
           notes?: string | null
+          product_type?: string
           quantity_received?: number
           supplier_id?: string
+          truck_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "stock_intake_truck_id_fkey"
+            columns: ["truck_id"]
+            isOneToOne: false
+            referencedRelation: "trucks"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "stock_intake_correction_of_fkey"
             columns: ["correction_of"]
@@ -650,44 +714,47 @@ export type Database = {
       }
       stock_return: {
         Row: {
-          area_id: string
           correction_of: string | null
           correction_status: string | null
           created_at: string
           created_by: string
-          distribution_id: string
+          distribution_id: string | null
           id: string
+          intake_id: string | null
           quantity_returned: number
           return_date: string
+          truck_id: string
         }
         Insert: {
-          area_id: string
           correction_of?: string | null
           correction_status?: string | null
           created_at?: string
           created_by: string
-          distribution_id: string
+          distribution_id?: string | null
           id?: string
+          intake_id?: string | null
           quantity_returned: number
           return_date: string
+          truck_id: string
         }
         Update: {
-          area_id?: string
           correction_of?: string | null
           correction_status?: string | null
           created_at?: string
           created_by?: string
-          distribution_id?: string
+          distribution_id?: string | null
           id?: string
+          intake_id?: string | null
           quantity_returned?: number
           return_date?: string
+          truck_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "stock_return_area_id_fkey"
-            columns: ["area_id"]
+            foreignKeyName: "stock_return_truck_id_fkey"
+            columns: ["truck_id"]
             isOneToOne: false
-            referencedRelation: "areas"
+            referencedRelation: "trucks"
             referencedColumns: ["id"]
           },
           {
@@ -709,6 +776,13 @@ export type Database = {
             columns: ["distribution_id"]
             isOneToOne: false
             referencedRelation: "stock_distribution"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_return_intake_id_fkey"
+            columns: ["intake_id"]
+            isOneToOne: false
+            referencedRelation: "stock_intake"
             referencedColumns: ["id"]
           },
         ]
@@ -855,13 +929,35 @@ export type Database = {
         }
         Relationships: []
       }
+      trucks: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      admin_delete_user: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
       get_current_user_role: { Args: never; Returns: string }
-      get_my_area_ids: { Args: never; Returns: string[] }
+      get_my_truck_ids: { Args: never; Returns: string[] }
       get_total_returned_for_intake: {
         Args: { p_intake_id: string }
         Returns: number
@@ -870,11 +966,16 @@ export type Database = {
         Args: { p_intake_id: string }
         Returns: number
       }
+      get_truck_available_stock: {
+        Args: { p_as_of_date: string; p_product_type: string; p_truck_id: string }
+        Returns: number
+      }
       perform_daily_closing: {
         Args: {
           p_action?: string
-          p_area_id: string
           p_closing_date: string
+          p_product_type: string
+          p_truck_id: string
           p_user_id: string
         }
         Returns: Json

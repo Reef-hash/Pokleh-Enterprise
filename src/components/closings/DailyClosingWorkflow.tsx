@@ -13,8 +13,9 @@ import { Badge } from "@/components/ui/badge";
 import { Lock, CheckCircle2, AlertCircle } from "lucide-react";
 import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
 import { useDailyClosings } from "@/hooks/useDailyClosings";
-import { useAreas } from "@/hooks/useAreas";
+import { useTrucks } from "@/hooks/useTrucks";
 import { formatCurrency } from "@/lib/currency";
+import { PRODUCT_TYPES, type ProductType } from "@/types/pokleh";
 
 interface DailyClosingWorkflowProps {
   userRole: "admin" | "staff";
@@ -22,23 +23,26 @@ interface DailyClosingWorkflowProps {
 
 export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) => {
   const { closings, loading, closeDay, reconcileDay } = useDailyClosings();
-  const { areas } = useAreas();
+  const { trucks } = useTrucks();
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
-  const [areaId, setAreaId] = useState("");
+  const [truckId, setTruckId] = useState("");
+  const [productType, setProductType] = useState<ProductType>("Air Batu Besar");
   const [action, setAction] = useState<"close" | "reconcile">("close");
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   if (loading) return <PageLoader />;
 
-  const selectedClosing = closings.find((c) => c.closing_date === date && c.area_id === areaId);
-  const selectedArea = areas.find((a) => a.id === areaId);
+  const selectedClosing = closings.find(
+    (c) => c.closing_date === date && c.truck_id === truckId && c.product_type === productType
+  );
+  const selectedTruck = trucks.find((t) => t.id === truckId);
 
   const handleConfirm = async () => {
     setConfirmOpen(false);
     if (action === "close") {
-      await closeDay(date, areaId);
+      await closeDay(date, truckId, productType);
     } else {
-      await reconcileDay(date, areaId);
+      await reconcileDay(date, truckId, productType);
     }
   };
 
@@ -65,36 +69,48 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
       <Card>
         <CardHeader>
           <CardTitle>Close / Reconcile a Day</CardTitle>
-          <CardDescription>Select a date and area, then close or reconcile</CardDescription>
+          <CardDescription>Select a date, truck, and product type, then close or reconcile</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
               <Label>Date</Label>
               <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label>Area</Label>
-              <Select value={areaId} onValueChange={setAreaId}>
-                <SelectTrigger><SelectValue placeholder="Select area" /></SelectTrigger>
+              <Label>Truck</Label>
+              <Select value={truckId} onValueChange={setTruckId}>
+                <SelectTrigger><SelectValue placeholder="Select truck" /></SelectTrigger>
                 <SelectContent>
-                  {areas.map((a) => (<SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>))}
+                  {trucks.map((t) => (<SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Product</Label>
+              <Select value={productType} onValueChange={(v) => setProductType(v as ProductType)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {PRODUCT_TYPES.map((p) => (<SelectItem key={p} value={p}>{p}</SelectItem>))}
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          {areaId && (
+          {truckId && (
             <div className="rounded-lg border p-4 space-y-2">
               <div className="flex justify-between items-center">
-                <span className="font-medium">{selectedArea?.name} — {new Date(date).toLocaleDateString()}</span>
+                <span className="font-medium">{selectedTruck?.name} — {productType} — {new Date(date).toLocaleDateString()}</span>
                 {selectedClosing ? statusBadge(selectedClosing.status) : <Badge variant="secondary">Open (No record)</Badge>}
               </div>
-              {selectedClosing && selectedClosing.status === "closed" && (
+              {selectedClosing && selectedClosing.status !== "open" && (
                 <div className="grid grid-cols-2 gap-2 text-sm">
-                  <span>Assigned: {selectedClosing.total_assigned}</span>
+                  <span>Intake: {selectedClosing.total_intake}</span>
+                  <span>Transfer In: {selectedClosing.total_transfer_in}</span>
                   <span>Sold: {selectedClosing.total_sold}</span>
+                  <span>Transfer Out: {selectedClosing.total_transfer_out}</span>
                   <span>Returned: {selectedClosing.total_returned}</span>
+                  <span>Carry-forward Balance: {selectedClosing.closing_balance}</span>
                   <span>Cash: {formatCurrency(selectedClosing.cash_sales)}</span>
                   <span>Debt: {formatCurrency(selectedClosing.debt_sales)}</span>
                   <span>Collections: {formatCurrency(selectedClosing.debt_collections)}</span>
@@ -141,11 +157,12 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
               <TableHeader>
                 <TableRow>
                   <TableHead>Date</TableHead>
-                  <TableHead>Area</TableHead>
+                  <TableHead>Truck</TableHead>
+                  <TableHead>Product</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Assigned</TableHead>
+                  <TableHead>Intake</TableHead>
                   <TableHead>Sold</TableHead>
-                  <TableHead>Returned</TableHead>
+                  <TableHead>Balance</TableHead>
                   <TableHead>Cash</TableHead>
                   <TableHead>Profit</TableHead>
                 </TableRow>
@@ -154,11 +171,12 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
                 {closings.map((c) => (
                   <TableRow key={c.id}>
                     <TableCell>{new Date(c.closing_date).toLocaleDateString()}</TableCell>
-                    <TableCell className="font-medium">{c.area?.name || "—"}</TableCell>
+                    <TableCell className="font-medium">{c.truck?.name || "—"}</TableCell>
+                    <TableCell className="text-sm">{c.product_type}</TableCell>
                     <TableCell>{statusBadge(c.status)}</TableCell>
-                    <TableCell>{c.total_assigned}</TableCell>
+                    <TableCell>{c.total_intake}</TableCell>
                     <TableCell>{c.total_sold}</TableCell>
-                    <TableCell>{c.total_returned}</TableCell>
+                    <TableCell>{c.closing_balance}</TableCell>
                     <TableCell>{formatCurrency(c.cash_sales)}</TableCell>
                     <TableCell className={c.profit_estimate >= 0 ? "text-green-600 font-medium" : "text-destructive font-medium"}>
                       {formatCurrency(c.profit_estimate)}
@@ -167,7 +185,7 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
                 ))}
                 {closings.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                    <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
                       No daily closings yet
                     </TableCell>
                   </TableRow>
@@ -183,13 +201,14 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
                 <ResponsiveRow label="Date">
                   {new Date(c.closing_date).toLocaleDateString()}
                 </ResponsiveRow>
-                <ResponsiveRow label="Area">
-                  <span className="font-medium">{c.area?.name || "—"}</span>
+                <ResponsiveRow label="Truck">
+                  <span className="font-medium">{c.truck?.name || "—"}</span>
                 </ResponsiveRow>
+                <ResponsiveRow label="Product">{c.product_type}</ResponsiveRow>
                 <ResponsiveRow label="Status">{statusBadge(c.status)}</ResponsiveRow>
-                <ResponsiveRow label="Assigned">{c.total_assigned}</ResponsiveRow>
+                <ResponsiveRow label="Intake">{c.total_intake}</ResponsiveRow>
                 <ResponsiveRow label="Sold">{c.total_sold}</ResponsiveRow>
-                <ResponsiveRow label="Returned">{c.total_returned}</ResponsiveRow>
+                <ResponsiveRow label="Balance">{c.closing_balance}</ResponsiveRow>
                 <ResponsiveRow label="Cash">{formatCurrency(c.cash_sales)}</ResponsiveRow>
                 <ResponsiveRow label="Profit">
                   <span className={c.profit_estimate >= 0 ? "text-green-600 font-medium" : "text-destructive font-medium"}>
@@ -213,16 +232,17 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
             <DialogTitle>Confirm {action === "close" ? "Close" : "Reconcile"}</DialogTitle>
             <DialogDescription>
               {action === "close"
-                ? "This will validate and freeze the day's data. No further edits will be allowed for this date and area."
+                ? "This will validate and freeze the day's data. No further edits will be allowed for this date, truck, and product."
                 : "This will mark the day as reconciled — the final state."}
             </DialogDescription>
           </DialogHeader>
           <div className="py-2">
             <p><strong>Date:</strong> {new Date(date).toLocaleDateString()}</p>
-            <p><strong>Area:</strong> {selectedArea?.name}</p>
+            <p><strong>Truck:</strong> {selectedTruck?.name}</p>
+            <p><strong>Product:</strong> {productType}</p>
             {action === "close" && (
               <p className="text-sm text-muted-foreground mt-2">
-                Validation: assigned must equal sold + returned
+                Validation: carry-forward balance (intake + transfer in − sold − transfer out − returned) must not be negative. A truck may carry unsold stock overnight.
               </p>
             )}
           </div>
@@ -237,4 +257,3 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
     </div>
   );
 };
-

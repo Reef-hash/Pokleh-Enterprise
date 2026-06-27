@@ -4,7 +4,7 @@ import { PoklehDashboard } from "@/components/dashboard/PoklehDashboard";
 import { GuidedTour } from "@/components/help/GuidedTour";
 import { useAuthStore } from "@/stores/authStore";
 import { supabase } from "@/integrations/supabase/client";
-import { AreaManagement } from "@/components/areas/AreaManagement";
+import { TruckManagement } from "@/components/trucks/TruckManagement";
 import { CustomerManagement } from "@/components/customers/CustomerManagement";
 import { StaffAssignment } from "@/components/staff/StaffAssignment";
 import { StockIntakeForm } from "@/components/stock/StockIntakeForm";
@@ -79,8 +79,8 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
     switch (currentPage) {
       case 'dashboard':
         return <PoklehDashboard user={user} onNavigate={handleNavigate} />;
-      case 'areas':
-        return <AreaManagement userRole={user.role} />;
+      case 'trucks':
+        return <TruckManagement userRole={user.role} />;
       case 'customers':
         return <CustomerManagement userRole={user.role} />;
       case 'staff-assignments':

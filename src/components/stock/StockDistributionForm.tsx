@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -13,10 +13,10 @@ import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { useStockDistribution } from "@/hooks/useStockDistribution";
 import { useStockIntake } from "@/hooks/useStockIntake";
-import { useAreas } from "@/hooks/useAreas";
-import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState as useStateFn } from "react";
+import { useTrucks } from "@/hooks/useTrucks";
+import { stockRpc } from "@/repositories/stockRepo";
 import { toast } from "sonner";
+import { PRODUCT_TYPES, type ProductType } from "@/types/pokleh";
 
 interface StockDistributionFormProps {
   userRole: "admin" | "staff";
@@ -25,40 +25,58 @@ interface StockDistributionFormProps {
 export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) => {
   const { distributions, loading, addDistribution } = useStockDistribution();
   const { intakes } = useStockIntake();
-  const { areas } = useAreas();
+  const { trucks } = useTrucks();
   const [isOpen, setIsOpen] = useState(false);
-  const [form, setForm] = useState({ intake_id: "", area_id: "", quantity_assigned: 0 });
-  const [assignedTotals, setAssignedTotals] = useState<Record<string, number>>({});
+  const [form, setForm] = useState({
+    from_truck_id: "",
+    to_truck_id: "",
+    product_type: "Air Batu Besar" as ProductType,
+    quantity_assigned: 0,
+    intake_id: "",
+  });
+  const [available, setAvailable] = useState<number | null>(null);
+  const [checkingAvailable, setCheckingAvailable] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    supabase
-      .from("stock_distribution")
-      .select("intake_id, quantity_assigned")
-      .then(({ data }) => {
-        const totals: Record<string, number> = {};
-        (data || []).forEach((d: { intake_id: string; quantity_assigned: number }) => {
-          totals[d.intake_id] = (totals[d.intake_id] || 0) + d.quantity_assigned;
-        });
-        setAssignedTotals(totals);
-      });
-  }, [distributions]);
+    if (!form.from_truck_id || !form.product_type) {
+      setAvailable(null);
+      return;
+    }
+    let cancelled = false;
+    setCheckingAvailable(true);
+    const today = new Date().toISOString().split("T")[0];
+    stockRpc.getAvailableStock(form.from_truck_id, form.product_type, today).then(({ data, error }) => {
+      if (cancelled) return;
+      setAvailable(error ? null : (data as number));
+      setCheckingAvailable(false);
+    });
+    return () => { cancelled = true; };
+  }, [form.from_truck_id, form.product_type]);
 
   if (loading) return <PageLoader />;
 
-  const selectedIntake = intakes.find((i) => i.id === form.intake_id);
-  const alreadyAssigned = assignedTotals[form.intake_id] || 0;
-  const remaining = selectedIntake ? selectedIntake.quantity_received - alreadyAssigned : 0;
+  const truckIntakes = intakes.filter((i) => i.truck_id === form.from_truck_id);
+  const overLimit = available !== null && form.quantity_assigned > available;
 
   const handleAdd = async () => {
-    if (!form.intake_id || !form.area_id || form.quantity_assigned <= 0 || submitting) { toast.error("Please select an intake, area, and enter a valid quantity."); return; }
-    if (form.quantity_assigned > remaining) return;
-    const product_type = selectedIntake?.product_type ?? "Air Batu Besar";
+    if (!form.from_truck_id || !form.to_truck_id || form.quantity_assigned <= 0 || submitting) {
+      toast.error("Please select a from-truck, a to-truck, and enter a valid quantity.");
+      return;
+    }
+    if (form.from_truck_id === form.to_truck_id) { toast.error("From-truck and to-truck must be different."); return; }
+    if (overLimit) return;
     setSubmitting(true);
     try {
-      const result = await addDistribution({ ...form, product_type });
+      const result = await addDistribution({
+        from_truck_id: form.from_truck_id,
+        to_truck_id: form.to_truck_id,
+        product_type: form.product_type,
+        quantity_assigned: form.quantity_assigned,
+        intake_id: form.intake_id || undefined,
+      });
       if (result.success) {
-        setForm({ intake_id: "", area_id: "", quantity_assigned: 0 });
+        setForm({ from_truck_id: "", to_truck_id: "", product_type: "Air Batu Besar", quantity_assigned: 0, intake_id: "" });
         setIsOpen(false);
       }
     } finally {
@@ -70,7 +88,7 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
     <div className="space-y-6">
       <PageHeader
         title="Stock Distribution"
-        subtitle="Distribute stock to delivery areas"
+        subtitle="Transfer stock between trucks"
       >
         {userRole === "admin" && (
           <Button onClick={() => setIsOpen(true)}>
@@ -91,9 +109,9 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
             <TableHeader>
               <TableRow>
                 <TableHead>Date</TableHead>
-                <TableHead>Intake (Supplier)</TableHead>
+                <TableHead>From</TableHead>
+                <TableHead>To</TableHead>
                 <TableHead>Product</TableHead>
-                <TableHead>Area</TableHead>
                 <TableHead>Qty Assigned</TableHead>
               </TableRow>
             </TableHeader>
@@ -101,9 +119,9 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
               {distributions.map((d) => (
                 <TableRow key={d.id}>
                   <TableCell className="text-muted-foreground">{new Date(d.created_at).toLocaleDateString()}</TableCell>
-                  <TableCell>{d.intake?.supplier?.name || "—"}</TableCell>
-                  <TableCell className="text-sm font-medium">{d.product_type || d.intake?.product_type || "—"}</TableCell>
-                  <TableCell><Badge variant="secondary">{d.area?.name}</Badge></TableCell>
+                  <TableCell><Badge variant="secondary">{d.from_truck?.name}</Badge></TableCell>
+                  <TableCell className="flex items-center gap-1"><ArrowRight className="h-3 w-3 text-muted-foreground" /><Badge variant="secondary">{d.to_truck?.name}</Badge></TableCell>
+                  <TableCell className="text-sm font-medium">{d.product_type}</TableCell>
                   <TableCell className="font-medium">{d.quantity_assigned} pax</TableCell>
                 </TableRow>
               ))}
@@ -123,7 +141,9 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
             {distributions.map((d) => (
               <ResponsiveCard key={d.id}>
                 <ResponsiveRow label="Date"><span className="text-muted-foreground">{new Date(d.created_at).toLocaleDateString()}</span></ResponsiveRow>
-                <ResponsiveRow label="Intake">{d.intake?.supplier?.name || "—"}</ResponsiveRow>                <ResponsiveRow label="Product">{d.product_type || d.intake?.product_type || "—"}</ResponsiveRow>                <ResponsiveRow label="Area"><Badge variant="secondary">{d.area?.name}</Badge></ResponsiveRow>
+                <ResponsiveRow label="From"><Badge variant="secondary">{d.from_truck?.name}</Badge></ResponsiveRow>
+                <ResponsiveRow label="To"><Badge variant="secondary">{d.to_truck?.name}</Badge></ResponsiveRow>
+                <ResponsiveRow label="Product">{d.product_type}</ResponsiveRow>
                 <ResponsiveRow label="Qty Assigned"><span className="font-medium">{d.quantity_assigned} pax</span></ResponsiveRow>
               </ResponsiveCard>
             ))}
@@ -138,59 +158,76 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Distribute Stock</DialogTitle>
-            <DialogDescription>Assign stock to a delivery area</DialogDescription>
+            <DialogDescription>Transfer stock from one truck to another</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>Intake Reference</Label>
-              <Select value={form.intake_id} onValueChange={(v) => setForm({ ...form, intake_id: v })}>
-                <SelectTrigger><SelectValue placeholder="Select intake" /></SelectTrigger>
+              <Label>From Truck</Label>
+              <Select value={form.from_truck_id} onValueChange={(v) => setForm({ ...form, from_truck_id: v, intake_id: "" })}>
+                <SelectTrigger><SelectValue placeholder="Select source truck" /></SelectTrigger>
                 <SelectContent>
-                  {intakes.map((i) => {
-                    const assigned = assignedTotals[i.id] || 0;
-                    const remain = i.quantity_received - assigned;
-                    return (
-                      <SelectItem key={i.id} value={i.id}>
-                        {i.supplier?.name} — {i.product_type} — {new Date(i.intake_date).toLocaleDateString()} ({remain} pax left)
-                      </SelectItem>
-                    );
-                  })}
+                  {trucks.map((t) => (<SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>))}
                 </SelectContent>
               </Select>
-              {remaining > 0 && (
-                <p className="text-sm text-muted-foreground">Available: {remaining} pax · {selectedIntake?.product_type}</p>
-              )}
             </div>
             <div className="space-y-2">
-              <Label>Area</Label>
-              <Select value={form.area_id} onValueChange={(v) => setForm({ ...form, area_id: v })}>
-                <SelectTrigger><SelectValue placeholder="Select area" /></SelectTrigger>
+              <Label>To Truck</Label>
+              <Select value={form.to_truck_id} onValueChange={(v) => setForm({ ...form, to_truck_id: v })}>
+                <SelectTrigger><SelectValue placeholder="Select destination truck" /></SelectTrigger>
                 <SelectContent>
-                  {areas.map((a) => (<SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>))}
+                  {trucks.filter((t) => t.id !== form.from_truck_id).map((t) => (<SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>))}
                 </SelectContent>
               </Select>
             </div>
+            <div className="space-y-2">
+              <Label>Product</Label>
+              <Select value={form.product_type} onValueChange={(v) => setForm({ ...form, product_type: v as ProductType })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {PRODUCT_TYPES.map((p) => (<SelectItem key={p} value={p}>{p}</SelectItem>))}
+                </SelectContent>
+              </Select>
+              {form.from_truck_id && (
+                <p className="text-sm text-muted-foreground">
+                  {checkingAvailable ? "Checking available stock…" : available !== null ? `Available: ${available} pax` : ""}
+                </p>
+              )}
+            </div>
+            {truckIntakes.length > 0 && (
+              <div className="space-y-2">
+                <Label>Intake Reference (optional)</Label>
+                <Select value={form.intake_id || "none"} onValueChange={(v) => setForm({ ...form, intake_id: v === "none" ? "" : v })}>
+                  <SelectTrigger><SelectValue placeholder="Tag to a specific intake batch" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    {truckIntakes.map((i) => (
+                      <SelectItem key={i.id} value={i.id}>
+                        {i.product_type} — {new Date(i.intake_date).toLocaleDateString()} ({i.quantity_received} pax)
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div className="space-y-2">
               <Label>Quantity (pax)</Label>
               <Input
                 type="number"
                 min={1}
-                max={remaining || 1}
                 value={form.quantity_assigned || ""}
                 onChange={(e) => setForm({ ...form, quantity_assigned: parseInt(e.target.value) || 0 })}
               />
-              {form.quantity_assigned > remaining && remaining > 0 && (
-                <p className="text-sm text-destructive">Cannot exceed available stock ({remaining} pax)</p>
+              {overLimit && (
+                <p className="text-sm text-destructive">Cannot exceed available stock ({available} pax)</p>
               )}
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-            <Button onClick={handleAdd} disabled={submitting || form.quantity_assigned > remaining}>{submitting ? "Saving..." : "Save"}</Button>
+            <Button onClick={handleAdd} disabled={submitting || overLimit}>{submitting ? "Saving..." : "Save"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
   );
 };
-

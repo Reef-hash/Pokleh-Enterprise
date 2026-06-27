@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { useSyncStore } from "@/stores/syncStore";
 import { customersRepo } from "@/repositories/customersRepo";
-import { areasRepo } from "@/repositories/areasRepo";
+import { trucksRepo } from "@/repositories/trucksRepo";
 import { db } from "@/lib/db";
-import type { OfflineCustomer, OfflineArea } from "@/lib/db";
+import type { OfflineCustomer, OfflineTruck } from "@/lib/db";
 
 export type BootPhase = "auth" | "syncing" | "ready";
 
@@ -20,7 +20,7 @@ const STATUS_MESSAGES: Record<BootPhase, string> = {
 /**
  * Orchestrates the app boot sequence:
  * 1. Restore auth session (Supabase)
- * 2. Pre-fetch dashboard data (customers + areas) → cache to Dexie
+ * 2. Pre-fetch dashboard data (customers + trucks) → cache to Dexie
  * 3. Process offline sync queue
  *
  * Reports status via `bootPhase` for the splash screen.
@@ -81,15 +81,15 @@ export const useAppBootstrap = () => {
         }
         return customers.length;
       })(),
-      // Areas
+      // Trucks
       (async () => {
-        const { data, error } = await areasRepo.fetchAll();
+        const { data, error } = await trucksRepo.fetchAll();
         if (error) throw error;
-        const areas = (data || []) as unknown as OfflineArea[];
-        if (areas.length > 0) {
-          await db.areas.bulkPut(areas);
+        const trucks = (data || []) as unknown as OfflineTruck[];
+        if (trucks.length > 0) {
+          await db.trucks.bulkPut(trucks);
         }
-        return areas.length;
+        return trucks.length;
       })(),
       // Process offline sync queue
       (async () => {
@@ -99,10 +99,10 @@ export const useAppBootstrap = () => {
 
     // Log results for debugging (non-blocking)
     if (process.env.NODE_ENV === "development") {
-      const [customers, areas, sync] = results;
+      const [customers, trucks, sync] = results;
       console.log("[bootstrap]", {
         customers: customers.status === "fulfilled" ? customers.value : "failed",
-        areas: areas.status === "fulfilled" ? areas.value : "failed",
+        trucks: trucks.status === "fulfilled" ? trucks.value : "failed",
         sync: sync.status,
       });
     }

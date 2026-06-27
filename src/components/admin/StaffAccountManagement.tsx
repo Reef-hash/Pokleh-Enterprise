@@ -118,7 +118,7 @@ export const StaffAccountManagement = () => {
       <Card>
         <CardHeader>
           <CardTitle>Staff Members ({staffMembers.length})</CardTitle>
-          <CardDescription>Staff accounts with area-restricted access</CardDescription>
+          <CardDescription>Staff accounts with truck-restricted access</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="hidden md:block overflow-x-auto">

@@ -1,7 +1,7 @@
 import { useCustomers } from "@/hooks/useCustomers";
-import { useAreas } from "@/hooks/useAreas";
+import { useTrucks } from "@/hooks/useTrucks";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, Users, MapPin, DollarSign } from "lucide-react";
+import { Package, Users, Truck, ArrowLeftRight, DollarSign } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
 
 interface PoklehDashboardProps {
@@ -11,14 +11,14 @@ interface PoklehDashboardProps {
 
 export const PoklehDashboard = ({ user, onNavigate }: PoklehDashboardProps) => {
   const { customers } = useCustomers();
-  const { areas } = useAreas();
+  const { trucks } = useTrucks();
 
   const activeCustomers = customers.filter(c => c.active !== false).length;
   const totalDebt = customers.reduce((sum, c) => sum + Number(c.debt_balance || 0), 0);
 
   const quickLinks = [
     { id: 'stock-intake', label: 'Stock Intake', icon: Package, desc: 'Record incoming stock from suppliers' },
-    { id: 'stock-distribution', label: 'Stock Distribution', icon: MapPin, desc: 'Assign stock to delivery areas' },
+    { id: 'stock-distribution', label: 'Stock Distribution', icon: ArrowLeftRight, desc: 'Transfer stock between trucks' },
     { id: 'sales', label: 'Sales Entry', icon: DollarSign, desc: 'Record ice sales (cash or debt)' },
     { id: 'customers', label: 'Customers', icon: Users, desc: 'Manage customer accounts and debts' },
     { id: 'daily-closing', label: 'Daily Closing', icon: DollarSign, desc: 'End-of-day reconciliation' },
@@ -56,11 +56,11 @@ export const PoklehDashboard = ({ user, onNavigate }: PoklehDashboardProps) => {
         </Card>
         <Card className="order-4 sm:order-3 animate-fade-in-up animate-delay-3">
           <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6">
-            <CardTitle className="text-xs sm:text-sm font-medium">Service Areas</CardTitle>
-            <MapPin className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-xs sm:text-sm font-medium">Fleet Size</CardTitle>
+            <Truck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent className="p-3 sm:p-6 pt-0">
-            <p className="text-lg sm:text-2xl font-bold">{areas.length}</p>
+            <p className="text-lg sm:text-2xl font-bold">{trucks.length}</p>
           </CardContent>
         </Card>
         <Card className="order-2 sm:order-4 animate-fade-in-up animate-delay-4">

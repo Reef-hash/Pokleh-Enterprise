@@ -3,15 +3,15 @@ import { useSyncStore } from "@/stores/syncStore";
 import { customersRepo } from "@/repositories/customersRepo";
 import { db } from "@/lib/db";
 import { persistWrite } from "@/lib/writeHelper";
-import type { Customer, Area } from "@/types/pokleh";
+import type { Customer, Truck } from "@/types/pokleh";
 
-export const useCustomers = (areaId?: string) => {
+export const useCustomers = (truckId?: string) => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchCustomers = useCallback(async () => {
     try {
-      const { data, error } = await customersRepo.fetchAll(areaId);
+      const { data, error } = await customersRepo.fetchAll(truckId);
       if (error) throw error;
       const result = (data || []) as unknown as Customer[];
       setCustomers(result);
@@ -24,23 +24,23 @@ export const useCustomers = (areaId?: string) => {
       );
     } catch {
       const cached = await db.customers
-        .where("area_id")
-        .equals(areaId || "")
+        .where("truck_id")
+        .equals(truckId || "")
         .toArray();
       if (cached.length > 0) {
         setCustomers(cached as unknown as Customer[]);
       }
     }
-  }, [areaId]);
+  }, [truckId]);
 
   const addCustomer = async (data: {
     name: string;
     phone?: string;
     address?: string;
-    area_id: string;
-    area?: Area;
+    truck_id: string;
+    truck?: Truck;
   }) => {
-    const { area, ...insertData } = data;
+    const { truck, ...insertData } = data;
     const tempId = crypto.randomUUID();
     const now = new Date().toISOString();
     const optimistic: Customer = {
@@ -48,8 +48,8 @@ export const useCustomers = (areaId?: string) => {
       name: data.name,
       phone: data.phone ?? null,
       address: data.address ?? null,
-      area_id: data.area_id,
-      area: area,
+      truck_id: data.truck_id,
+      truck: truck,
       debt_balance: 0,
       active: true,
       created_at: now,

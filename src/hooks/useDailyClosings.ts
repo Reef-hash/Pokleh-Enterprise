@@ -4,7 +4,7 @@ import { closingRepo } from "@/repositories/closingRepo";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
-import type { DailyClosing } from "@/types/pokleh";
+import type { DailyClosing, ProductType } from "@/types/pokleh";
 
 export const useDailyClosings = () => {
   const [closings, setClosings] = useState<DailyClosing[]>([]);
@@ -24,11 +24,12 @@ export const useDailyClosings = () => {
     }
   }, []);
 
-  const closeDay = async (closingDate: string, areaId: string) => {
+  const closeDay = async (closingDate: string, truckId: string, productType: ProductType) => {
     if (!userId) return { success: false, error: "Not authenticated" };
     const { data, error } = await closingRepo.closeOrReconcile({
       p_closing_date: closingDate,
-      p_area_id: areaId,
+      p_truck_id: truckId,
+      p_product_type: productType,
       p_user_id: userId,
       p_action: "close",
     });
@@ -46,11 +47,12 @@ export const useDailyClosings = () => {
     return { success: true, data: closing };
   };
 
-  const reconcileDay = async (closingDate: string, areaId: string) => {
+  const reconcileDay = async (closingDate: string, truckId: string, productType: ProductType) => {
     if (!userId) return { success: false, error: "Not authenticated" };
     const { data, error } = await closingRepo.closeOrReconcile({
       p_closing_date: closingDate,
-      p_area_id: areaId,
+      p_truck_id: truckId,
+      p_product_type: productType,
       p_user_id: userId,
       p_action: "reconcile",
     });

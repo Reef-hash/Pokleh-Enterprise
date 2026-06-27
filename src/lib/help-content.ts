@@ -9,7 +9,7 @@ const pageHelp: Record<string, HelpContent> = {
   dashboard: {
     purpose: "Overview of today's operations with quick access to all modules.",
     steps: [
-      "View your key metrics: active customers, service areas, and outstanding debt.",
+      "View your key metrics: active customers, fleet size, and outstanding debt.",
       "Use the Quick Actions cards to jump directly to any module.",
       "Navigate using the sidebar menu to access all features.",
     ],
@@ -19,36 +19,36 @@ const pageHelp: Record<string, HelpContent> = {
       "Use Quick Actions for faster navigation to frequent tasks.",
     ],
   },
-  areas: {
-    purpose: "Manage delivery coverage areas for your ice distribution.",
+  trucks: {
+    purpose: "Manage the lorries (trucks) used for your ice distribution fleet.",
     steps: [
-      "Click Add Area to create a new delivery area.",
-      "Enter a name for the area (e.g. 'Town Centre', 'Kampung Baru').",
-      "Areas are used to group customers, assign staff, and track stock distribution.",
+      "Click Add Truck to register a new lorry.",
+      "Enter a name for the truck (e.g. 'Lori A', 'Lori B').",
+      "Trucks are used to group customers, assign staff, and track stock intake, distribution, and sales.",
     ],
     mistakes: [
-      "Deleting an area will affect customer assignments and staff scheduling.",
+      "Deleting a truck will affect customer assignments and staff scheduling.",
     ],
     tips: [
-      "Name areas by geographic location or route for clarity.",
-      "You can reassign customers to a different area if needed.",
+      "Name trucks by route or driver for clarity.",
+      "You can reassign customers to a different truck if needed.",
     ],
   },
   customers: {
     purpose: "Manage your ice customers and their debt balances.",
     steps: [
       "Click Add Customer to register a new customer.",
-      "Fill in name, phone number, address, and select their delivery area.",
+      "Fill in name, phone number, address, and select their delivery truck.",
       "Toggle the Active switch to enable or disable a customer account.",
       "View each customer's debt balance updated in real time.",
     ],
     mistakes: [
-      "Make sure the area is correct — it determines staff assignment.",
+      "Make sure the truck is correct — it determines staff assignment.",
       "Double-check phone numbers for accuracy.",
     ],
     tips: [
       "Search customers by name using the search bar.",
-      "Filter by area to quickly find customers in a specific zone.",
+      "Filter by truck to quickly find customers on a specific route.",
     ],
   },
   suppliers: {
@@ -66,34 +66,33 @@ const pageHelp: Record<string, HelpContent> = {
     ],
   },
   "staff-assignments": {
-    purpose: "Assign staff members to delivery areas.",
+    purpose: "Assign staff members to trucks.",
     steps: [
       "Select a staff member from the dropdown.",
-      "Select the area to assign them to.",
+      "Select the truck to assign them to.",
       "Click Assign to save the assignment.",
-      "Use the X button to end an assignment when staff changes areas.",
+      "Use the X button to end an assignment when staff changes trucks.",
     ],
     mistakes: [
-      "A staff member can only have one active assignment per area.",
+      "A staff member can only have one active assignment per truck.",
       "Ending an assignment does not delete it — it records the end date.",
     ],
     tips: [
-      "Assign staff to their most familiar areas for better efficiency.",
+      "Assign staff to their most familiar trucks/routes for better efficiency.",
     ],
   },
   "stock-intake": {
-    purpose: "Record incoming ice stock from suppliers.",
+    purpose: "Record incoming ice stock from suppliers, collected by a specific truck.",
     steps: [
       "Select the date of intake.",
-      "Choose the supplier from the dropdown.",
-      "Enter the quantity received (in pax).",
-      "Enter the cost per pax.",
+      "Choose the supplier and the truck that collected the stock.",
+      "Enter the quantity received (in pax) and cost per pax for each product type — leave a product blank to skip it.",
       "Add optional notes (e.g. delivery reference).",
-      "Click Record Intake to save.",
+      "Click Record Intake to save. Multiple product types can be saved in one trip.",
     ],
     mistakes: [
       "Enter COST per pax, not total cost. Total cost = quantity × cost.",
-      "Make sure the supplier is selected before saving.",
+      "Make sure the supplier and truck are selected before saving.",
     ],
     tips: [
       "Record intakes promptly to keep stock levels accurate.",
@@ -101,34 +100,34 @@ const pageHelp: Record<string, HelpContent> = {
     ],
   },
   "stock-distribution": {
-    purpose: "Assign stock from an intake to delivery areas.",
+    purpose: "Transfer stock from one truck to another (e.g. a hub truck redistributing to other trucks).",
     steps: [
-      "Select the intake reference (recent stock arrival).",
-      "Select the target delivery area.",
-      "Enter the quantity to assign.",
-      "The available stock remaining is shown automatically.",
+      "Select the source truck (from) and the destination truck (to).",
+      "Select the product type.",
+      "Enter the quantity to transfer — the available stock on the source truck is shown automatically.",
+      "Optionally tag the transfer to a specific intake batch for traceability.",
       "Click Distribute to save.",
     ],
     mistakes: [
-      "You cannot distribute more stock than is available.",
+      "You cannot transfer more stock than is available on the source truck.",
       "Distributions are permanent records — correct via a new distribution.",
     ],
     tips: [
       "Distribute early in the day so staff can begin deliveries.",
-      "Track remaining stock to plan your next intake.",
+      "Use truck-to-truck transfers to sweep unsold stock between trucks at end of day (e.g. D to E).",
     ],
   },
   "stock-return": {
-    purpose: "Record unsold ice stock returned from delivery areas.",
+    purpose: "Record unsold ice stock returned from a truck (e.g. back to the supplier/warehouse).",
     steps: [
-      "Select the distribution that the stock was part of.",
-      "Select the area returning the stock.",
+      "Select the truck returning the stock.",
+      "Optionally tag the return to a specific distribution or intake batch.",
       "Enter the quantity being returned.",
       "Set the return date.",
       "Click Record Return to save.",
     ],
     mistakes: [
-      "Returns must be recorded on the same day or after the distribution.",
+      "Returns must be recorded on the same day or after the related distribution/intake.",
     ],
     tips: [
       "Returns help calculate accurate settlement amounts for suppliers.",
@@ -139,7 +138,7 @@ const pageHelp: Record<string, HelpContent> = {
     purpose: "Record ice sales to customers.",
     steps: [
       "Select the customer from the dropdown.",
-      "Select the delivery area.",
+      "Select the truck.",
       "Enter the quantity of ice pax sold.",
       "Enter the selling price per pax.",
       "Select payment type: Cash (immediate payment) or Debt (credit sale).",
@@ -234,21 +233,21 @@ const pageHelp: Record<string, HelpContent> = {
     ],
   },
   "daily-closing": {
-    purpose: "Perform end-of-day reconciliation for each area.",
+    purpose: "Perform end-of-day reconciliation for each truck and product type.",
     steps: [
-      "Select the date and area to close.",
-      "Review the day's totals: assigned stock, sold quantity, returns.",
+      "Select the date, truck, and product type to close.",
+      "Review the day's totals: intake, transfer in/out, sold quantity, returns, and carry-forward balance.",
       "Review financial summaries: cash sales, debt sales, collections, expenses.",
       "Click Close to lock the day's records.",
       "Click Reconcile to finalise after verification.",
     ],
     mistakes: [
       "Once closed, records for that day cannot be modified.",
-      "Ensure all sales, returns, and expenses are entered before closing.",
+      "Ensure all sales, transfers, returns, and expenses are entered before closing.",
     ],
     tips: [
       "Close each day before starting the next day's operations.",
-      "Use reconciliation to verify all figures match your physical count.",
+      "A nonzero carry-forward balance is allowed — a truck can carry unsold stock overnight.",
     ],
   },
   "pokleh-reports": {
@@ -273,7 +272,7 @@ export function getHelpContent(pageId: string): HelpContent | null {
 export function getAllHelpTopics(): { id: string; title: string; content: HelpContent }[] {
   const titles: Record<string, string> = {
     dashboard: "Dashboard",
-    areas: "Areas",
+    trucks: "Trucks",
     customers: "Customers",
     suppliers: "Suppliers",
     "staff-assignments": "Staff Assignments",
@@ -307,13 +306,13 @@ export const tourSteps: TourStep[] = [
   {
     targetId: "tour-dashboard",
     title: "Dashboard",
-    description: "Welcome to Pokleh Enterprise! This is your home screen showing key metrics — active customers, service areas, outstanding debt — and quick action cards to jump into any module.",
+    description: "Welcome to Pokleh Enterprise! This is your home screen showing key metrics — active customers, fleet size, outstanding debt — and quick action cards to jump into any module.",
     position: "bottom",
   },
   {
     targetId: "tour-customers",
     title: "Customers",
-    description: "Add and manage your ice customers here. Each customer is assigned to a delivery area, and their debt balance is tracked automatically.",
+    description: "Add and manage your ice customers here. Each customer is assigned to a delivery truck, and their debt balance is tracked automatically.",
     position: "right",
   },
   {
