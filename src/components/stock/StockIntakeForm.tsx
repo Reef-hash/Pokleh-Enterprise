@@ -187,27 +187,32 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
           <div className="space-y-2 pt-1">
             <div className="flex items-center gap-2 text-sm font-medium">
               <Package className="h-4 w-4" />
-              Products (leave blank to skip)
+              Products
             </div>
-            {PRODUCT_TYPES.map((p) => (
-              <div key={p} className="space-y-1.5 pb-2">
-                <p className="text-xs text-muted-foreground font-medium">{p}</p>
-                <div className="grid grid-cols-2 gap-2">
-                  <NumberInput
-                    label="Qty (pax)"
-                    min={0}
-                    value={lines[p].quantity_received}
-                    onChange={(e) => updateLine(p, "quantity_received", e.target.value)}
-                  />
-                  <CurrencyInput
-                    label="Cost/Pax"
-                    currency="RM"
-                    value={lines[p].cost_per_pax}
-                    onChange={(e) => updateLine(p, "cost_per_pax", e.target.value)}
-                  />
+            <p className="text-xs text-muted-foreground">
+              Enter quantity (pax) and cost per pax for each product. Leave blank to skip.
+            </p>
+            <div className="space-y-3">
+              {PRODUCT_TYPES.map((p) => (
+                <div key={p} className="rounded-xl border border-border bg-muted/30 p-3 space-y-2.5">
+                  <p className="text-sm font-semibold">{p}</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <NumberInput
+                      label="Qty (pax)"
+                      min={0}
+                      value={lines[p].quantity_received}
+                      onChange={(e) => updateLine(p, "quantity_received", e.target.value)}
+                    />
+                    <CurrencyInput
+                      label="Cost/Pax (RM)"
+                      currency="RM"
+                      value={lines[p].cost_per_pax}
+                      onChange={(e) => updateLine(p, "cost_per_pax", e.target.value)}
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
           <div>
