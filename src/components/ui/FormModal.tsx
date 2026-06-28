@@ -52,12 +52,12 @@ export const FormModal = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className={cn(
-          "flex flex-col max-h-[90vh] sm:max-h-[85vh] w-[95vw] sm:w-full sm:max-w-md md:max-w-lg p-0",
+          "flex flex-col max-h-[90dvh] sm:max-h-[85dvh] w-[95vw] sm:w-full sm:max-w-md md:max-w-lg p-0 gap-0",
           className
         )}
       >
         {/* Fixed Header */}
-        <div className="flex-shrink-0 border-b px-6 py-4 sticky top-0 z-10 bg-background/95 backdrop-blur-sm">
+        <div className="flex-shrink-0 border-b bg-background px-6 py-4 pr-12">
           <DialogHeader className="text-left">
             <DialogTitle className="text-lg sm:text-xl">{title}</DialogTitle>
             {description && (
@@ -69,17 +69,17 @@ export const FormModal = ({
         </div>
 
         {/* Scrollable Body */}
-        <div className="flex-1 overflow-y-auto px-6 py-4">
+        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden overscroll-contain px-6 py-4">
           {children}
         </div>
 
         {/* Fixed Footer */}
-        <div className="flex-shrink-0 border-t px-6 py-3 sticky bottom-0 z-10 bg-background/95 backdrop-blur-sm flex flex-col-reverse sm:flex-row gap-2 sm:justify-end">
+        <div className="flex-shrink-0 border-t bg-background px-6 py-3 flex flex-row gap-2">
           <Button
             variant="outline"
             onClick={handleCancel}
             disabled={isSubmitting}
-            className="w-full sm:w-auto"
+            className="flex-1"
           >
             {cancelLabel}
           </Button>
@@ -87,7 +87,7 @@ export const FormModal = ({
             <Button
               onClick={handleSubmit}
               disabled={submitDisabled || isSubmitting}
-              className="w-full sm:w-auto"
+              className="flex-1"
             >
               {isSubmitting ? "Saving..." : submitLabel}
             </Button>
