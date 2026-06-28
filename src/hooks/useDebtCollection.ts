@@ -5,7 +5,7 @@ import { customersRepo } from "@/repositories/customersRepo";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
-import { persistWrite } from "@/lib/writeHelper";
+import { persistWrite, mergeUnSyncedData } from "@/lib/writeHelper";
 import type { DebtCollection } from "@/types/pokleh";
 
 export const useDebtCollection = () => {
@@ -18,8 +18,9 @@ export const useDebtCollection = () => {
       const { data, error } = await debtCollectionRepo.fetchAll();
       if (error) throw error;
       const result = (data || []) as unknown as DebtCollection[];
-      setCollections(result);
-      await db.debtCollections.bulkPut(result as unknown as import("@/lib/db").OfflineDebtCollection[]);
+      const merged = await mergeUnSyncedData("debt_collection", result);
+      setCollections(merged);
+      await db.debtCollections.bulkPut(merged as unknown as import("@/lib/db").OfflineDebtCollection[]);
     } catch {
       const cached = await db.debtCollections.orderBy("collection_date").reverse().toArray();
       setCollections(cached as unknown as DebtCollection[]);

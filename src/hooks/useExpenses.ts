@@ -3,7 +3,7 @@ import { useSyncStore } from "@/stores/syncStore";
 import { expensesRepo } from "@/repositories/expensesRepo";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
-import { persistWrite } from "@/lib/writeHelper";
+import { persistWrite, mergeUnSyncedData } from "@/lib/writeHelper";
 import type { Expense } from "@/types/pokleh";
 
 export const useExpenses = () => {
@@ -16,8 +16,9 @@ export const useExpenses = () => {
       const { data, error } = await expensesRepo.fetchAll();
       if (error) throw error;
       const result = (data || []) as unknown as Expense[];
-      setExpenses(result);
-      await db.expenses.bulkPut(result as unknown as import("@/lib/db").OfflineExpense[]);
+      const merged = await mergeUnSyncedData("expenses", result);
+      setExpenses(merged);
+      await db.expenses.bulkPut(merged as unknown as import("@/lib/db").OfflineExpense[]);
     } catch {
       const cached = await db.expenses.orderBy("expense_date").reverse().toArray();
       setExpenses(cached as unknown as Expense[]);

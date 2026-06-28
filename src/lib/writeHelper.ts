@@ -2,6 +2,7 @@ import { offlineDetector } from "@/services/offline";
 import { syncEngine } from "@/services/sync";
 import { toast } from "sonner";
 import { getUserFriendlyError } from "@/lib/errors";
+import { db } from "@/lib/db";
 
 export interface PersistConfig<T> {
   entity: string;
@@ -69,4 +70,25 @@ export async function persistWrite<T>(config: PersistConfig<T>): Promise<Persist
     if (optimistic) optimistic.remove();
     return { success: false };
   }
+}
+
+export async function mergeUnSyncedData<T extends { id: string }>(
+  entity: string,
+  serverData: T[]
+): Promise<T[]> {
+  // Get unsynced INSERT operations from queue
+  const syncQueue = await db.syncQueue
+    .where("entity").equals(entity)
+    .filter(item => item.action === "INSERT")
+    .toArray();
+
+  const syncedIds = new Set(serverData.map((item: any) => item.id));
+  const unsyncedItems = syncQueue
+    .filter(item => !syncedIds.has(item.entityId))
+    .map(item => ({
+      id: item.entityId,
+      ...item.payload,
+    })) as T[];
+
+  return [...serverData, ...unsyncedItems];
 }

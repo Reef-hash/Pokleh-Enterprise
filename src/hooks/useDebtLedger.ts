@@ -4,6 +4,7 @@ import { debtLedgerRepo } from "@/repositories/debtRepo";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
+import { mergeUnSyncedData } from "@/lib/writeHelper";
 import type { DebtLedgerEntry } from "@/types/pokleh";
 
 export const useDebtLedger = () => {
@@ -16,8 +17,9 @@ export const useDebtLedger = () => {
       const { data, error } = await debtLedgerRepo.fetchAll();
       if (error) throw error;
       const result = (data || []) as unknown as DebtLedgerEntry[];
-      setEntries(result);
-      await db.debtLedger.bulkPut(result as unknown as import("@/lib/db").OfflineDebtLedgerEntry[]);
+      const merged = await mergeUnSyncedData("debt_ledger", result);
+      setEntries(merged);
+      await db.debtLedger.bulkPut(merged as unknown as import("@/lib/db").OfflineDebtLedgerEntry[]);
     } catch {
       const cached = await db.debtLedger.orderBy("created_at").reverse().toArray();
       setEntries(cached as unknown as DebtLedgerEntry[]);

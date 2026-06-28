@@ -2,21 +2,23 @@ import { useState, useEffect, useCallback } from "react";
 import { useSyncStore } from "@/stores/syncStore";
 import { suppliersRepo } from "@/repositories/suppliersRepo";
 import { db } from "@/lib/db";
-import { persistWrite } from "@/lib/writeHelper";
+import { persistWrite, mergeUnSyncedData } from "@/lib/writeHelper";
 import type { Supplier } from "@/types/pokleh";
 
 export const usePoklehSuppliers = () => {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(true);
+  const triggerRefresh = useSyncStore((s) => s.triggerRefresh);
 
   const fetchSuppliers = useCallback(async () => {
     try {
       const { data, error } = await suppliersRepo.fetchAll();
       if (error) throw error;
       const result = (data || []) as Supplier[];
-      setSuppliers(result);
+      const merged = await mergeUnSyncedData("suppliers", result);
+      setSuppliers(merged);
       await db.suppliers.bulkPut(
-        result.map((s) => ({ ...s, updatedAt: s.updated_at, syncedAt: new Date().toISOString() }))
+        merged.map((s) => ({ ...s, updatedAt: s.updated_at, syncedAt: new Date().toISOString() }))
       );
     } catch {
       const cached = await db.suppliers.toArray();
@@ -34,7 +36,7 @@ export const usePoklehSuppliers = () => {
       created_at: now,
       updated_at: now,
     } as Supplier;
-    return persistWrite<Supplier>({
+    const result = await persistWrite<Supplier>({
       entity: "suppliers",
       action: "INSERT",
       userId: "system",
@@ -51,10 +53,12 @@ export const usePoklehSuppliers = () => {
       cacheOffline: async () => db.suppliers.put(optimistic as unknown as import("@/lib/db").OfflineSupplier),
       msg: "Supplier added",
     });
+    if (result.success) await triggerRefresh();
+    return result;
   };
 
   const updateSupplier = async (id: string, name: string, phone?: string) => {
-    return persistWrite<Supplier>({
+    const result = await persistWrite<Supplier>({
       entity: "suppliers",
       action: "UPDATE",
       userId: "system",
@@ -67,6 +71,8 @@ export const usePoklehSuppliers = () => {
         db.suppliers.put({ ...updated, updatedAt: updated.updated_at, syncedAt: new Date().toISOString() }),
       msg: "Supplier updated",
     });
+    if (result.success) await triggerRefresh();
+    return result;
   };
 
   const deleteSupplier = async (id: string) => {
@@ -90,7 +96,7 @@ export const usePoklehSuppliers = () => {
 
   useEffect(() => {
     fetchSuppliers().finally(() => setLoading(false));
-  }, [fetchSuppliers, refreshTick]);
+  }, [fetchSuppliers, refreshTick, triggerRefresh]);
 
   return { suppliers, loading, addSupplier, updateSupplier, deleteSupplier, refresh: fetchSuppliers };
 };

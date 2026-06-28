@@ -2,21 +2,23 @@ import { useState, useEffect, useCallback } from "react";
 import { useSyncStore } from "@/stores/syncStore";
 import { customersRepo } from "@/repositories/customersRepo";
 import { db } from "@/lib/db";
-import { persistWrite } from "@/lib/writeHelper";
+import { persistWrite, mergeUnSyncedData } from "@/lib/writeHelper";
 import type { Customer, Truck } from "@/types/pokleh";
 
 export const useCustomers = (truckId?: string) => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
+  const triggerRefresh = useSyncStore((s) => s.triggerRefresh);
 
   const fetchCustomers = useCallback(async () => {
     try {
       const { data, error } = await customersRepo.fetchAll(truckId);
       if (error) throw error;
       const result = (data || []) as unknown as Customer[];
-      setCustomers(result);
+      const merged = await mergeUnSyncedData("customers", result);
+      setCustomers(merged);
       await db.customers.bulkPut(
-        result.map((c) => ({
+        merged.map((c) => ({
           ...c,
           updatedAt: c.updated_at,
           syncedAt: new Date().toISOString(),
@@ -55,7 +57,7 @@ export const useCustomers = (truckId?: string) => {
       created_at: now,
       updated_at: now,
     } as Customer;
-    return persistWrite<Customer>({
+    const result = await persistWrite<Customer>({
       entity: "customers",
       action: "INSERT",
       userId: "system",
@@ -76,6 +78,10 @@ export const useCustomers = (truckId?: string) => {
       cacheOffline: async () => db.customers.put({ ...optimistic, updatedAt: optimistic.created_at, syncedAt: now }),
       msg: "Customer added",
     });
+    if (result.success) {
+      await triggerRefresh();
+    }
+    return result;
   };
 
   const updateCustomer = async (id: string, updates: Partial<Customer>) => {

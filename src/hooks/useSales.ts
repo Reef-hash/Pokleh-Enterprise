@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
 import type { Sale, ProductType } from "@/types/pokleh";
-import { persistWrite } from "@/lib/writeHelper";
+import { persistWrite, mergeUnSyncedData } from "@/lib/writeHelper";
 
 export const useSales = () => {
   const [sales, setSales] = useState<Sale[]>([]);
@@ -17,8 +17,11 @@ export const useSales = () => {
       const { data, error } = await salesRepo.fetchAll();
       if (error) throw error;
       const result = (data || []) as unknown as Sale[];
-      setSales(result);
-      await db.sales.bulkPut(result as unknown as import("@/lib/db").OfflineSale[]);
+
+      // Merge with unsynced local data to prevent data loss during sync
+      const merged = await mergeUnSyncedData("sales", result);
+      setSales(merged);
+      await db.sales.bulkPut(merged as unknown as import("@/lib/db").OfflineSale[]);
     } catch {
       const cached = await db.sales.orderBy("sale_date").reverse().toArray();
       setSales(cached as unknown as Sale[]);

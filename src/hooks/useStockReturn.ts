@@ -3,7 +3,7 @@ import { useSyncStore } from "@/stores/syncStore";
 import { stockReturnRepo } from "@/repositories/stockRepo";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
-import { persistWrite } from "@/lib/writeHelper";
+import { persistWrite, mergeUnSyncedData } from "@/lib/writeHelper";
 import type { StockReturn } from "@/types/pokleh";
 
 export const useStockReturn = (truckId?: string) => {
@@ -16,8 +16,9 @@ export const useStockReturn = (truckId?: string) => {
       const { data, error } = await stockReturnRepo.fetchAll(truckId);
       if (error) throw error;
       const result = (data || []) as unknown as StockReturn[];
-      setReturns(result);
-      await db.stockReturns.bulkPut(result as unknown as import("@/lib/db").OfflineStockReturn[]);
+      const merged = await mergeUnSyncedData("stock_return", result);
+      setReturns(merged);
+      await db.stockReturns.bulkPut(merged as unknown as import("@/lib/db").OfflineStockReturn[]);
     } catch {
       const cached = await db.stockReturns.orderBy("return_date").reverse().toArray();
       if (cached.length > 0) setReturns(cached as unknown as StockReturn[]);

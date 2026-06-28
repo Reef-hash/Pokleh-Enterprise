@@ -5,6 +5,7 @@ import { settlementRepo, settlementRpc } from "@/repositories/settlementRepo";
 import { stockIntakeRepo, stockDistributionRepo } from "@/repositories/stockRepo";
 import { offlineDetector } from "@/services/offline";
 import { syncEngine } from "@/services/sync";
+import { mergeUnSyncedData } from "@/lib/writeHelper";
 import { toast } from "sonner";
 import type { SupplierSettlement } from "@/types/pokleh";
 import { useAuthStore } from "@/stores/authStore";
@@ -14,12 +15,14 @@ export const useSettlements = () => {
   const [settlements, setSettlements] = useState<SupplierSettlement[]>([]);
   const [loading, setLoading] = useState(true);
   const userId = useAuthStore((s) => s.user?.id);
+  const triggerRefresh = useSyncStore((s) => s.triggerRefresh);
 
   const fetchSettlements = useCallback(async () => {
     try {
       const { data, error } = await settlementRepo.fetchAll();
       if (error) throw error;
-      setSettlements((data || []) as unknown as SupplierSettlement[]);
+      const merged = await mergeUnSyncedData("supplier_settlements", (data || []) as unknown as SupplierSettlement[]);
+      setSettlements(merged);
     } catch {
       // offline fallback
     }
@@ -107,6 +110,7 @@ export const useSettlements = () => {
         return [result as unknown as SupplierSettlement, ...filtered];
       });
       toast.success("Settlement calculated");
+      await triggerRefresh();
       return { success: true, data: result as unknown as SupplierSettlement };
     } catch (err: any) {
       toast.error("Connection error. Please try again.");
@@ -146,6 +150,7 @@ export const useSettlements = () => {
         )
       );
       toast.success("Settlement marked as settled");
+      await triggerRefresh();
       return { success: true };
     } catch (err: any) {
       toast.error("Connection error. Please try again.");
@@ -157,7 +162,7 @@ export const useSettlements = () => {
 
   useEffect(() => {
     fetchSettlements().finally(() => setLoading(false));
-  }, [fetchSettlements, refreshTick]);
+  }, [fetchSettlements, refreshTick, triggerRefresh]);
 
   return { settlements, loading, calculateSettlement, markSettled, refresh: fetchSettlements };
 };

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSyncStore } from "@/stores/syncStore";
 import { sellingPriceRepo } from "@/repositories/sellingPriceRepo";
+import { mergeUnSyncedData } from "@/lib/writeHelper";
 import { toast } from "sonner";
 import type { SellingPrice, ProductType } from "@/types/pokleh";
 
@@ -8,10 +9,14 @@ export const useSellingPrices = () => {
   const [prices, setPrices] = useState<SellingPrice[]>([]);
   const [loading, setLoading] = useState(true);
   const refreshTick = useSyncStore((s) => s.refreshTick);
+  const triggerRefresh = useSyncStore((s) => s.triggerRefresh);
 
   const fetchPrices = useCallback(async () => {
     const { data, error } = await sellingPriceRepo.fetchAll();
-    if (!error && data) setPrices(data as unknown as SellingPrice[]);
+    if (!error && data) {
+      const merged = await mergeUnSyncedData("selling_prices", data as unknown as SellingPrice[]);
+      setPrices(merged);
+    }
   }, []);
 
   useEffect(() => {
@@ -46,6 +51,7 @@ export const useSellingPrices = () => {
       return [...prev, updated];
     });
     toast.success("Harga disimpan");
+    await triggerRefresh();
     return { success: true };
   };
 

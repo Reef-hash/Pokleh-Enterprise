@@ -7,6 +7,7 @@ import { offlineDetector } from "@/services/offline";
 import { syncEngine } from "@/services/sync";
 import { toast } from "sonner";
 import { getUserFriendlyError } from "@/lib/errors";
+import { mergeUnSyncedData } from "@/lib/writeHelper";
 import type { StockIntake, ProductType } from "@/types/pokleh";
 
 export const useStockIntake = () => {
@@ -19,8 +20,9 @@ export const useStockIntake = () => {
       const { data, error } = await stockIntakeRepo.fetchAll();
       if (error) throw error;
       const result = (data || []) as unknown as StockIntake[];
-      setIntakes(result);
-      await db.stockIntakes.bulkPut(result as unknown as import("@/lib/db").OfflineStockIntake[]);
+      const merged = await mergeUnSyncedData("stock_intake", result);
+      setIntakes(merged);
+      await db.stockIntakes.bulkPut(merged as unknown as import("@/lib/db").OfflineStockIntake[]);
     } catch {
       const cached = await db.stockIntakes.orderBy("intake_date").reverse().toArray();
       if (cached.length > 0) setIntakes(cached as unknown as StockIntake[]);

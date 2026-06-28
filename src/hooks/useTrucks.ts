@@ -3,19 +3,22 @@ import { useSyncStore } from "@/stores/syncStore";
 import { trucksRepo } from "@/repositories/trucksRepo";
 import { db } from "@/lib/db";
 import { toast } from "sonner";
+import { mergeUnSyncedData } from "@/lib/writeHelper";
 import type { Truck } from "@/types/pokleh";
 
 export const useTrucks = () => {
   const [trucks, setTrucks] = useState<Truck[]>([]);
   const [loading, setLoading] = useState(true);
+  const triggerRefresh = useSyncStore((s) => s.triggerRefresh);
 
   const fetchTrucks = useCallback(async () => {
     try {
       const { data, error } = await trucksRepo.fetchAll();
       if (error) throw error;
       const result = (data || []) as Truck[];
-      setTrucks(result);
-      await db.trucks.bulkPut(result.map((t) => ({ ...t, syncedAt: new Date().toISOString() })));
+      const merged = await mergeUnSyncedData("trucks", result);
+      setTrucks(merged);
+      await db.trucks.bulkPut(merged.map((t) => ({ ...t, syncedAt: new Date().toISOString() })));
     } catch (err) {
       const cached = await db.trucks.toArray();
       if (cached.length > 0) {
@@ -34,6 +37,7 @@ export const useTrucks = () => {
     await db.trucks.put({ ...truck, syncedAt: new Date().toISOString() });
     setTrucks((prev) => [...prev, truck]);
     toast.success("Truck created");
+    await triggerRefresh();
     return { success: true };
   };
 
@@ -46,6 +50,7 @@ export const useTrucks = () => {
     setTrucks((prev) => prev.map((t) => (t.id === id ? { ...t, name } : t)));
     await db.trucks.put({ id, name, syncedAt: new Date().toISOString() } as Truck & { syncedAt: string });
     toast.success("Truck updated");
+    await triggerRefresh();
     return { success: true };
   };
 
