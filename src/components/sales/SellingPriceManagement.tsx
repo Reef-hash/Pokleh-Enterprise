@@ -7,6 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { FormModal } from "@/components/ui/FormModal";
+import { CurrencyInput } from "@/components/ui/MobileOptimizedInputs";
 import { Pencil, Plus, Trash2, Tag } from "lucide-react";
 import { useSellingPrices } from "@/hooks/useSellingPrices";
 import { useCustomers } from "@/hooks/useCustomers";
