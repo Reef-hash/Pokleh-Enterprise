@@ -37,6 +37,7 @@ export const BottomNavigation = ({
       label: "Stock",
       icon: Package,
       subItems: [
+        { id: "truck-stock", label: "Stok Lori", icon: Truck },
         { id: "stock-intake", label: "Masukan Stok", icon: ClipboardList },
         { id: "stock-distribution", label: "Pengagihan Stok", icon: ArrowLeftRight },
         { id: "stock-return", label: "Pulangan Stok", icon: RotateCcw },
