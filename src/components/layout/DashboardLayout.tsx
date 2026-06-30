@@ -121,6 +121,7 @@ export const DashboardLayout = ({
       'selling-prices': 'Harga Jual',
       expenses: t('nav.expenses'),
       'pokleh-reports': t('nav.pokleh-reports'),
+      'truck-stock': 'Stok Lori',
       'daily-closing': t('nav.daily-closing'),
       'audit-logs': t('nav.audit-logs'),
       'staff-accounts': t('nav.staff-accounts'),
@@ -136,6 +137,7 @@ export const DashboardLayout = ({
     {
       label: 'Stock', key: 'stock',
       items: [
+        { id: 'truck-stock', label: 'Stok Lori', icon: Truck },
         { id: 'stock-intake', label: 'Stock Intake', icon: ClipboardList },
         { id: 'stock-distribution', label: 'Stock Distribution', icon: ArrowLeftRight },
         { id: 'stock-return', label: 'Stock Returns', icon: RotateCcw },
@@ -186,6 +188,7 @@ export const DashboardLayout = ({
     {
       label: 'Stock', key: 'stock',
       items: [
+        { id: 'truck-stock', label: 'Stok Lori', icon: Truck },
         { id: 'stock-distribution', label: 'Stock Distribution', icon: ArrowLeftRight },
         { id: 'stock-return', label: 'Stock Returns', icon: RotateCcw },
       ]
