@@ -18,12 +18,12 @@ interface DailyBillViewProps {
 
 export const DailyBillView = ({ dailyBills, isLoading }: DailyBillViewProps) => {
   const [filterDate, setFilterDate] = useState("");
-  const [filterTruck, setFilterTruck] = useState("");
+  const [filterTruck, setFilterTruck] = useState("all");
 
   const filtered = useMemo(() => {
     return dailyBills.filter((bill) => {
       if (filterDate && bill.date !== filterDate) return false;
-      if (filterTruck && bill.truckId !== filterTruck) return false;
+      if (filterTruck && filterTruck !== "all" && bill.truckId !== filterTruck) return false;
       return true;
     });
   }, [dailyBills, filterDate, filterTruck]);
@@ -73,7 +73,7 @@ export const DailyBillView = ({ dailyBills, isLoading }: DailyBillViewProps) => 
                   <SelectValue placeholder="All trucks" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All trucks</SelectItem>
+                  <SelectItem value="all">All trucks</SelectItem>
                   {trucks.map((t) => (
                     <SelectItem key={t.id} value={t.id}>
                       {t.name}
