@@ -14,6 +14,10 @@ export const useStockWastage = () => {
   const [adjustments, setAdjustments] = useState<WastageAdjustment[]>([]);
   const [loading, setLoading] = useState(true);
   const userId = useAuthStore((s) => s.user?.id);
+  // Wastage mutates truck available stock (get_truck_available_stock now
+  // subtracts SUM(quantity_wasted)), so re-fetch truck stock views after any
+  // wastage write so the UI reflects the reduced balance immediately.
+  const triggerRefresh = useSyncStore((s) => s.triggerRefresh);
 
   const fetchWastages = useCallback(async () => {
     try {
@@ -75,6 +79,7 @@ export const useStockWastage = () => {
       });
       setWastages((prev) => [optimistic, ...prev]);
       await db.stockWastages?.put(optimistic as any);
+      triggerRefresh();
       toast.success("Wastage recorded offline — will sync when connected");
       return { success: true, offline: true };
     }
@@ -89,6 +94,7 @@ export const useStockWastage = () => {
     const result = (created || {}) as unknown as StockWastage;
     setWastages((prev) => [...prev.filter((w) => w.id !== optimistic.id), result]);
     await db.stockWastages?.put(result as any);
+    triggerRefresh();
     toast.success("Wastage recorded");
     return { success: true, data: result };
   };
@@ -133,6 +139,7 @@ export const useStockWastage = () => {
       });
       setAdjustments((prev) => [optimistic, ...prev]);
       await db.wastageAdjustments?.put(optimistic as any);
+      triggerRefresh();
       toast.success("Adjustment recorded offline — will sync when connected");
       return { success: true, offline: true };
     }
@@ -147,6 +154,7 @@ export const useStockWastage = () => {
     const result = (created || {}) as unknown as WastageAdjustment;
     setAdjustments((prev) => [...prev.filter((a) => a.id !== optimistic.id), result]);
     await db.wastageAdjustments?.put(result as any);
+    triggerRefresh();
     toast.success("Adjustment recorded");
     return { success: true, data: result };
   };

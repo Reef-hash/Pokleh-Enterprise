@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, Fragment } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -158,13 +158,14 @@ export const DailyBillView = ({ dailyBills, isLoading }: DailyBillViewProps) => 
             <p className="text-center text-muted-foreground py-8">{t('empty.no-collections')}</p>
           ) : (
             <>
-              {/* Desktop Table */}
+              {/* Desktop Table — grouped rows: one group per bill (date+truck) */}
               <div className="hidden md:block overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>{t('common.date')}</TableHead>
                       <TableHead>{t('common.truck')}</TableHead>
+                      <TableHead>{t('supplier.title')}</TableHead>
                       <TableHead>{t('common.product')}</TableHead>
                       <TableHead className="text-right">{t('closing.sold')}</TableHead>
                       <TableHead className="text-right">{t('stock.reason-damaged')}</TableHead>
@@ -176,100 +177,120 @@ export const DailyBillView = ({ dailyBills, isLoading }: DailyBillViewProps) => 
                   </TableHeader>
                   <TableBody>
                     {filtered.map((bill) => (
-                      <TableRow key={bill.date + bill.truckId} className="hover:bg-muted/50">
-                        <TableCell className="font-medium">
-                          {new Date(bill.date).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell>{bill.truckName}</TableCell>
-                        <TableCell>
-                          {bill.lines.map((l, idx) => (
-                            <div key={idx} className="text-sm">
-                              {l.productType}
-                            </div>
-                          ))}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {bill.lines.map((l, idx) => (
-                            <div key={idx}>{l.quantitySold}</div>
-                          ))}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {bill.lines.map((l, idx) => (
-                            <div key={idx} className="text-orange-600 font-medium">
-                              {l.quantityWasted}
-                            </div>
-                          ))}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {bill.lines.map((l, idx) => (
-                            <div key={idx} className="text-green-600">
-                              {l.wastageReduction > 0 ? `-${l.wastageReduction}` : "—"}
-                            </div>
-                          ))}
-                        </TableCell>
-                        <TableCell className="text-right font-bold">
-                          {bill.lines.map((l, idx) => (
-                            <div key={idx}>{l.payableQuantity}</div>
-                          ))}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {bill.lines.map((l, idx) => (
-                            <div key={idx}>{formatCurrency(l.costPerPax)}</div>
-                          ))}
-                        </TableCell>
-                        <TableCell className="text-right font-bold">
-                          {bill.lines.map((l, idx) => (
-                            <div key={idx}>{formatCurrency(l.payableAmount)}</div>
-                          ))}
-                        </TableCell>
-                      </TableRow>
+                      <Fragment key={bill.date + bill.truckId}>
+                        {/* Group header — date + truck */}
+                        <TableRow className="bg-blue-50 dark:bg-blue-950/40 border-y-2 border-blue-200 dark:border-blue-800">
+                          <TableCell colSpan={10} className="font-bold text-blue-700 dark:text-blue-300 py-2">
+                            {new Date(bill.date).toLocaleDateString()} — {bill.truckName}
+                          </TableCell>
+                        </TableRow>
+                        {/* Line rows — one row per product */}
+                        {bill.lines.map((line, idx) => (
+                          <TableRow key={idx} className="hover:bg-muted/50">
+                            <TableCell className="text-muted-foreground">—</TableCell>
+                            <TableCell className="text-muted-foreground">—</TableCell>
+                            <TableCell>{line.supplierName}</TableCell>
+                            <TableCell className="font-medium">{line.productType}</TableCell>
+                            <TableCell className="text-right">{line.quantitySold}</TableCell>
+                            <TableCell className="text-right text-orange-600 font-medium">
+                              {line.quantityWasted}
+                            </TableCell>
+                            <TableCell className="text-right text-green-600">
+                              {line.wastageReduction > 0 ? `-${line.wastageReduction}` : "—"}
+                            </TableCell>
+                            <TableCell className="text-right font-bold">{line.payableQuantity}</TableCell>
+                            <TableCell className="text-right">{formatCurrency(line.costPerPax)}</TableCell>
+                            <TableCell className="text-right font-bold">{formatCurrency(line.payableAmount)}</TableCell>
+                          </TableRow>
+                        ))}
+                        {/* Subtotal row for this bill */}
+                        <TableRow className="bg-muted/40 font-bold border-t border-muted">
+                          <TableCell colSpan={4} className="text-muted-foreground">
+                            Subtotal — {bill.truckName}
+                          </TableCell>
+                          <TableCell className="text-right">{bill.totalSold}</TableCell>
+                          <TableCell className="text-right text-orange-600">{bill.totalWasted}</TableCell>
+                          <TableCell className="text-right text-green-600">{bill.totalReduction}</TableCell>
+                          <TableCell className="text-right">{bill.totalPayable}</TableCell>
+                          <TableCell />
+                          <TableCell className="text-right text-green-600">{formatCurrency(bill.totalAmount)}</TableCell>
+                        </TableRow>
+                      </Fragment>
                     ))}
-                    <TableRow className="bg-muted/50 font-bold">
-                      <TableCell colSpan={3}>TOTAL ({t('common.pax')})</TableCell>
+                    {/* Grand total */}
+                    <TableRow className="bg-blue-600 hover:bg-blue-600 text-white font-bold border-t-2 border-blue-800">
+                      <TableCell colSpan={4}>GRAND TOTAL ({t('common.pax')})</TableCell>
                       <TableCell className="text-right">{filtered.reduce((s, b) => s + b.totalSold, 0)}</TableCell>
-                      <TableCell className="text-right text-orange-600">
-                        {filtered.reduce((s, b) => s + b.totalWasted, 0)}
-                      </TableCell>
-                      <TableCell className="text-right text-green-600">
-                        {filtered.reduce((s, b) => s + b.totalReduction, 0)}
-                      </TableCell>
+                      <TableCell className="text-right">{filtered.reduce((s, b) => s + b.totalWasted, 0)}</TableCell>
+                      <TableCell className="text-right">{filtered.reduce((s, b) => s + b.totalReduction, 0)}</TableCell>
                       <TableCell className="text-right">{filtered.reduce((s, b) => s + b.totalPayable, 0)}</TableCell>
                       <TableCell />
-                      <TableCell className="text-right text-green-600">{formatCurrency(totalAmount)}</TableCell>
+                      <TableCell className="text-right">{formatCurrency(totalAmount)}</TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>
               </div>
 
-              {/* Mobile Cards */}
-              <div className="block md:hidden space-y-3">
+              {/* Mobile Cards — grouped per bill with line items */}
+              <div className="block md:hidden space-y-4">
                 {filtered.map((bill) => (
                   <ResponsiveCard key={bill.date + bill.truckId}>
-                    <ResponsiveRow label={t('common.date')}>{new Date(bill.date).toLocaleDateString()}</ResponsiveRow>
-                    <ResponsiveRow label={t('common.truck')}>
-                      <span className="font-medium">{bill.truckName}</span>
-                    </ResponsiveRow>
+                    {/* Bill header */}
+                    <div className="flex items-center justify-between border-b pb-2 mb-2">
+                      <div>
+                        <p className="text-sm text-muted-foreground">{new Date(bill.date).toLocaleDateString()}</p>
+                        <p className="font-bold text-blue-700 dark:text-blue-300">{bill.truckName}</p>
+                      </div>
+                      <Badge variant="secondary" className="font-bold">
+                        {formatCurrency(bill.totalAmount)}
+                      </Badge>
+                    </div>
+                    {/* Line items */}
                     {bill.lines.map((line, idx) => (
-                      <div key={idx} className="space-y-2 py-2 border-t">
-                        <ResponsiveRow label={t('common.product')}>{line.productType}</ResponsiveRow>
-                        <ResponsiveRow label={t('closing.sold')}>{line.quantitySold}</ResponsiveRow>
-                        <ResponsiveRow label={t('stock.reason-damaged')}>
-                          <span className="text-orange-600 font-medium">{line.quantityWasted}</span>
-                        </ResponsiveRow>
-                        {line.wastageReduction > 0 && (
-                          <ResponsiveRow label={t('supplier.table-reduction')}>
-                            <span className="text-green-600">-{line.wastageReduction}</span>
+                      <div key={idx} className="space-y-1 py-2 border-t first:border-t-0">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">{line.productType}</span>
+                          <span className="text-xs text-muted-foreground">{line.supplierName}</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-sm">
+                          <ResponsiveRow label={t('closing.sold')}>
+                            <span>{line.quantitySold}</span>
                           </ResponsiveRow>
-                        )}
-                        <ResponsiveRow label={t('supplier.table-payable-qty')}>
-                          <span className="font-bold">{line.payableQuantity}</span>
-                        </ResponsiveRow>
-                        <ResponsiveRow label={t('supplier.cost-per-pax')}>{formatCurrency(line.costPerPax)}</ResponsiveRow>
-                        <ResponsiveRow label={t('common.amount')}>
-                          <span className="font-bold">{formatCurrency(line.payableAmount)}</span>
-                        </ResponsiveRow>
+                          <ResponsiveRow label={t('stock.reason-damaged')}>
+                            <span className="text-orange-600 font-medium">{line.quantityWasted}</span>
+                          </ResponsiveRow>
+                          {line.wastageReduction > 0 && (
+                            <ResponsiveRow label={t('supplier.table-reduction')}>
+                              <span className="text-green-600">-{line.wastageReduction}</span>
+                            </ResponsiveRow>
+                          )}
+                          <ResponsiveRow label={t('supplier.table-payable-qty')}>
+                            <span className="font-bold">{line.payableQuantity}</span>
+                          </ResponsiveRow>
+                          <ResponsiveRow label={t('supplier.cost-per-pax')}>
+                            {formatCurrency(line.costPerPax)}
+                          </ResponsiveRow>
+                          <ResponsiveRow label={t('common.amount')}>
+                            <span className="font-bold">{formatCurrency(line.payableAmount)}</span>
+                          </ResponsiveRow>
+                        </div>
                       </div>
                     ))}
+                    {/* Bill subtotal */}
+                    <div className="border-t pt-2 mt-1 space-y-1 text-sm">
+                      <ResponsiveRow label={`${t('closing.sold')}`}>
+                        <span className="font-bold">{bill.totalSold}</span>
+                      </ResponsiveRow>
+                      <ResponsiveRow label={t('stock.reason-damaged')}>
+                        <span className="font-bold text-orange-600">{bill.totalWasted}</span>
+                      </ResponsiveRow>
+                      <ResponsiveRow label={t('supplier.table-payable-qty')}>
+                        <span className="font-bold">{bill.totalPayable}</span>
+                      </ResponsiveRow>
+                      <ResponsiveRow label={t('common.amount')}>
+                        <span className="font-bold text-green-600">{formatCurrency(bill.totalAmount)}</span>
+                      </ResponsiveRow>
+                    </div>
                   </ResponsiveCard>
                 ))}
               </div>
