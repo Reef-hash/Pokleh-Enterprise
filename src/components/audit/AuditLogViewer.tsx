@@ -5,6 +5,7 @@ import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/lib/i18n";
 import type { AuditLog } from "@/types/pokleh";
 
 const ENTITIES = [
@@ -13,6 +14,7 @@ const ENTITIES = [
 ];
 
 export const AuditLogViewer = () => {
+  const { t } = useLanguage();
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterEntity, setFilterEntity] = useState("all");
@@ -41,17 +43,17 @@ export const AuditLogViewer = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Audit Logs</h2>
-        <p className="text-muted-foreground">Immutable record of all data changes (admin only)</p>
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight">{t('audit.title')}</h2>
+        <p className="text-muted-foreground">{t('audit.subtitle')}</p>
       </div>
 
       <div className="w-64 space-y-2">
-        <Label>Filter by Entity</Label>
+        <Label>{t('audit.filter-by-entity')}</Label>
         <Select value={filterEntity} onValueChange={setFilterEntity}>
           <SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent>
             {ENTITIES.map((e) => (
-              <SelectItem key={e} value={e}>{e === "all" ? "All Entities" : e.replace(/_/g, " ")}</SelectItem>
+              <SelectItem key={e} value={e}>{e === "all" ? t('audit.all-entities') : e.replace(/_/g, " ")}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -59,8 +61,8 @@ export const AuditLogViewer = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Audit Trail ({logs.length})</CardTitle>
-          <CardDescription>All changes tracked via database triggers</CardDescription>
+          <CardTitle>{t('audit.trail')} ({logs.length})</CardTitle>
+          <CardDescription>{t('audit.all-changes')}</CardDescription>
         </CardHeader>
         <CardContent>
           {/* Desktop table */}
@@ -68,11 +70,11 @@ export const AuditLogViewer = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Timestamp</TableHead>
-                  <TableHead>User</TableHead>
-                  <TableHead>Action</TableHead>
-                  <TableHead>Entity</TableHead>
-                  <TableHead>Entity ID</TableHead>
+                  <TableHead>{t('audit.timestamp')}</TableHead>
+                  <TableHead>{t('audit.user')}</TableHead>
+                  <TableHead>{t('audit.action')}</TableHead>
+                  <TableHead>{t('audit.entity')}</TableHead>
+                  <TableHead>{t('audit.entity-id')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -94,7 +96,7 @@ export const AuditLogViewer = () => {
                 {logs.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                      No audit logs found
+                      {t('empty.no-logs')}
                     </TableCell>
                   </TableRow>
                 )}
@@ -105,21 +107,21 @@ export const AuditLogViewer = () => {
           {/* Mobile cards */}
           <div className="block md:hidden space-y-3">
             {logs.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">No audit logs found</p>
+              <p className="text-center text-muted-foreground py-8">{t('empty.no-logs')}</p>
             ) : (
               logs.map((log) => (
                 <ResponsiveCard key={log.id}>
-                  <ResponsiveRow label="Timestamp">{new Date(log.created_at).toLocaleString()}</ResponsiveRow>
-                  <ResponsiveRow label="User">{log.user_id.slice(0, 8)}...</ResponsiveRow>
-                  <ResponsiveRow label="Action">
+                  <ResponsiveRow label={t('audit.timestamp')}>{new Date(log.created_at).toLocaleString()}</ResponsiveRow>
+                  <ResponsiveRow label={t('audit.user')}>{log.user_id.slice(0, 8)}...</ResponsiveRow>
+                  <ResponsiveRow label={t('audit.action')}>
                     <span className={`text-sm font-medium ${
                       log.action === "INSERT" ? "text-green-600" :
                       log.action === "UPDATE" ? "text-blue-600" :
                       log.action === "DELETE" ? "text-destructive" : ""
                     }`}>{log.action}</span>
                   </ResponsiveRow>
-                  <ResponsiveRow label="Entity">{log.entity.replace(/_/g, " ")}</ResponsiveRow>
-                  <ResponsiveRow label="Entity ID" className="text-xs text-muted-foreground font-mono">{log.entity_id.slice(0, 8)}...</ResponsiveRow>
+                  <ResponsiveRow label={t('audit.entity')}>{log.entity.replace(/_/g, " ")}</ResponsiveRow>
+                  <ResponsiveRow label={t('audit.entity-id')} className="text-xs text-muted-foreground font-mono">{log.entity_id.slice(0, 8)}...</ResponsiveRow>
                 </ResponsiveCard>
               ))
             )}

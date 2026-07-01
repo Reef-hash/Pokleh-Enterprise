@@ -8,6 +8,7 @@ import { useDebtCollection } from "@/hooks/useDebtCollection";
 import { useStockIntake } from "@/hooks/useStockIntake";
 import { useTrucks } from "@/hooks/useTrucks";
 import { formatCurrency } from "@/lib/currency";
+import { useLanguage } from "@/lib/i18n";
 
 const COLORS = ["#2563eb", "#16a34a", "#dc2626", "#f59e0b", "#8b5cf6", "#ec4899"];
 
@@ -16,6 +17,7 @@ interface PoklehReportsProps {
 }
 
 export const PoklehReports = ({ userRole }: PoklehReportsProps) => {
+  const { t } = useLanguage();
   const { sales } = useSales();
   const { expenses } = useExpenses();
   const { collections } = useDebtCollection();
@@ -49,10 +51,10 @@ export const PoklehReports = ({ userRole }: PoklehReportsProps) => {
   const profit = totalRevenue - totalExpenses;
 
   const pieData = useMemo(() => [
-    { name: "Cash Sales", value: totalCashSales },
-    { name: "Debt Sales", value: totalDebtSales },
-    { name: "Expenses", value: totalExpenses },
-  ], [totalCashSales, totalDebtSales, totalExpenses]);
+    { name: t('report.cash-sales'), value: totalCashSales },
+    { name: t('report.debt-sales'), value: totalDebtSales },
+    { name: t('report.expenses'), value: totalExpenses },
+  ], [totalCashSales, totalDebtSales, totalExpenses, t]);
 
   const staffData = useMemo(() => {
     const map = new Map<string, { staff: string; sales: number; revenue: number; collections: number }>();
@@ -72,30 +74,30 @@ export const PoklehReports = ({ userRole }: PoklehReportsProps) => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Pokleh Reports</h2>
-        <p className="text-muted-foreground">Sales, expenses, collections and profit analytics</p>
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight">{t('report.title')}</h2>
+        <p className="text-muted-foreground">{t('report.subtitle')}</p>
       </div>
 
       {userRole === "admin" && (
         <div className="grid gap-4 md:grid-cols-4">
-          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Revenue</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-green-600">{formatCurrency(totalRevenue)}</p></CardContent></Card>
-          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Expenses</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-destructive">{formatCurrency(totalExpenses)}</p></CardContent></Card>
-          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Profit</CardTitle></CardHeader><CardContent><p className={`text-2xl font-bold ${profit >= 0 ? "text-green-600" : "text-destructive"}`}>{formatCurrency(profit)}</p></CardContent></Card>
-          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Collections</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{formatCurrency(totalCollected)}</p></CardContent></Card>
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">{t('report.revenue')}</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-green-600">{formatCurrency(totalRevenue)}</p></CardContent></Card>
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">{t('report.expenses')}</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-destructive">{formatCurrency(totalExpenses)}</p></CardContent></Card>
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">{t('report.profit')}</CardTitle></CardHeader><CardContent><p className={`text-2xl font-bold ${profit >= 0 ? "text-green-600" : "text-destructive"}`}>{formatCurrency(profit)}</p></CardContent></Card>
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">{t('report.collections')}</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{formatCurrency(totalCollected)}</p></CardContent></Card>
         </div>
       )}
 
       <Tabs defaultValue="daily">
         <TabsList>
-          <TabsTrigger value="daily">Daily Trends</TabsTrigger>
-          {userRole === "admin" && <TabsTrigger value="truck">By Truck</TabsTrigger>}
-          {userRole === "admin" && <TabsTrigger value="staff">By Staff</TabsTrigger>}
-          {userRole === "admin" && <TabsTrigger value="company">Company Overview</TabsTrigger>}
+          <TabsTrigger value="daily">{t('report.daily-trends')}</TabsTrigger>
+          {userRole === "admin" && <TabsTrigger value="truck">{t('report.by-truck')}</TabsTrigger>}
+          {userRole === "admin" && <TabsTrigger value="staff">{t('report.by-staff')}</TabsTrigger>}
+          {userRole === "admin" && <TabsTrigger value="company">{t('report.company-overview')}</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="daily" className="space-y-4 mt-4">
           <Card>
-            <CardHeader><CardTitle>Daily Sales & Collections (Last 30 days)</CardTitle><CardDescription>Cash sales, debt sales, and collections over time</CardDescription></CardHeader>
+            <CardHeader><CardTitle>{t('report.daily-sales-collections')}</CardTitle><CardDescription>{t('report.cash-debt-collections')}</CardDescription></CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={350}>
                 <LineChart data={dailyData}>
@@ -104,15 +106,15 @@ export const PoklehReports = ({ userRole }: PoklehReportsProps) => {
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Line type="monotone" dataKey="cash" stroke="#16a34a" name="Cash Sales" strokeWidth={2} />
-                  <Line type="monotone" dataKey="debt" stroke="#dc2626" name="Debt Sales" strokeWidth={2} />
-                  <Line type="monotone" dataKey="collected" stroke="#2563eb" name="Collections" strokeWidth={2} />
+                  <Line type="monotone" dataKey="cash" stroke="#16a34a" name={t('report.cash-sales')} strokeWidth={2} />
+                  <Line type="monotone" dataKey="debt" stroke="#dc2626" name={t('report.debt-sales')} strokeWidth={2} />
+                  <Line type="monotone" dataKey="collected" stroke="#2563eb" name={t('report.collections')} strokeWidth={2} />
                 </LineChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
           <Card>
-            <CardHeader><CardTitle>Daily Stock Activity</CardTitle><CardDescription>Stock received vs sold vs expenses</CardDescription></CardHeader>
+            <CardHeader><CardTitle>{t('report.daily-stock')}</CardTitle><CardDescription>{t('report.stock-received-sold-expenses')}</CardDescription></CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={dailyData}>
@@ -121,9 +123,9 @@ export const PoklehReports = ({ userRole }: PoklehReportsProps) => {
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="received" fill="#8b5cf6" name="Received" />
-                  <Bar dataKey="sold" fill="#16a34a" name="Sold" />
-                  <Bar dataKey="expenses" fill="#dc2626" name="Expenses" />
+                  <Bar dataKey="received" fill="#8b5cf6" name={t('report.received')} />
+                  <Bar dataKey="sold" fill="#16a34a" name={t('report.sold')} />
+                  <Bar dataKey="expenses" fill="#dc2626" name={t('report.expenses')} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -133,7 +135,7 @@ export const PoklehReports = ({ userRole }: PoklehReportsProps) => {
         {userRole === "admin" && (
           <TabsContent value="truck" className="space-y-4 mt-4">
             <Card>
-              <CardHeader><CardTitle>Sales by Truck</CardTitle><CardDescription>Comparison across all trucks</CardDescription></CardHeader>
+              <CardHeader><CardTitle>{t('report.sales-by-truck')}</CardTitle><CardDescription>{t('report.comparison-trucks')}</CardDescription></CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={350}>
                   <BarChart data={truckData}>
@@ -142,8 +144,8 @@ export const PoklehReports = ({ userRole }: PoklehReportsProps) => {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="sold" fill="#2563eb" name="Pax Sold" />
-                    <Bar dataKey="revenue" fill="#16a34a" name="Revenue (RM)" />
+                    <Bar dataKey="sold" fill="#2563eb" name={t('report.pax-sold')} />
+                    <Bar dataKey="revenue" fill="#16a34a" name={t('report.revenue-rm')} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -154,7 +156,7 @@ export const PoklehReports = ({ userRole }: PoklehReportsProps) => {
         {userRole === "admin" && (
           <TabsContent value="staff" className="space-y-4 mt-4">
             <Card>
-              <CardHeader><CardTitle>Staff Performance</CardTitle><CardDescription>Sales and collections by staff member</CardDescription></CardHeader>
+              <CardHeader><CardTitle>{t('report.staff-performance')}</CardTitle><CardDescription>{t('report.sales-collections-staff')}</CardDescription></CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={350}>
                   <BarChart data={staffData}>
@@ -163,9 +165,9 @@ export const PoklehReports = ({ userRole }: PoklehReportsProps) => {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="sales" fill="#2563eb" name="Pax Sold" />
-                    <Bar dataKey="revenue" fill="#16a34a" name="Revenue (RM)" />
-                    <Bar dataKey="collections" fill="#f59e0b" name="Collections (RM)" />
+                    <Bar dataKey="sales" fill="#2563eb" name={t('report.pax-sold')} />
+                    <Bar dataKey="revenue" fill="#16a34a" name={t('report.revenue-rm')} />
+                    <Bar dataKey="collections" fill="#f59e0b" name={t('report.collections-rm')} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -177,7 +179,7 @@ export const PoklehReports = ({ userRole }: PoklehReportsProps) => {
           <TabsContent value="company" className="space-y-4 mt-4">
             <div className="grid gap-4 md:grid-cols-2">
               <Card>
-                <CardHeader><CardTitle>Revenue Breakdown</CardTitle><CardDescription>Cash vs Debt vs Expenses</CardDescription></CardHeader>
+                <CardHeader><CardTitle>{t('report.revenue-breakdown')}</CardTitle><CardDescription>{t('report.cash-debt-breakdown')}</CardDescription></CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
@@ -190,16 +192,16 @@ export const PoklehReports = ({ userRole }: PoklehReportsProps) => {
                 </CardContent>
               </Card>
               <Card>
-                <CardHeader><CardTitle>Summary</CardTitle><CardDescription>Overall company metrics</CardDescription></CardHeader>
+                <CardHeader><CardTitle>{t('report.summary')}</CardTitle><CardDescription>{t('report.overall-metrics')}</CardDescription></CardHeader>
                 <CardContent className="space-y-4">
                   {[
-                    { label: "Total Revenue", value: totalRevenue, color: "text-green-600" },
-                    { label: "Cash Sales", value: totalCashSales, color: "" },
-                    { label: "Debt Sales", value: totalDebtSales, color: "text-destructive" },
-                    { label: "Total Collections", value: totalCollected, color: "" },
-                    { label: "Total Expenses", value: totalExpenses, color: "text-destructive" },
-                    { label: "Net Profit", value: profit, color: profit >= 0 ? "text-green-600" : "text-destructive" },
-                    { label: "Total Pax Sold", value: sales.reduce((s, x) => s + x.quantity, 0), color: "" },
+                    { label: t('report.revenue'), value: totalRevenue, color: "text-green-600" },
+                    { label: t('report.cash-sales'), value: totalCashSales, color: "" },
+                    { label: t('report.debt-sales'), value: totalDebtSales, color: "text-destructive" },
+                    { label: t('report.total-collected'), value: totalCollected, color: "" },
+                    { label: t('report.total-expenses'), value: totalExpenses, color: "text-destructive" },
+                    { label: t('report.net-profit'), value: profit, color: profit >= 0 ? "text-green-600" : "text-destructive" },
+                    { label: t('report.total-pax'), value: sales.reduce((s, x) => s + x.quantity, 0), color: "" },
                   ].map(({ label, value, color }) => (
                     <div key={label} className="flex justify-between items-center">
                       <span className="text-sm text-muted-foreground">{label}</span>

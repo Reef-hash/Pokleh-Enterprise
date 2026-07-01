@@ -15,6 +15,7 @@ import { useStockDistribution } from "@/hooks/useStockDistribution";
 import { useStockIntake } from "@/hooks/useStockIntake";
 import { useTrucks } from "@/hooks/useTrucks";
 import { stockRpc } from "@/repositories/stockRepo";
+import { useLanguage } from "@/lib/i18n";
 import { toast } from "sonner";
 import { PRODUCT_TYPES, type ProductType } from "@/types/pokleh";
 
@@ -23,6 +24,7 @@ interface StockDistributionFormProps {
 }
 
 export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) => {
+  const { t } = useLanguage();
   const { distributions, loading, addDistribution } = useStockDistribution();
   const { intakes } = useStockIntake();
   const { trucks } = useTrucks();
@@ -61,10 +63,10 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
 
   const handleAdd = async () => {
     if (!form.from_truck_id || !form.to_truck_id || form.quantity_assigned <= 0 || submitting) {
-      toast.error("Please select a from-truck, a to-truck, and enter a valid quantity.");
+      toast.error(t("stock.error-required"));
       return;
     }
-    if (form.from_truck_id === form.to_truck_id) { toast.error("From-truck and to-truck must be different."); return; }
+    if (form.from_truck_id === form.to_truck_id) { toast.error(t("stock.error-same-truck")); return; }
     if (overLimit) return;
     setSubmitting(true);
     try {
@@ -87,20 +89,20 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Stock Distribution"
-        subtitle="Transfer stock between trucks"
+        title={t('stock.distribution-title')}
+        subtitle={t('stock.distribution-subtitle')}
       >
         {userRole === "admin" && (
           <Button onClick={() => setIsOpen(true)}>
             <Plus className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Distribute</span>
+            <span className="hidden sm:inline">{t('stock.distribute')}</span>
           </Button>
         )}
       </PageHeader>
 
       <Card>
         <CardHeader>
-          <CardTitle>Distribution Records ({distributions.length})</CardTitle>
+          <CardTitle>{t('stock.distribution-records')} ({distributions.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {/* Desktop table */}
@@ -108,11 +110,11 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
             <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>From</TableHead>
-                <TableHead>To</TableHead>
-                <TableHead>Product</TableHead>
-                <TableHead>Qty Assigned</TableHead>
+                <TableHead>{t('common.date')}</TableHead>
+                <TableHead>{t('stock.from')}</TableHead>
+                <TableHead>{t('stock.to')}</TableHead>
+                <TableHead>{t('common.product')}</TableHead>
+                <TableHead>{t('stock.qty-assigned')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -122,13 +124,13 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
                   <TableCell><Badge variant="secondary">{d.from_truck?.name}</Badge></TableCell>
                   <TableCell className="flex items-center gap-1"><ArrowRight className="h-3 w-3 text-muted-foreground" /><Badge variant="secondary">{d.to_truck?.name}</Badge></TableCell>
                   <TableCell className="text-sm font-medium">{d.product_type}</TableCell>
-                  <TableCell className="font-medium">{d.quantity_assigned} pax</TableCell>
+                  <TableCell className="font-medium">{d.quantity_assigned} {t('common.pax')}</TableCell>
                 </TableRow>
               ))}
               {distributions.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                    No distributions yet
+                    {t('empty.no-stock-distribution')}
                   </TableCell>
                 </TableRow>
               )}
@@ -140,15 +142,15 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
           <div className="block md:hidden space-y-3">
             {distributions.map((d) => (
               <ResponsiveCard key={d.id}>
-                <ResponsiveRow label="Date"><span className="text-muted-foreground">{new Date(d.created_at).toLocaleDateString()}</span></ResponsiveRow>
-                <ResponsiveRow label="From"><Badge variant="secondary">{d.from_truck?.name}</Badge></ResponsiveRow>
-                <ResponsiveRow label="To"><Badge variant="secondary">{d.to_truck?.name}</Badge></ResponsiveRow>
-                <ResponsiveRow label="Product">{d.product_type}</ResponsiveRow>
-                <ResponsiveRow label="Qty Assigned"><span className="font-medium">{d.quantity_assigned} pax</span></ResponsiveRow>
+                <ResponsiveRow label={t('common.date')}><span className="text-muted-foreground">{new Date(d.created_at).toLocaleDateString()}</span></ResponsiveRow>
+                <ResponsiveRow label={t('stock.from')}><Badge variant="secondary">{d.from_truck?.name}</Badge></ResponsiveRow>
+                <ResponsiveRow label={t('stock.to')}><Badge variant="secondary">{d.to_truck?.name}</Badge></ResponsiveRow>
+                <ResponsiveRow label={t('common.product')}>{d.product_type}</ResponsiveRow>
+                <ResponsiveRow label={t('stock.qty-assigned')}><span className="font-medium">{d.quantity_assigned} {t('common.pax')}</span></ResponsiveRow>
               </ResponsiveCard>
             ))}
             {distributions.length === 0 && (
-              <p className="text-center text-muted-foreground py-4 text-sm">No distributions yet</p>
+              <p className="text-center text-muted-foreground py-4 text-sm">{t('empty.no-stock-distribution')}</p>
             )}
           </div>
         </CardContent>
@@ -157,9 +159,9 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
       <FormModal
         open={isOpen}
         onOpenChange={setIsOpen}
-        title="Distribute Stock"
-        description="Transfer stock from one truck to another"
-        submitLabel="Distribute"
+        title={t('stock.distribution-title')}
+        description={t('stock.distribution-desc')}
+        submitLabel={t('stock.distribute')}
         submitDisabled={!form.from_truck_id || !form.to_truck_id || form.quantity_assigned <= 0 || overLimit}
         isSubmitting={submitting}
         onSubmit={handleAdd}
@@ -167,9 +169,9 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
       >
         <div className="space-y-3">
           <div>
-            <Label htmlFor="from_truck" className="text-sm font-medium">From Truck</Label>
+            <Label htmlFor="from_truck" className="text-sm font-medium">{t('stock.from-truck')}</Label>
             <Select value={form.from_truck_id} onValueChange={(v) => setForm({ ...form, from_truck_id: v, intake_id: "" })}>
-              <SelectTrigger id="from_truck"><SelectValue placeholder="Select source truck" /></SelectTrigger>
+              <SelectTrigger id="from_truck"><SelectValue placeholder={t('stock.select-source')} /></SelectTrigger>
               <SelectContent>
                 {trucks.map((t) => (<SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>))}
               </SelectContent>
@@ -177,9 +179,9 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
           </div>
 
           <div>
-            <Label htmlFor="to_truck" className="text-sm font-medium">To Truck</Label>
+            <Label htmlFor="to_truck" className="text-sm font-medium">{t('stock.to-truck')}</Label>
             <Select value={form.to_truck_id} onValueChange={(v) => setForm({ ...form, to_truck_id: v })}>
-              <SelectTrigger id="to_truck"><SelectValue placeholder="Select destination truck" /></SelectTrigger>
+              <SelectTrigger id="to_truck"><SelectValue placeholder={t('stock.select-dest')} /></SelectTrigger>
               <SelectContent>
                 {trucks.filter((t) => t.id !== form.from_truck_id).map((t) => (<SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>))}
               </SelectContent>
@@ -187,7 +189,7 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
           </div>
 
           <div>
-            <Label htmlFor="product" className="text-sm font-medium">Product</Label>
+            <Label htmlFor="product" className="text-sm font-medium">{t('common.product')}</Label>
             <Select value={form.product_type} onValueChange={(v) => setForm({ ...form, product_type: v as ProductType })}>
               <SelectTrigger id="product"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -196,18 +198,18 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
             </Select>
             {form.from_truck_id && (
               <p className="text-xs text-muted-foreground mt-1.5">
-                {checkingAvailable ? "Checking available stock…" : available !== null ? `Available: ${available} pax` : ""}
+                {checkingAvailable ? t('stock.checking-stock') : available !== null ? `${t('stock.available')}: ${available} ${t('common.pax')}` : ""}
               </p>
             )}
           </div>
 
           {truckIntakes.length > 0 && (
             <div>
-              <Label htmlFor="intake_ref" className="text-sm font-medium">Intake Reference (optional)</Label>
+              <Label htmlFor="intake_ref" className="text-sm font-medium">{t('stock.intake-ref')} ({t('common.optional')})</Label>
               <Select value={form.intake_id || "none"} onValueChange={(v) => setForm({ ...form, intake_id: v === "none" ? "" : v })}>
-                <SelectTrigger id="intake_ref"><SelectValue placeholder="Tag to a specific intake batch" /></SelectTrigger>
+                <SelectTrigger id="intake_ref"><SelectValue placeholder={t('stock.tag-intake')} /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
+                  <SelectItem value="none">{t('common.none')}</SelectItem>
                   {truckIntakes.map((i) => (
                     <SelectItem key={i.id} value={i.id}>
                       {i.product_type} — {new Date(i.intake_date).toLocaleDateString()} ({i.quantity_received} pax)
@@ -219,7 +221,7 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
           )}
 
           <QuantityInput
-            label="Quantity (pax)"
+            label={t('stock.quantity-pax')}
             value={form.quantity_assigned || ""}
             onChange={(e) => setForm({ ...form, quantity_assigned: parseInt(e.target.value) || 0 })}
             min={1}
@@ -228,7 +230,7 @@ export const StockDistributionForm = ({ userRole }: StockDistributionFormProps) 
 
           {overLimit && (
             <div className="bg-destructive/10 text-destructive text-xs p-2 rounded">
-              Cannot exceed available stock ({available} pax)
+              {t('stock.error-exceeds')} ({available} {t('common.pax')})
             </div>
           )}
         </div>

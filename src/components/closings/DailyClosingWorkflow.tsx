@@ -15,6 +15,7 @@ import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
 import { useDailyClosings } from "@/hooks/useDailyClosings";
 import { useTrucks } from "@/hooks/useTrucks";
 import { formatCurrency } from "@/lib/currency";
+import { useLanguage } from "@/lib/i18n";
 import { PRODUCT_TYPES, type ProductType } from "@/types/pokleh";
 
 interface DailyClosingWorkflowProps {
@@ -22,6 +23,7 @@ interface DailyClosingWorkflowProps {
 }
 
 export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) => {
+  const { t } = useLanguage();
   const { closings, loading, closeDay, reconcileDay } = useDailyClosings();
   const { trucks } = useTrucks();
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
@@ -48,9 +50,9 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
 
   const statusBadge = (status: string) => {
     const map: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
-      open: { label: "Open", variant: "secondary" },
-      closed: { label: "Closed", variant: "default" },
-      reconciled: { label: "Reconciled", variant: "outline" },
+      open: { label: t('closing.status-open'), variant: "secondary" },
+      closed: { label: t('closing.status-closed'), variant: "default" },
+      reconciled: { label: t('closing.status-reconciled'), variant: "outline" },
     };
     const s = map[status] || { label: status, variant: "secondary" as const };
     return <Badge variant={s.variant}>{s.label}</Badge>;
@@ -62,32 +64,32 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Daily Closing</h2>
-        <p className="text-muted-foreground">Close and reconcile daily operations</p>
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight">{t('closing.title')}</h2>
+        <p className="text-muted-foreground">{t('closing.subtitle')}</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Close / Reconcile a Day</CardTitle>
-          <CardDescription>Select a date, truck, and product type, then close or reconcile</CardDescription>
+          <CardTitle>{t('closing.close-reconcile')}</CardTitle>
+          <CardDescription>{t('closing.close-reconcile-desc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
-              <Label>Date</Label>
+              <Label>{t('closing.date-label')}</Label>
               <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label>Truck</Label>
+              <Label>{t('closing.truck-label')}</Label>
               <Select value={truckId} onValueChange={setTruckId}>
-                <SelectTrigger><SelectValue placeholder="Select truck" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder={t('closing.truck-select')} /></SelectTrigger>
                 <SelectContent>
                   {trucks.map((t) => (<SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Product</Label>
+              <Label>{t('closing.product-label')}</Label>
               <Select value={productType} onValueChange={(v) => setProductType(v as ProductType)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -101,21 +103,21 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
             <div className="rounded-lg border p-4 space-y-2">
               <div className="flex justify-between items-center">
                 <span className="font-medium">{selectedTruck?.name} — {productType} — {new Date(date).toLocaleDateString()}</span>
-                {selectedClosing ? statusBadge(selectedClosing.status) : <Badge variant="secondary">Open (No record)</Badge>}
+                {selectedClosing ? statusBadge(selectedClosing.status) : <Badge variant="secondary">{t('closing.status-open')} ({t('closing.no-record')})</Badge>}
               </div>
               {selectedClosing && selectedClosing.status !== "open" && (
                 <div className="grid grid-cols-2 gap-2 text-sm">
-                  <span>Intake: {selectedClosing.total_intake}</span>
-                  <span>Transfer In: {selectedClosing.total_transfer_in}</span>
-                  <span>Sold: {selectedClosing.total_sold}</span>
-                  <span>Transfer Out: {selectedClosing.total_transfer_out}</span>
-                  <span>Returned: {selectedClosing.total_returned}</span>
-                  <span>Carry-forward Balance: {selectedClosing.closing_balance}</span>
-                  <span>Cash: {formatCurrency(selectedClosing.cash_sales)}</span>
-                  <span>Debt: {formatCurrency(selectedClosing.debt_sales)}</span>
-                  <span>Collections: {formatCurrency(selectedClosing.debt_collections)}</span>
-                  <span>Expenses: {formatCurrency(selectedClosing.expenses_total)}</span>
-                  <span>Profit: {formatCurrency(selectedClosing.profit_estimate)}</span>
+                  <span>{t('closing.intake')}: {selectedClosing.total_intake}</span>
+                  <span>{t('closing.transfer-in')}: {selectedClosing.total_transfer_in}</span>
+                  <span>{t('closing.sold')}: {selectedClosing.total_sold}</span>
+                  <span>{t('closing.transfer-out')}: {selectedClosing.total_transfer_out}</span>
+                  <span>{t('closing.returned')}: {selectedClosing.total_returned}</span>
+                  <span>{t('closing.carry-forward')}: {selectedClosing.closing_balance}</span>
+                  <span>{t('closing.cash')}: {formatCurrency(selectedClosing.cash_sales)}</span>
+                  <span>{t('closing.debt')}: {formatCurrency(selectedClosing.debt_sales)}</span>
+                  <span>{t('closing.collections')}: {formatCurrency(selectedClosing.debt_collections)}</span>
+                  <span>{t('closing.expenses')}: {formatCurrency(selectedClosing.expenses_total)}</span>
+                  <span>{t('closing.profit')}: {formatCurrency(selectedClosing.profit_estimate)}</span>
                 </div>
               )}
               <div className="flex gap-2 mt-2">
@@ -123,7 +125,7 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
                   disabled={!canClose}
                   onClick={() => { setAction("close"); setConfirmOpen(true); }}
                 >
-                  <Lock className="mr-2 h-4 w-4" /> Close Day
+                  <Lock className="mr-2 h-4 w-4" /> {t('closing.close-day')}
                 </Button>
                 {userRole === "admin" && (
                   <Button
@@ -131,13 +133,13 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
                     disabled={!canReconcile}
                     onClick={() => { setAction("reconcile"); setConfirmOpen(true); }}
                   >
-                    <CheckCircle2 className="mr-2 h-4 w-4" /> Reconcile
+                    <CheckCircle2 className="mr-2 h-4 w-4" /> {t('closing.reconcile')}
                   </Button>
                 )}
               </div>
               {!canClose && action === "close" && selectedClosing && selectedClosing.status !== "open" && (
                 <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                  <AlertCircle className="h-3 w-3" /> Day is already {selectedClosing.status}
+                  <AlertCircle className="h-3 w-3" /> {t('closing.already-status')} {selectedClosing.status}
                 </p>
               )}
             </div>
@@ -147,8 +149,8 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
 
       <Card>
         <CardHeader>
-          <CardTitle>Daily Closing Records ({closings.length})</CardTitle>
-          <CardDescription>All closed/reconciled days</CardDescription>
+          <CardTitle>{t('closing.records')} ({closings.length})</CardTitle>
+          <CardDescription>{t('closing.all-closed')}</CardDescription>
         </CardHeader>
         <CardContent>
           {/* Desktop table */}
@@ -156,15 +158,15 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Truck</TableHead>
-                  <TableHead>Product</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Intake</TableHead>
-                  <TableHead>Sold</TableHead>
-                  <TableHead>Balance</TableHead>
-                  <TableHead>Cash</TableHead>
-                  <TableHead>Profit</TableHead>
+                  <TableHead>{t('common.date')}</TableHead>
+                  <TableHead>{t('common.truck')}</TableHead>
+                  <TableHead>{t('closing.product')}</TableHead>
+                  <TableHead>{t('common.status')}</TableHead>
+                  <TableHead>{t('closing.intake')}</TableHead>
+                  <TableHead>{t('closing.sold')}</TableHead>
+                  <TableHead>{t('closing.balance')}</TableHead>
+                  <TableHead>{t('closing.cash')}</TableHead>
+                  <TableHead>{t('closing.profit')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -186,7 +188,7 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
                 {closings.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
-                      No daily closings yet
+                      {t('empty.no-closings')}
                     </TableCell>
                   </TableRow>
                 )}
@@ -198,19 +200,19 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
           <div className="block md:hidden space-y-3">
             {closings.map((c) => (
               <ResponsiveCard key={c.id}>
-                <ResponsiveRow label="Date">
+                <ResponsiveRow label={t('common.date')}>
                   {new Date(c.closing_date).toLocaleDateString()}
                 </ResponsiveRow>
-                <ResponsiveRow label="Truck">
+                <ResponsiveRow label={t('common.truck')}>
                   <span className="font-medium">{c.truck?.name || "—"}</span>
                 </ResponsiveRow>
-                <ResponsiveRow label="Product">{c.product_type}</ResponsiveRow>
-                <ResponsiveRow label="Status">{statusBadge(c.status)}</ResponsiveRow>
-                <ResponsiveRow label="Intake">{c.total_intake}</ResponsiveRow>
-                <ResponsiveRow label="Sold">{c.total_sold}</ResponsiveRow>
-                <ResponsiveRow label="Balance">{c.closing_balance}</ResponsiveRow>
-                <ResponsiveRow label="Cash">{formatCurrency(c.cash_sales)}</ResponsiveRow>
-                <ResponsiveRow label="Profit">
+                <ResponsiveRow label={t('closing.product')}>{c.product_type}</ResponsiveRow>
+                <ResponsiveRow label={t('common.status')}>{statusBadge(c.status)}</ResponsiveRow>
+                <ResponsiveRow label={t('closing.intake')}>{c.total_intake}</ResponsiveRow>
+                <ResponsiveRow label={t('closing.sold')}>{c.total_sold}</ResponsiveRow>
+                <ResponsiveRow label={t('closing.balance')}>{c.closing_balance}</ResponsiveRow>
+                <ResponsiveRow label={t('closing.cash')}>{formatCurrency(c.cash_sales)}</ResponsiveRow>
+                <ResponsiveRow label={t('closing.profit')}>
                   <span className={c.profit_estimate >= 0 ? "text-green-600 font-medium" : "text-destructive font-medium"}>
                     {formatCurrency(c.profit_estimate)}
                   </span>
@@ -219,7 +221,7 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
             ))}
             {closings.length === 0 && (
               <p className="text-center text-muted-foreground py-8">
-                No daily closings yet
+                {t('empty.no-closings')}
               </p>
             )}
           </div>
@@ -229,27 +231,27 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirm {action === "close" ? "Close" : "Reconcile"}</DialogTitle>
+            <DialogTitle>{t('closing.confirm')} {action === "close" ? t('closing.close-day') : t('closing.reconcile')}</DialogTitle>
             <DialogDescription>
               {action === "close"
-                ? "This will validate and freeze the day's data. No further edits will be allowed for this date, truck, and product."
-                : "This will mark the day as reconciled — the final state."}
+                ? t('closing.confirm-close-desc')
+                : t('closing.confirm-reconcile-desc')}
             </DialogDescription>
           </DialogHeader>
           <div className="py-2">
-            <p><strong>Date:</strong> {new Date(date).toLocaleDateString()}</p>
-            <p><strong>Truck:</strong> {selectedTruck?.name}</p>
-            <p><strong>Product:</strong> {productType}</p>
+            <p><strong>{t('common.date')}:</strong> {new Date(date).toLocaleDateString()}</p>
+            <p><strong>{t('common.truck')}:</strong> {selectedTruck?.name}</p>
+            <p><strong>{t('closing.product')}:</strong> {productType}</p>
             {action === "close" && (
               <p className="text-sm text-muted-foreground mt-2">
-                Validation: carry-forward balance (intake + transfer in − sold − transfer out − returned) must not be negative. A truck may carry unsold stock overnight.
+                {t('closing.validation-note')}
               </p>
             )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setConfirmOpen(false)}>{t('common.cancel')}</Button>
             <Button onClick={handleConfirm}>
-              {action === "close" ? "Close Day" : "Reconcile"}
+              {action === "close" ? t('closing.close-day') : t('closing.reconcile')}
             </Button>
           </DialogFooter>
         </DialogContent>

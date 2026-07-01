@@ -13,6 +13,7 @@ import { Pencil, Plus, Trash2, Tag } from "lucide-react";
 import { useSellingPrices } from "@/hooks/useSellingPrices";
 import { useCustomers } from "@/hooks/useCustomers";
 import { formatCurrency } from "@/lib/currency";
+import { useLanguage } from "@/lib/i18n";
 import { PRODUCT_TYPES, type ProductType } from "@/types/pokleh";
 
 interface SellingPriceManagementProps {
@@ -20,6 +21,7 @@ interface SellingPriceManagementProps {
 }
 
 export const SellingPriceManagement = ({ userRole }: SellingPriceManagementProps) => {
+  const { t } = useLanguage();
   const { prices, loading, setPrice, deletePrice } = useSellingPrices();
   const { customers } = useCustomers();
 
@@ -75,15 +77,15 @@ export const SellingPriceManagement = ({ userRole }: SellingPriceManagementProps
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Senarai Harga Jual</h2>
-        <p className="text-muted-foreground">Tetapkan harga lalai dan harga khusus per pelanggan</p>
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight">{t('price.title')}</h2>
+        <p className="text-muted-foreground">{t('price.subtitle')}</p>
       </div>
 
       {/* Default prices */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2"><Tag className="h-4 w-4" /> Harga Lalai (Semua Pelanggan)</CardTitle>
-          <CardDescription>Harga ini digunakan apabila tiada harga khusus untuk pelanggan</CardDescription>
+          <CardTitle className="flex items-center gap-2"><Tag className="h-4 w-4" /> {t('price.default-prices')}</CardTitle>
+          <CardDescription>{t('price.default-prices-desc')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 sm:grid-cols-3">
@@ -93,7 +95,7 @@ export const SellingPriceManagement = ({ userRole }: SellingPriceManagementProps
                 <div key={pt} className="flex items-center justify-between p-4 border rounded-lg">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">{pt}</p>
-                    <p className="text-2xl font-bold">{entry ? formatCurrency(entry.price_per_pax) : "—"}<span className="text-sm font-normal text-muted-foreground">/pax</span></p>
+                    <p className="text-2xl font-bold">{entry ? formatCurrency(entry.price_per_pax) : "—"}<span className="text-sm font-normal text-muted-foreground">/{t('common.pax')}</span></p>
                   </div>
                   {userRole === "admin" && (
                     <Button size="sm" variant="ghost" onClick={() => openEditDefault(pt)}>
@@ -111,26 +113,26 @@ export const SellingPriceManagement = ({ userRole }: SellingPriceManagementProps
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>Harga Khusus Pelanggan ({customerOverrides.length})</CardTitle>
-            <CardDescription>Pelanggan tertentu mendapat harga berbeza</CardDescription>
+            <CardTitle>{t('price.customer-overrides')} ({customerOverrides.length})</CardTitle>
+            <CardDescription>{t('price.customer-overrides-desc')}</CardDescription>
           </div>
           {userRole === "admin" && (
             <Button size="sm" onClick={openAddCustomer}>
-              <Plus className="mr-2 h-4 w-4" /> Tambah Override
+              <Plus className="mr-2 h-4 w-4" /> {t('price.add-override')}
             </Button>
           )}
         </CardHeader>
         <CardContent>
           {customerOverrides.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8 text-sm">Tiada harga khusus lagi</p>
+            <p className="text-center text-muted-foreground py-8 text-sm">{t('empty.no-overrides')}</p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Pelanggan</TableHead>
-                  <TableHead>Produk</TableHead>
-                  <TableHead>Harga/Pax</TableHead>
-                  <TableHead>Nota</TableHead>
+                  <TableHead>{t('common.customer')}</TableHead>
+                  <TableHead>{t('common.product')}</TableHead>
+                  <TableHead>{t('price.price-per-pax')}</TableHead>
+                  <TableHead>{t('common.notes')}</TableHead>
                   {userRole === "admin" && <TableHead />}
                 </TableRow>
               </TableHeader>
@@ -158,15 +160,15 @@ export const SellingPriceManagement = ({ userRole }: SellingPriceManagementProps
       <FormModal
         open={editDefault.open}
         onOpenChange={(o) => setEditDefault((s) => ({ ...s, open: o }))}
-        title={`Edit Harga Lalai — ${editDefault.product_type}`}
-        submitLabel="Simpan"
+        title={`${t('price.edit-default')} — ${editDefault.product_type}`}
+        submitLabel={t('common.save')}
         submitDisabled={editDefault.price <= 0}
         isSubmitting={submitting}
         onSubmit={handleSaveDefault}
         onCancel={() => setEditDefault((s) => ({ ...s, open: false }))}
       >
         <CurrencyInput
-          label="Harga Per Pax"
+          label={t('price.price-per-pax')}
           currency="RM"
           value={editDefault.price || ""}
           onChange={(e) => setEditDefault((s) => ({ ...s, price: parseFloat(e.target.value) || 0 }))}
@@ -176,8 +178,8 @@ export const SellingPriceManagement = ({ userRole }: SellingPriceManagementProps
       <FormModal
         open={editCustomer.open}
         onOpenChange={(o) => setEditCustomer((s) => ({ ...s, open: o }))}
-        title={`${editCustomer.id ? "Edit" : "Tambah"} Harga Khusus`}
-        submitLabel="Simpan"
+        title={`${editCustomer.id ? t('common.edit') : t('common.add')} ${t('price.customer-override')}`}
+        submitLabel={t('common.save')}
         submitDisabled={!editCustomer.customer_id || editCustomer.price <= 0}
         isSubmitting={submitting}
         onSubmit={handleSaveCustomer}
@@ -185,16 +187,16 @@ export const SellingPriceManagement = ({ userRole }: SellingPriceManagementProps
       >
         <div className="space-y-3">
           <div>
-            <Label htmlFor="customer" className="text-sm font-medium">Pelanggan</Label>
+            <Label htmlFor="customer" className="text-sm font-medium">{t('common.customer')}</Label>
             <Select value={editCustomer.customer_id} onValueChange={(v) => setEditCustomer((s) => ({ ...s, customer_id: v }))} disabled={!!editCustomer.id}>
-              <SelectTrigger id="customer"><SelectValue placeholder="Pilih pelanggan" /></SelectTrigger>
+              <SelectTrigger id="customer"><SelectValue placeholder={t('price.select-customer')} /></SelectTrigger>
               <SelectContent>
                 {customers.filter((c) => c.active).map((c) => (<SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>))}
               </SelectContent>
             </Select>
           </div>
           <div>
-            <Label htmlFor="product" className="text-sm font-medium">Jenis Produk</Label>
+            <Label htmlFor="product" className="text-sm font-medium">{t('common.product')}</Label>
             <Select value={editCustomer.product_type} onValueChange={(v) => setEditCustomer((s) => ({ ...s, product_type: v as ProductType }))} disabled={!!editCustomer.id}>
               <SelectTrigger id="product"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -203,14 +205,14 @@ export const SellingPriceManagement = ({ userRole }: SellingPriceManagementProps
             </Select>
           </div>
           <CurrencyInput
-            label="Harga Per Pax"
+            label={t('price.price-per-pax')}
             currency="RM"
             value={editCustomer.price || ""}
             onChange={(e) => setEditCustomer((s) => ({ ...s, price: parseFloat(e.target.value) || 0 }))}
           />
           <div>
-            <Label htmlFor="notes" className="text-sm font-medium">Nota (pilihan)</Label>
-            <Input id="notes" value={editCustomer.notes} onChange={(e) => setEditCustomer((s) => ({ ...s, notes: e.target.value }))} placeholder="Contoh: Diskaun regular" />
+            <Label htmlFor="notes" className="text-sm font-medium">{t('common.notes')} ({t('common.optional')})</Label>
+            <Input id="notes" value={editCustomer.notes} onChange={(e) => setEditCustomer((s) => ({ ...s, notes: e.target.value }))} placeholder={t('price.notes-example')} />
           </div>
         </div>
       </FormModal>

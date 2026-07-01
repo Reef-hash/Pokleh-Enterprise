@@ -7,9 +7,11 @@ import { Label } from "@/components/ui/label";
 import { useSupplierPriceHistory } from "@/hooks/useSupplierPriceHistory";
 import { usePoklehSuppliers } from "@/hooks/usePoklehSuppliers";
 import { formatCurrency } from "@/lib/currency";
+import { useLanguage } from "@/lib/i18n";
 import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
 
 export const SupplierPriceHistoryView = () => {
+  const { t } = useLanguage();
   const { history, loading } = useSupplierPriceHistory();
   const { suppliers } = usePoklehSuppliers();
   const [filterSupplier, setFilterSupplier] = useState("all");
@@ -23,16 +25,16 @@ export const SupplierPriceHistoryView = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Supplier Price History</h2>
-        <p className="text-muted-foreground">Historical cost per pax from suppliers</p>
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight">{t('supplier.price-history-title')}</h2>
+        <p className="text-muted-foreground">{t('supplier.price-history-subtitle')}</p>
       </div>
 
       <div className="w-64 space-y-2">
-        <Label>Filter by Supplier</Label>
+        <Label>{t('supplier.filter-by-supplier')}</Label>
         <Select value={filterSupplier} onValueChange={setFilterSupplier}>
-          <SelectTrigger><SelectValue placeholder="All suppliers" /></SelectTrigger>
+          <SelectTrigger><SelectValue placeholder={t('supplier.all-suppliers')} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Suppliers</SelectItem>
+            <SelectItem value="all">{t('supplier.all-suppliers')}</SelectItem>
             {suppliers.map((s) => (<SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>))}
           </SelectContent>
         </Select>
@@ -40,8 +42,8 @@ export const SupplierPriceHistoryView = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Price Changes ({filtered.length})</CardTitle>
-          <CardDescription>Append-only record of supplier pricing</CardDescription>
+          <CardTitle>{t('supplier.price-changes')} ({filtered.length})</CardTitle>
+          <CardDescription>{t('supplier.append-only-record')}</CardDescription>
         </CardHeader>
         <CardContent>
           {/* Desktop table */}
@@ -49,10 +51,10 @@ export const SupplierPriceHistoryView = () => {
             <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Effective Date</TableHead>
-                <TableHead>Supplier</TableHead>
-                <TableHead>Cost / Pax</TableHead>
-                <TableHead>Recorded At</TableHead>
+                <TableHead>{t('supplier.effective-date')}</TableHead>
+                <TableHead>{t('supplier.supplier')}</TableHead>
+                <TableHead>{t('supplier.cost-per-pax')}</TableHead>
+                <TableHead>{t('supplier.recorded-at')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -70,7 +72,7 @@ export const SupplierPriceHistoryView = () => {
               {filtered.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                    No price history recorded yet
+                    {t('empty.no-price-history')}
                   </TableCell>
                 </TableRow>
               )}
@@ -84,15 +86,15 @@ export const SupplierPriceHistoryView = () => {
               const supplier = suppliers.find((s) => s.id === h.supplier_id);
               return (
                 <ResponsiveCard key={h.id}>
-                  <ResponsiveRow label="Effective Date">{new Date(h.effective_date).toLocaleDateString()}</ResponsiveRow>
-                  <ResponsiveRow label="Supplier"><span className="font-medium">{supplier?.name || "—"}</span></ResponsiveRow>
-                  <ResponsiveRow label="Cost / Pax"><span className="font-medium">{formatCurrency(h.cost_per_pax)}</span></ResponsiveRow>
-                  <ResponsiveRow label="Recorded At"><span className="text-muted-foreground text-sm">{new Date(h.created_at).toLocaleDateString()}</span></ResponsiveRow>
+                  <ResponsiveRow label={t('supplier.effective-date')}>{new Date(h.effective_date).toLocaleDateString()}</ResponsiveRow>
+                  <ResponsiveRow label={t('supplier.supplier')}><span className="font-medium">{supplier?.name || "—"}</span></ResponsiveRow>
+                  <ResponsiveRow label={t('supplier.cost-per-pax')}><span className="font-medium">{formatCurrency(h.cost_per_pax)}</span></ResponsiveRow>
+                  <ResponsiveRow label={t('supplier.recorded-at')}><span className="text-muted-foreground text-sm">{new Date(h.created_at).toLocaleDateString()}</span></ResponsiveRow>
                 </ResponsiveCard>
               );
             })}
             {filtered.length === 0 && (
-              <p className="text-center text-muted-foreground py-4 text-sm">No price history recorded yet</p>
+              <p className="text-center text-muted-foreground py-4 text-sm">{t('empty.no-price-history')}</p>
             )}
           </div>
         </CardContent>

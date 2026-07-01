@@ -1,5 +1,6 @@
 import { useCustomers } from "@/hooks/useCustomers";
 import { useTrucks } from "@/hooks/useTrucks";
+import { useLanguage } from "@/lib/i18n";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package, Users, Truck, ArrowLeftRight, DollarSign } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
@@ -10,6 +11,7 @@ interface PoklehDashboardProps {
 }
 
 export const PoklehDashboard = ({ user, onNavigate }: PoklehDashboardProps) => {
+  const { t } = useLanguage();
   const { customers } = useCustomers();
   const { trucks } = useTrucks();
 
@@ -17,20 +19,20 @@ export const PoklehDashboard = ({ user, onNavigate }: PoklehDashboardProps) => {
   const totalDebt = customers.reduce((sum, c) => sum + Number(c.debt_balance || 0), 0);
 
   const quickLinks = [
-    { id: 'stock-intake', label: 'Stock Intake', icon: Package, desc: 'Record incoming stock from suppliers' },
-    { id: 'stock-distribution', label: 'Stock Distribution', icon: ArrowLeftRight, desc: 'Transfer stock between trucks' },
-    { id: 'sales', label: 'Sales Entry', icon: DollarSign, desc: 'Record ice sales (cash or debt)' },
-    { id: 'customers', label: 'Customers', icon: Users, desc: 'Manage customer accounts and debts' },
-    { id: 'daily-closing', label: 'Daily Closing', icon: DollarSign, desc: 'End-of-day reconciliation' },
-    { id: 'pokleh-reports', label: 'Reports', icon: DollarSign, desc: 'View sales, expenses, and analytics' },
+    { id: 'stock-intake', label: t('nav.stock-intake'), icon: Package, desc: t('dashboard.stock-intake-desc') },
+    { id: 'stock-distribution', label: t('nav.stock-distribution'), icon: ArrowLeftRight, desc: t('dashboard.stock-distribution-desc') },
+    { id: 'sales', label: t('nav.sales'), icon: DollarSign, desc: t('dashboard.sales-entry-desc') },
+    { id: 'customers', label: t('nav.customers'), icon: Users, desc: t('dashboard.customers-desc') },
+    { id: 'daily-closing', label: t('nav.daily-closing'), icon: DollarSign, desc: t('dashboard.daily-closing-desc') },
+    { id: 'pokleh-reports', label: t('nav.pokleh-reports'), icon: DollarSign, desc: t('dashboard.reports-desc') },
   ];
 
   return (
     <div className="space-y-4 sm:space-y-6">
       <div className="px-1 sm:px-0">
-        <h2 className="text-xl sm:text-2xl font-bold">Welcome, {user.name}</h2>
+        <h2 className="text-xl sm:text-2xl font-bold">{t('dashboard.welcome-greeting').replace('{name}', user.name)}</h2>
         <p className="text-sm sm:text-base text-muted-foreground hidden sm:block">
-          {user.role === 'admin' ? 'Overview of your ice distribution system' : 'Your ice distribution dashboard'}
+          {user.role === 'admin' ? t('dashboard.admin-message') : t('dashboard.staff-message')}
         </p>
       </div>
 
@@ -38,7 +40,7 @@ export const PoklehDashboard = ({ user, onNavigate }: PoklehDashboardProps) => {
       <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-2 md:grid-cols-4">
         <Card className="order-1 animate-fade-in-up animate-delay-1">
           <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6">
-            <CardTitle className="text-xs sm:text-sm font-medium">Outstanding Debt</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t('dashboard.outstanding-debt')}</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent className="p-3 sm:p-6 pt-0">
@@ -47,7 +49,7 @@ export const PoklehDashboard = ({ user, onNavigate }: PoklehDashboardProps) => {
         </Card>
         <Card className="order-3 sm:order-2 animate-fade-in-up animate-delay-2">
           <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6">
-            <CardTitle className="text-xs sm:text-sm font-medium">Active Customers</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t('dashboard.active-customers')}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent className="p-3 sm:p-6 pt-0">
@@ -56,7 +58,7 @@ export const PoklehDashboard = ({ user, onNavigate }: PoklehDashboardProps) => {
         </Card>
         <Card className="order-4 sm:order-3 animate-fade-in-up animate-delay-3">
           <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6">
-            <CardTitle className="text-xs sm:text-sm font-medium">Fleet Size</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t('dashboard.fleet-size')}</CardTitle>
             <Truck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent className="p-3 sm:p-6 pt-0">
@@ -65,7 +67,7 @@ export const PoklehDashboard = ({ user, onNavigate }: PoklehDashboardProps) => {
         </Card>
         <Card className="order-2 sm:order-4 animate-fade-in-up animate-delay-4">
           <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6">
-            <CardTitle className="text-xs sm:text-sm font-medium">Total Customers</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t('dashboard.total-customers')}</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent className="p-3 sm:p-6 pt-0">
@@ -76,7 +78,7 @@ export const PoklehDashboard = ({ user, onNavigate }: PoklehDashboardProps) => {
 
       {/* Quick actions with staggered entry */}
       <div className="px-1 sm:px-0 animate-fade-in-up animate-delay-5">
-        <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Quick Actions</h3>
+        <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">{t('dashboard.quick-actions')}</h3>
         <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {quickLinks.map((link, i) => (
             <Card

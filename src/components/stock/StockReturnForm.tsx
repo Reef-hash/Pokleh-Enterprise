@@ -17,6 +17,7 @@ import { useStockDistribution } from "@/hooks/useStockDistribution";
 import { useStockIntake } from "@/hooks/useStockIntake";
 import { useTrucks } from "@/hooks/useTrucks";
 import { stockRpc } from "@/repositories/stockRepo";
+import { useLanguage } from "@/lib/i18n";
 import { PRODUCT_TYPES, type ProductType } from "@/types/pokleh";
 import { toast } from "sonner";
 
@@ -25,6 +26,7 @@ interface StockReturnFormProps {
 }
 
 export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
+  const { t } = useLanguage();
   const { returns, loading, addReturn } = useStockReturn();
   const { distributions } = useStockDistribution();
   const { intakes } = useStockIntake();
@@ -79,12 +81,12 @@ export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
   const maxAvailable = selectedProductStock?.quantity ?? 0;
 
   const handleAdd = async () => {
-    if (!form.truck_id || !form.product_type || form.quantity_returned <= 0 || submitting) { 
-      toast.error("Please select a truck, product type, and enter a valid quantity."); 
-      return; 
+    if (!form.truck_id || !form.product_type || form.quantity_returned <= 0 || submitting) {
+      toast.error(t("stock.error-required"));
+      return;
     }
     if (form.quantity_returned > maxAvailable) {
-      toast.error(`Quantity exceeds available stock (${maxAvailable} pax).`);
+      toast.error(t("stock.error-exceeds"));
       return;
     }
     setSubmitting(true);
@@ -109,16 +111,16 @@ export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Stock Returns"
-        subtitle="Record unsold stock returned from a truck"
-        actionLabel="Record Return"
+        title={t('stock.return-title')}
+        subtitle={t('stock.return-subtitle')}
+        actionLabel={t('stock.record-return')}
         actionIcon={Plus}
         onAction={() => setIsOpen(true)}
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>Return Records ({returns.length})</CardTitle>
+          <CardTitle>{t('stock.return-records')} ({returns.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {/* Desktop table */}
@@ -126,11 +128,11 @@ export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
             <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Truck</TableHead>
-                <TableHead>Product</TableHead>
-                <TableHead>Distribution</TableHead>
-                <TableHead>Qty Returned</TableHead>
+                <TableHead>{t('common.date')}</TableHead>
+                <TableHead>{t('common.truck')}</TableHead>
+                <TableHead>{t('common.product')}</TableHead>
+                <TableHead>{t('stock.distribution')}</TableHead>
+                <TableHead>{t('stock.qty-returned')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -140,13 +142,13 @@ export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
                   <TableCell><Badge variant="secondary">{r.truck?.name}</Badge></TableCell>
                   <TableCell><Badge variant="outline">{r.product_type}</Badge></TableCell>
                   <TableCell className="text-sm text-muted-foreground">{r.distribution_id ? `${r.distribution_id.substring(0, 8)}...` : "—"}</TableCell>
-                  <TableCell className="font-medium">{r.quantity_returned} pax</TableCell>
+                  <TableCell className="font-medium">{r.quantity_returned} {t('common.pax')}</TableCell>
                 </TableRow>
               ))}
               {returns.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                    No returns recorded yet
+                    {t('empty.no-stock-return')}
                   </TableCell>
                 </TableRow>
               )}
@@ -158,15 +160,15 @@ export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
           <div className="block md:hidden space-y-3">
             {returns.map((r) => (
               <ResponsiveCard key={r.id}>
-                <ResponsiveRow label="Date"><span className="text-muted-foreground">{new Date(r.return_date).toLocaleDateString()}</span></ResponsiveRow>
-                <ResponsiveRow label="Truck"><Badge variant="secondary">{r.truck?.name}</Badge></ResponsiveRow>
-                <ResponsiveRow label="Product"><Badge variant="outline">{r.product_type}</Badge></ResponsiveRow>
-                <ResponsiveRow label="Distribution"><span className="text-sm text-muted-foreground">{r.distribution_id ? `${r.distribution_id.substring(0, 8)}...` : "—"}</span></ResponsiveRow>
-                <ResponsiveRow label="Qty Returned"><span className="font-medium">{r.quantity_returned} pax</span></ResponsiveRow>
+                <ResponsiveRow label={t('common.date')}><span className="text-muted-foreground">{new Date(r.return_date).toLocaleDateString()}</span></ResponsiveRow>
+                <ResponsiveRow label={t('common.truck')}><Badge variant="secondary">{r.truck?.name}</Badge></ResponsiveRow>
+                <ResponsiveRow label={t('common.product')}><Badge variant="outline">{r.product_type}</Badge></ResponsiveRow>
+                <ResponsiveRow label={t('stock.distribution')}><span className="text-sm text-muted-foreground">{r.distribution_id ? `${r.distribution_id.substring(0, 8)}...` : "—"}</span></ResponsiveRow>
+                <ResponsiveRow label={t('stock.qty-returned')}><span className="font-medium">{r.quantity_returned} {t('common.pax')}</span></ResponsiveRow>
               </ResponsiveCard>
             ))}
             {returns.length === 0 && (
-              <p className="text-center text-muted-foreground py-4 text-sm">No returns recorded yet</p>
+              <p className="text-center text-muted-foreground py-4 text-sm">{t('empty.no-stock-return')}</p>
             )}
           </div>
         </CardContent>
@@ -175,10 +177,9 @@ export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
       <FormModal
         open={isOpen}
         onOpenChange={setIsOpen}
-        title="Record Stock Return"
-        description="Record unsold stock returned from a truck"
-        submitLabel="Record Return"
-        submitDisabled={!form.truck_id || form.quantity_returned <= 0}
+        title={t('stock.return-title')}
+        description={t('stock.return-subtitle')}
+        submitLabel={t('stock.record-return')}
         isSubmitting={submitting}
         onSubmit={handleAdd}
         onCancel={() => setForm({ truck_id: "", product_type: "", distribution_id: "", intake_id: "", quantity_returned: 0, return_date: new Date().toISOString().split("T")[0] })}
@@ -186,7 +187,7 @@ export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
       >
         <div className="space-y-3">
           <div>
-            <Label htmlFor="return_date" className="text-sm font-medium">Date</Label>
+            <Label htmlFor="return_date" className="text-sm font-medium">{t('common.date')}</Label>
             <Input
               id="return_date"
               type="date"
@@ -196,9 +197,9 @@ export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
           </div>
 
           <div>
-            <Label htmlFor="truck" className="text-sm font-medium">Truck</Label>
+            <Label htmlFor="truck" className="text-sm font-medium">{t('common.truck')}</Label>
             <Select value={form.truck_id} onValueChange={(v) => setForm({ ...form, truck_id: v, product_type: "", distribution_id: "", intake_id: "", quantity_returned: 0 })}>
-              <SelectTrigger id="truck"><SelectValue placeholder="Select truck" /></SelectTrigger>
+              <SelectTrigger id="truck"><SelectValue placeholder={t('common.select-truck')} /></SelectTrigger>
               <SelectContent>
                 {trucks.map((t) => (<SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>))}
               </SelectContent>
@@ -207,9 +208,9 @@ export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
 
           {form.truck_id && (
             <div>
-              <Label className="text-sm font-medium">Available Stock</Label>
+              <Label className="text-sm font-medium">{t('stock.available-stock')}</Label>
               {loadingStock ? (
-                <div className="text-sm text-muted-foreground py-2">Loading stock...</div>
+                <div className="text-sm text-muted-foreground py-2">{t('common.loading')}...</div>
               ) : availableStock.length > 0 ? (
                 <div className="grid grid-cols-3 gap-2 mt-2">
                   {availableStock.map((stock) => (
@@ -222,22 +223,22 @@ export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
                   ))}
                 </div>
               ) : (
-                <div className="text-sm text-muted-foreground py-2">No stock data available</div>
+                <div className="text-sm text-muted-foreground py-2">{t('stock.no-stock-data')}</div>
               )}
             </div>
           )}
 
           {form.truck_id && (
             <div>
-              <Label htmlFor="product_type" className="text-sm font-medium">Product Type</Label>
+              <Label htmlFor="product_type" className="text-sm font-medium">{t('common.product')}</Label>
               <Select value={form.product_type} onValueChange={(v) => setForm({ ...form, product_type: v as ProductType, distribution_id: "", intake_id: "", quantity_returned: 0 })}>
-                <SelectTrigger id="product_type"><SelectValue placeholder="Select product type" /></SelectTrigger>
+                <SelectTrigger id="product_type"><SelectValue placeholder={t('stock.select-product')} /></SelectTrigger>
                 <SelectContent>
                   {PRODUCT_TYPES.map((pt) => {
                     const stock = availableStock.find((s) => s.productType === pt);
                     return (
                       <SelectItem key={pt} value={pt}>
-                        {pt} {stock ? `(${stock.quantity} available)` : ""}
+                        {pt} {stock ? `(${stock.quantity} ${t('stock.available')})` : ""}
                       </SelectItem>
                     );
                   })}
@@ -250,14 +251,14 @@ export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
             <>
               {truckDistributions.length > 0 && (
                 <div>
-                  <Label htmlFor="distribution" className="text-sm font-medium">Distribution (optional)</Label>
+                  <Label htmlFor="distribution" className="text-sm font-medium">{t('stock.distribution')} ({t('common.optional')})</Label>
                   <Select value={form.distribution_id || "none"} onValueChange={(v) => setForm({ ...form, distribution_id: v === "none" ? "" : v })}>
-                    <SelectTrigger id="distribution"><SelectValue placeholder="Tag to a specific transfer" /></SelectTrigger>
+                    <SelectTrigger id="distribution"><SelectValue placeholder={t('stock.tag-transfer')} /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">None</SelectItem>
+                      <SelectItem value="none">{t('common.none')}</SelectItem>
                       {truckDistributions.map((d) => (
                         <SelectItem key={d.id} value={d.id}>
-                          {d.from_truck?.name} → {d.to_truck?.name} ({d.quantity_assigned} pax)
+                          {d.from_truck?.name} → {d.to_truck?.name} ({d.quantity_assigned} {t('common.pax')})
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -267,14 +268,14 @@ export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
 
               {truckIntakes.length > 0 && (
                 <div>
-                  <Label htmlFor="intake" className="text-sm font-medium">Intake (optional, for supplier settlement credit)</Label>
+                  <Label htmlFor="intake" className="text-sm font-medium">{t('stock.intake')} ({t('common.optional')})</Label>
                   <Select value={form.intake_id || "none"} onValueChange={(v) => setForm({ ...form, intake_id: v === "none" ? "" : v })}>
-                    <SelectTrigger id="intake"><SelectValue placeholder="Tag to a specific intake batch" /></SelectTrigger>
+                    <SelectTrigger id="intake"><SelectValue placeholder={t('stock.tag-intake-batch')} /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">None</SelectItem>
+                      <SelectItem value="none">{t('common.none')}</SelectItem>
                       {truckIntakes.map((i) => (
                         <SelectItem key={i.id} value={i.id}>
-                          {new Date(i.intake_date).toLocaleDateString()} ({i.quantity_received} pax)
+                          {new Date(i.intake_date).toLocaleDateString()} ({i.quantity_received} {t('common.pax')})
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -283,14 +284,14 @@ export const StockReturnForm = ({ userRole }: StockReturnFormProps) => {
               )}
 
               <QuantityInput
-                label={`Quantity Returned (pax) - Max: ${maxAvailable}`}
+                label={t('stock.qty-returned-pax', { max: maxAvailable })}
                 value={form.quantity_returned || ""}
                 onChange={(e) => setForm({ ...form, quantity_returned: Math.min(parseInt(e.target.value) || 0, maxAvailable) })}
                 min={0}
                 max={maxAvailable}
               />
               {form.quantity_returned > maxAvailable && (
-                <p className="text-sm text-destructive mt-1">Quantity exceeds available stock</p>
+                <p className="text-sm text-destructive mt-1">{t('stock.error-exceeds')}</p>
               )}
             </>
           )}
