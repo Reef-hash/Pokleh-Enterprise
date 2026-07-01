@@ -6,9 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, FileDown, TrendingUp } from "lucide-react";
+import { Calendar, FileDown, TrendingUp, Download } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
 import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
+import { generateDetailedBillPDF } from "@/lib/pdf-utils";
+import { toast } from "sonner";
 import type { DailyBillSummary } from "@/hooks/useDailyBill";
 
 interface DailyBillViewProps {
@@ -19,6 +21,7 @@ interface DailyBillViewProps {
 export const DailyBillView = ({ dailyBills, isLoading }: DailyBillViewProps) => {
   const [filterDate, setFilterDate] = useState("");
   const [filterTruck, setFilterTruck] = useState("all");
+  const [generatingPDF, setGeneratingPDF] = useState(false);
 
   const filtered = useMemo(() => {
     return dailyBills.filter((bill) => {
@@ -37,17 +40,43 @@ export const DailyBillView = ({ dailyBills, isLoading }: DailyBillViewProps) => 
 
   const totalAmount = filtered.reduce((sum, bill) => sum + bill.totalAmount, 0);
 
+  const handleExportPDF = async () => {
+    try {
+      setGeneratingPDF(true);
+      generateDetailedBillPDF(filtered, "POKLEH ENTERPRISE");
+      toast.success("PDF downloaded successfully!");
+    } catch (error) {
+      toast.error("Failed to generate PDF");
+      console.error(error);
+    } finally {
+      setGeneratingPDF(false);
+    }
+  };
+
   if (isLoading) {
     return <div className="text-center py-8">Loading daily bills...</div>;
   }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Daily Bills</h2>
-        <p className="text-muted-foreground">
-          Track daily wastage and payable amounts to suppliers
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Daily Bills</h2>
+          <p className="text-muted-foreground">
+            Track daily wastage and payable amounts to suppliers
+          </p>
+        </div>
+        {filtered.length > 0 && (
+          <Button
+            onClick={handleExportPDF}
+            disabled={generatingPDF}
+            variant="default"
+            className="gap-2"
+          >
+            <Download className="h-4 w-4" />
+            {generatingPDF ? "Generating..." : "Export PDF"}
+          </Button>
+        )}
       </div>
 
       {/* Filters */}
