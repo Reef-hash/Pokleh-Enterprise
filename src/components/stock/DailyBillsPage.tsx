@@ -6,12 +6,14 @@ import { useStockWastage } from "@/hooks/useStockWastage";
 import { useStockIntake } from "@/hooks/useStockIntake";
 import { useTrucks } from "@/hooks/useTrucks";
 import { useDailyBill } from "@/hooks/useDailyBill";
+import { useLanguage } from "@/lib/i18n";
 
 interface DailyBillsPageProps {
   userRole: "admin" | "staff";
 }
 
 export const DailyBillsPage = ({ userRole }: DailyBillsPageProps) => {
+  const { t } = useLanguage();
   const { sales, loading: salesLoading } = useSales();
   const { wastages, adjustments, loading: wastageLoading } = useStockWastage();
   const { intakes, loading: intakesLoading } = useStockIntake();
@@ -28,9 +30,9 @@ export const DailyBillsPage = ({ userRole }: DailyBillsPageProps) => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Daily Bills</h2>
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight">{t('stock.daily-bills-title')}</h2>
         <p className="text-muted-foreground">
-          Review daily bills per truck before paying suppliers
+          {t('stock.daily-bills-subtitle')}
         </p>
       </div>
 
@@ -38,8 +40,8 @@ export const DailyBillsPage = ({ userRole }: DailyBillsPageProps) => {
         <DailyBillView dailyBills={dailyBills} isLoading={loading} />
       ) : (
         <div className="text-center py-12">
-          <h3 className="text-lg font-semibold mb-2">Access Denied</h3>
-          <p className="text-muted-foreground">Only administrators can view daily bills.</p>
+          <h3 className="text-lg font-semibold mb-2">{t('common.error')}</h3>
+          <p className="text-muted-foreground">{t('empty.no-logs')}</p>
         </div>
       )}
     </div>

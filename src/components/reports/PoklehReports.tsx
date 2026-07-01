@@ -198,7 +198,7 @@ export const PoklehReports = ({ userRole }: PoklehReportsProps) => {
                     { label: t('report.revenue'), value: totalRevenue, color: "text-green-600" },
                     { label: t('report.cash-sales'), value: totalCashSales, color: "" },
                     { label: t('report.debt-sales'), value: totalDebtSales, color: "text-destructive" },
-                    { label: t('report.total-collected'), value: totalCollected, color: "" },
+                    { label: t('report.total-collections'), value: totalCollected, color: "" },
                     { label: t('report.total-expenses'), value: totalExpenses, color: "text-destructive" },
                     { label: t('report.net-profit'), value: profit, color: profit >= 0 ? "text-green-600" : "text-destructive" },
                     { label: t('report.total-pax'), value: sales.reduce((s, x) => s + x.quantity, 0), color: "" },

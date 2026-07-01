@@ -118,10 +118,10 @@ export const DashboardLayout = ({
       suppliers: t('nav.suppliers'),
       'staff-assignments': t('nav.staff-assignments'),
       'price-history': t('nav.price-history'),
-      'selling-prices': 'Harga Jual',
+      'selling-prices': 'Selling Prices',
       expenses: t('nav.expenses'),
       'pokleh-reports': t('nav.pokleh-reports'),
-      'truck-stock': 'Stok Lori',
+      'truck-stock': 'Truck Stock',
       'daily-closing': t('nav.daily-closing'),
       'audit-logs': t('nav.audit-logs'),
       'staff-accounts': t('nav.staff-accounts'),
@@ -132,50 +132,50 @@ export const DashboardLayout = ({
   const adminNavGroups: NavGroup[] = [
     {
       label: null, key: 'main',
-      items: [{ id: 'dashboard', label: 'Dashboard', icon: Home }]
+      items: [{ id: 'dashboard', label: t('nav.dashboard'), icon: Home }]
     },
     {
-      label: 'Stock', key: 'stock',
+      label: t('nav.stock'), key: 'stock',
       items: [
-        { id: 'truck-stock', label: 'Stok Lori', icon: Truck },
-        { id: 'stock-intake', label: 'Stock Intake', icon: ClipboardList },
-        { id: 'stock-distribution', label: 'Stock Distribution', icon: ArrowLeftRight },
-        { id: 'stock-return', label: 'Stock Returns', icon: RotateCcw },
+        { id: 'truck-stock', label: 'Truck Stock', icon: Truck },
+        { id: 'stock-intake', label: t('nav.stock-intake'), icon: ClipboardList },
+        { id: 'stock-distribution', label: t('nav.stock-distribution'), icon: ArrowLeftRight },
+        { id: 'stock-return', label: t('nav.stock-return'), icon: RotateCcw },
       ]
     },
     {
-      label: 'Sales & Debt', key: 'sales-debt',
+      label: t('nav.sales-debt'), key: 'sales-debt',
       items: [
-        { id: 'sales', label: 'Sales Entry', icon: DollarSign },
-        { id: 'debt-ledger', label: 'Debt Ledger', icon: BookOpen },
-        { id: 'debt-collection', label: 'Debt Collection', icon: HandCoins },
-        { id: 'settlements', label: 'Supplier Settlements', icon: FileSpreadsheet },
+        { id: 'sales', label: t('nav.sales'), icon: DollarSign },
+        { id: 'debt-ledger', label: t('nav.debt-ledger'), icon: BookOpen },
+        { id: 'debt-collection', label: t('nav.debt-collection'), icon: HandCoins },
+        { id: 'settlements', label: t('nav.settlements'), icon: FileSpreadsheet },
       ]
     },
     {
-      label: 'Management', key: 'management',
+      label: t('nav.management'), key: 'management',
       items: [
-        { id: 'trucks', label: 'Trucks', icon: Truck },
-        { id: 'customers', label: 'Customers', icon: Users },
-        { id: 'suppliers', label: 'Suppliers', icon: Building2 },
-        { id: 'staff-assignments', label: 'Staff Assignments', icon: UserCheck },
-        { id: 'price-history', label: 'Price History', icon: Clock },
-        { id: 'selling-prices', label: 'Harga Jual', icon: Tag },
-        { id: 'expenses', label: 'Expenses', icon: Receipt },
+        { id: 'trucks', label: t('nav.trucks'), icon: Truck },
+        { id: 'customers', label: t('nav.customers'), icon: Users },
+        { id: 'suppliers', label: t('nav.suppliers'), icon: Building2 },
+        { id: 'staff-assignments', label: t('nav.staff-assignments'), icon: UserCheck },
+        { id: 'price-history', label: t('nav.price-history'), icon: Clock },
+        { id: 'selling-prices', label: 'Selling Prices', icon: Tag },
+        { id: 'expenses', label: t('nav.expenses'), icon: Receipt },
       ]
     },
     {
-      label: 'Reports & Operations', key: 'reports',
+      label: t('nav.reports-operations'), key: 'reports',
       items: [
-        { id: 'pokleh-reports', label: 'Pokleh Reports', icon: TrendingUp },
-        { id: 'daily-closing', label: 'Daily Closing', icon: CalendarCheck },
+        { id: 'pokleh-reports', label: t('nav.pokleh-reports'), icon: TrendingUp },
+        { id: 'daily-closing', label: t('nav.daily-closing'), icon: CalendarCheck },
       ]
     },
     {
-      label: 'Admin', key: 'admin',
+      label: t('nav.admin'), key: 'admin',
       items: [
-        { id: 'staff-accounts', label: 'Staff Accounts', icon: Users },
-        { id: 'audit-logs', label: 'Audit Logs', icon: Shield },
+        { id: 'staff-accounts', label: t('nav.staff-accounts'), icon: Users },
+        { id: 'audit-logs', label: t('nav.audit-logs'), icon: Shield },
       ]
     },
   ];
@@ -183,35 +183,35 @@ export const DashboardLayout = ({
   const staffNavGroups: NavGroup[] = [
     {
       label: null, key: 'main',
-      items: [{ id: 'dashboard', label: 'Dashboard', icon: Home }]
+      items: [{ id: 'dashboard', label: t('nav.dashboard'), icon: Home }]
     },
     {
-      label: 'Stock', key: 'stock',
+      label: t('nav.stock'), key: 'stock',
       items: [
-        { id: 'truck-stock', label: 'Stok Lori', icon: Truck },
-        { id: 'stock-distribution', label: 'Stock Distribution', icon: ArrowLeftRight },
-        { id: 'stock-return', label: 'Stock Returns', icon: RotateCcw },
+        { id: 'truck-stock', label: 'Truck Stock', icon: Truck },
+        { id: 'stock-distribution', label: t('nav.stock-distribution'), icon: ArrowLeftRight },
+        { id: 'stock-return', label: t('nav.stock-return'), icon: RotateCcw },
       ]
     },
     {
-      label: 'Sales & Debt', key: 'sales-debt',
+      label: t('nav.sales-debt'), key: 'sales-debt',
       items: [
-        { id: 'sales', label: 'Sales Entry', icon: DollarSign },
-        { id: 'debt-collection', label: 'Debt Collection', icon: HandCoins },
+        { id: 'sales', label: t('nav.sales'), icon: DollarSign },
+        { id: 'debt-collection', label: t('nav.debt-collection'), icon: HandCoins },
       ]
     },
     {
-      label: 'Management', key: 'management',
+      label: t('nav.management'), key: 'management',
       items: [
-        { id: 'customers', label: 'Customers', icon: Users },
-        { id: 'expenses', label: 'Expenses', icon: Receipt },
+        { id: 'customers', label: t('nav.customers'), icon: Users },
+        { id: 'expenses', label: t('nav.expenses'), icon: Receipt },
       ]
     },
     {
-      label: 'Reports & Operations', key: 'reports',
+      label: t('nav.reports-operations'), key: 'reports',
       items: [
-        { id: 'pokleh-reports', label: 'Pokleh Reports', icon: TrendingUp },
-        { id: 'daily-closing', label: 'Daily Closing', icon: CalendarCheck },
+        { id: 'pokleh-reports', label: t('nav.pokleh-reports'), icon: TrendingUp },
+        { id: 'daily-closing', label: t('nav.daily-closing'), icon: CalendarCheck },
       ]
     },
   ];
@@ -349,7 +349,7 @@ export const DashboardLayout = ({
               size="sm"
               onClick={handleSync}
               disabled={syncing}
-              title="Sync data dengan server"
+              title={t('common.action')}
               className="px-1.5 sm:px-2"
             >
               <RefreshCw className={cn("h-4 w-4", syncing && "animate-spin")} />

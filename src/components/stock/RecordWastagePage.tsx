@@ -8,6 +8,7 @@ import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
 import { RecordWastageForm } from "./RecordWastageForm";
 import { useStockWastage } from "@/hooks/useStockWastage";
 import { useTrucks } from "@/hooks/useTrucks";
+import { useLanguage } from "@/lib/i18n";
 import { formatCurrency } from "@/lib/currency";
 
 interface RecordWastagePageProps {
@@ -15,6 +16,7 @@ interface RecordWastagePageProps {
 }
 
 export const RecordWastagePage = ({ userRole }: RecordWastagePageProps) => {
+  const { t } = useLanguage();
   const { wastages, addWastage, loading } = useStockWastage();
   const { trucks } = useTrucks();
 
@@ -35,8 +37,8 @@ export const RecordWastagePage = ({ userRole }: RecordWastagePageProps) => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Record Wastage (Sating)</h2>
-        <p className="text-muted-foreground">Track daily wastage — units that melted or were damaged</p>
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight">{t('stock.wastage-title')}</h2>
+        <p className="text-muted-foreground">{t('stock.wastage-subtitle')}</p>
       </div>
 
       <RecordWastageForm trucks={trucks} onSubmit={addWastage} isLoading={loading} />
@@ -47,7 +49,7 @@ export const RecordWastagePage = ({ userRole }: RecordWastagePageProps) => {
           <CardContent className="pt-6">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div>
-                <p className="text-sm text-muted-foreground">Total Wastage Records</p>
+                <p className="text-sm text-muted-foreground">{t('stock.wastage-records')}</p>
                 <p className="text-2xl font-bold">{wastages.length}</p>
               </div>
               <div>
@@ -62,7 +64,7 @@ export const RecordWastagePage = ({ userRole }: RecordWastagePageProps) => {
                       new Date(w.waste_date).getTime() >
                       new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).getTime()
                   ).length}
-                  {" "}records
+                  {" records"}
                 </p>
               </div>
             </div>
@@ -78,7 +80,7 @@ export const RecordWastagePage = ({ userRole }: RecordWastagePageProps) => {
               <Droplet className="h-5 w-5 text-orange-500" />
               Recent Wastage Records
             </CardTitle>
-            <CardDescription>Last 20 records</CardDescription>
+            <CardDescription>Last 20 records ({t('common.pax')})</CardDescription>
           </CardHeader>
           <CardContent>
             {/* Desktop Table */}
@@ -86,11 +88,11 @@ export const RecordWastagePage = ({ userRole }: RecordWastagePageProps) => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Truck</TableHead>
-                    <TableHead>Product</TableHead>
-                    <TableHead className="text-right">Quantity</TableHead>
-                    <TableHead>Notes</TableHead>
+                    <TableHead>{t('common.date')}</TableHead>
+                    <TableHead>{t('common.truck')}</TableHead>
+                    <TableHead>{t('common.product')}</TableHead>
+                    <TableHead className="text-right">{t('common.quantity')}</TableHead>
+                    <TableHead>{t('common.notes')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -124,17 +126,17 @@ export const RecordWastagePage = ({ userRole }: RecordWastagePageProps) => {
                 const truck = trucks.find((t) => t.id === w.truck_id);
                 return (
                   <ResponsiveCard key={w.id}>
-                    <ResponsiveRow label="Date">
+                    <ResponsiveRow label={t('common.date')}>
                       {new Date(w.waste_date).toLocaleDateString()}
                     </ResponsiveRow>
-                    <ResponsiveRow label="Truck">{truck?.name || "Unknown"}</ResponsiveRow>
-                    <ResponsiveRow label="Product">
+                    <ResponsiveRow label={t('common.truck')}>{truck?.name || "Unknown"}</ResponsiveRow>
+                    <ResponsiveRow label={t('common.product')}>
                       <Badge variant="outline">{w.product_type}</Badge>
                     </ResponsiveRow>
-                    <ResponsiveRow label="Quantity">
+                    <ResponsiveRow label={t('common.quantity')}>
                       <span className="font-bold text-orange-600">{w.quantity_wasted}</span>
                     </ResponsiveRow>
-                    {w.notes && <ResponsiveRow label="Notes">{w.notes}</ResponsiveRow>}
+                    {w.notes && <ResponsiveRow label={t('common.notes')}>{w.notes}</ResponsiveRow>}
                   </ResponsiveCard>
                 );
               })}
@@ -147,7 +149,7 @@ export const RecordWastagePage = ({ userRole }: RecordWastagePageProps) => {
         <Card>
           <CardContent className="text-center py-12">
             <Droplet className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-            <p className="text-muted-foreground">No wastage records yet</p>
+            <p className="text-muted-foreground">{t('empty.no-collections')}</p>
           </CardContent>
         </Card>
       )}

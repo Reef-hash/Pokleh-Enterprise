@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Truck, RefreshCw, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/lib/i18n";
 import { PRODUCT_TYPES, type ProductType } from "@/types/pokleh";
 
 const PRODUCT_SHORT: Record<ProductType, string> = {
@@ -27,6 +28,7 @@ function quantityBadge(qty: number) {
 }
 
 export const TruckStockView = () => {
+  const { t } = useLanguage();
   const { data, loading, lastRefreshed, refresh } = useTruckStock();
 
   // Grand totals per product type across all trucks
@@ -42,12 +44,12 @@ export const TruckStockView = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Stok Lori"
-        subtitle="Stok semasa yang ada atas setiap lori"
+        title={t('stock.truck-stock-title')}
+        subtitle={t('stock.truck-stock-subtitle')}
       >
         <Button variant="outline" size="sm" onClick={refresh} disabled={loading}>
           <RefreshCw className={cn("h-4 w-4 sm:mr-2", loading && "animate-spin")} />
-          <span className="hidden sm:inline">Muat Semula</span>
+          <span className="hidden sm:inline">Refresh</span>
         </Button>
       </PageHeader>
 
@@ -57,10 +59,10 @@ export const TruckStockView = () => {
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2 text-base">
               <Package className="h-4 w-4 text-muted-foreground" />
-              Jumlah Keseluruhan — Semua Lori
+              Grand Total - All Trucks
             </CardTitle>
             <Badge variant="outline" className="text-xs font-normal text-muted-foreground">
-              {grandTotal} pax
+              {grandTotal} {t('common.pax')}
             </Badge>
           </div>
         </CardHeader>
@@ -84,7 +86,7 @@ export const TruckStockView = () => {
                   <p className={cn("text-xl", quantityColor(quantity))}>
                     {quantity}
                   </p>
-                  <p className="text-xs text-muted-foreground">pax</p>
+                  <p className="text-xs text-muted-foreground">{t('common.pax')}</p>
                 </div>
               ))}
             </div>
@@ -111,7 +113,7 @@ export const TruckStockView = () => {
       ) : data.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            Tiada lori didaftarkan. Tambah lori dalam bahagian Pengurusan → Lori.
+            {t('empty.no-trucks')}
           </CardContent>
         </Card>
       ) : (
@@ -125,7 +127,7 @@ export const TruckStockView = () => {
                     {truck.name}
                   </CardTitle>
                   <Badge variant={total === 0 ? "destructive" : "secondary"}>
-                    {total} pax
+                    {total} {t('common.pax')}
                   </Badge>
                 </div>
               </CardHeader>
@@ -144,7 +146,7 @@ export const TruckStockView = () => {
                           {quantity}
                         </span>
                         <Badge variant={quantityBadge(quantity)} className="text-xs min-w-[44px] justify-center">
-                          pax
+                          {t('common.pax')}
                         </Badge>
                       </div>
                     </div>
@@ -158,7 +160,7 @@ export const TruckStockView = () => {
 
       {lastRefreshed && !loading && (
         <p className="text-center text-xs text-muted-foreground">
-          Dikemaskini: {lastRefreshed.toLocaleTimeString("ms-MY")}
+          Last updated: {lastRefreshed.toLocaleTimeString()}
         </p>
       )}
     </div>

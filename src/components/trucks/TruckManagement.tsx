@@ -10,6 +10,7 @@ import { Plus, Edit, Trash2, Truck as TruckIcon } from "lucide-react";
 import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { useTrucks } from "@/hooks/useTrucks";
+import { useLanguage } from "@/lib/i18n";
 import { toast } from "sonner";
 
 interface TruckManagementProps {
@@ -17,6 +18,7 @@ interface TruckManagementProps {
 }
 
 export const TruckManagement = ({ userRole }: TruckManagementProps) => {
+  const { t } = useLanguage();
   const { trucks, loading, addTruck, updateTruck, deleteTruck } = useTrucks();
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -26,7 +28,7 @@ export const TruckManagement = ({ userRole }: TruckManagementProps) => {
   const [submitting, setSubmitting] = useState(false);
 
   const handleAdd = async () => {
-    if (!name.trim() || submitting) { toast.error("Please enter a truck name."); return; }
+    if (!name.trim() || submitting) { toast.error(t("truck.error-required")); return; }
     setSubmitting(true);
     try {
       const result = await addTruck(name.trim());
@@ -40,7 +42,7 @@ export const TruckManagement = ({ userRole }: TruckManagementProps) => {
   };
 
   const handleEdit = async () => {
-    if (!name.trim() || !editingId || submitting) { toast.error("Please enter a truck name."); return; }
+    if (!name.trim() || !editingId || submitting) { toast.error(t("truck.error-required")); return; }
     setSubmitting(true);
     try {
       const result = await updateTruck(editingId, name.trim());
@@ -76,7 +78,7 @@ export const TruckManagement = ({ userRole }: TruckManagementProps) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">Loading trucks...</p>
+        <p className="text-muted-foreground">{t("truck.loading")}</p>
       </div>
     );
   }
@@ -84,21 +86,21 @@ export const TruckManagement = ({ userRole }: TruckManagementProps) => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Truck Management"
-        subtitle="Manage the fleet of lorries"
+        title={t("truck.title")}
+        subtitle={t("truck.subtitle")}
       >
         {userRole === "admin" && (
           <Button onClick={() => setIsAddOpen(true)}>
             <Plus className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Add Truck</span>
+            <span className="hidden sm:inline">{t("truck.add")}</span>
           </Button>
         )}
       </PageHeader>
 
       <Card>
         <CardHeader>
-          <CardTitle>Trucks ({trucks.length})</CardTitle>
-          <CardDescription>Lorries used for intake, distribution, and sales</CardDescription>
+          <CardTitle>{t("truck.count").replace("{count}", trucks.length.toString())}</CardTitle>
+          <CardDescription>{t("truck.description")}</CardDescription>
         </CardHeader>
         <CardContent>
           {/* Desktop table */}
@@ -106,9 +108,9 @@ export const TruckManagement = ({ userRole }: TruckManagementProps) => {
             <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Truck Name</TableHead>
-                <TableHead>Created</TableHead>
-                {userRole === "admin" && <TableHead>Actions</TableHead>}
+                <TableHead>{t("truck.name-label")}</TableHead>
+                <TableHead>{t("common.created")}</TableHead>
+                {userRole === "admin" && <TableHead>{t("common.actions")}</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -140,7 +142,7 @@ export const TruckManagement = ({ userRole }: TruckManagementProps) => {
               {trucks.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
-                    No trucks yet. Add your first lorry.
+                    {t("empty.no-trucks")}
                   </TableCell>
                 </TableRow>
               )}
@@ -152,13 +154,13 @@ export const TruckManagement = ({ userRole }: TruckManagementProps) => {
           <div className="block md:hidden space-y-3">
             {trucks.map((truck) => (
               <ResponsiveCard key={truck.id}>
-                <ResponsiveRow label="Truck Name">
+                <ResponsiveRow label={t("truck.name-label")}>
                   <span className="flex items-center gap-2">
                     <TruckIcon className="h-4 w-4 text-muted-foreground" />
                     <span className="font-medium">{truck.name}</span>
                   </span>
                 </ResponsiveRow>
-                <ResponsiveRow label="Created"><span className="text-muted-foreground">{new Date(truck.created_at).toLocaleDateString()}</span></ResponsiveRow>
+                <ResponsiveRow label={t("common.created")}><span className="text-muted-foreground">{new Date(truck.created_at).toLocaleDateString()}</span></ResponsiveRow>
                 {userRole === "admin" && (
                   <div className="flex justify-end gap-1 pt-2 border-t">
                     <Button variant="ghost" size="sm" onClick={() => openEdit(truck)}>
@@ -172,7 +174,7 @@ export const TruckManagement = ({ userRole }: TruckManagementProps) => {
               </ResponsiveCard>
             ))}
             {trucks.length === 0 && (
-              <p className="text-center text-muted-foreground py-4 text-sm">No trucks yet. Add your first lorry.</p>
+              <p className="text-center text-muted-foreground py-4 text-sm">{t("empty.no-trucks")}</p>
             )}
           </div>
         </CardContent>
@@ -181,21 +183,21 @@ export const TruckManagement = ({ userRole }: TruckManagementProps) => {
       <FormModal
         open={isAddOpen}
         onOpenChange={setIsAddOpen}
-        title="Add Truck"
-        description="Register a new lorry"
-        submitLabel="Create Truck"
+        title={t("truck.add-modal-title")}
+        description={t("truck.add-modal-desc")}
+        submitLabel={t("truck.add-modal-button")}
         submitDisabled={!name.trim()}
         isSubmitting={submitting}
         onSubmit={handleAdd}
         onCancel={() => setName("")}
       >
         <div>
-          <Label htmlFor="add_truck_name" className="text-sm font-medium">Truck Name</Label>
+          <Label htmlFor="add_truck_name" className="text-sm font-medium">{t("truck.name-label")}</Label>
           <Input
             id="add_truck_name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. Lori A"
+            placeholder={t("truck.name-placeholder")}
           />
         </div>
       </FormModal>
@@ -203,16 +205,16 @@ export const TruckManagement = ({ userRole }: TruckManagementProps) => {
       <FormModal
         open={isEditOpen}
         onOpenChange={setIsEditOpen}
-        title="Edit Truck"
-        description="Update the truck name"
-        submitLabel="Update Truck"
+        title={t("truck.edit-modal-title")}
+        description={t("truck.edit-modal-desc")}
+        submitLabel={t("truck.edit-modal-button")}
         submitDisabled={!name.trim()}
         isSubmitting={submitting}
         onSubmit={handleEdit}
         onCancel={() => { setName(""); setEditingId(null); }}
       >
         <div>
-          <Label htmlFor="edit_truck_name" className="text-sm font-medium">Truck Name</Label>
+          <Label htmlFor="edit_truck_name" className="text-sm font-medium">{t("truck.name-label")}</Label>
           <Input
             id="edit_truck_name"
             value={name}
@@ -224,14 +226,14 @@ export const TruckManagement = ({ userRole }: TruckManagementProps) => {
       <AlertDialog open={!!deleteConfirmId} onOpenChange={(o) => { if (!o) setDeleteConfirmId(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Truck</AlertDialogTitle>
+            <AlertDialogTitle>{t("truck.confirm-delete-title")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this truck? Customers assigned to this truck will be affected. This action cannot be undone.
+              {t("truck.confirm-delete")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} disabled={submitting} className="bg-destructive text-destructive-foreground">{submitting ? "Deleting..." : "Delete"}</AlertDialogAction>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={submitting} className="bg-destructive text-destructive-foreground">{submitting ? t("truck.deleting") : t("common.delete")}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -11,6 +11,7 @@ import { Plus, Search, Edit, Trash2, Building2, Phone } from "lucide-react";
 import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { usePoklehSuppliers } from "@/hooks/usePoklehSuppliers";
+import { useLanguage } from "@/lib/i18n";
 import { toast } from "sonner";
 
 interface SuppliersManagementProps {
@@ -18,6 +19,7 @@ interface SuppliersManagementProps {
 }
 
 export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
+  const { t } = useLanguage();
   const { suppliers, loading, addSupplier, updateSupplier, deleteSupplier } = usePoklehSuppliers();
   const [search, setSearch] = useState("");
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -46,7 +48,7 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
   );
 
   const handleAdd = async () => {
-    if (!name.trim() || submitting) { toast.error("Please enter a supplier name."); return; }
+    if (!name.trim() || submitting) { toast.error(t("supplier.error-required")); return; }
     setSubmitting(true);
     try {
       const result = await addSupplier(name.trim(), phone.trim() || undefined);
@@ -61,7 +63,7 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
   };
 
   const handleEdit = async () => {
-    if (!name.trim() || !editingId || submitting) { toast.error("Please enter a supplier name."); return; }
+    if (!name.trim() || !editingId || submitting) { toast.error(t("supplier.error-required")); return; }
     setSubmitting(true);
     try {
       const result = await updateSupplier(editingId, name.trim(), phone.trim() || undefined);
@@ -86,7 +88,7 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">Loading suppliers...</p>
+        <p className="text-muted-foreground">{t("supplier.loading")}</p>
       </div>
     );
   }
@@ -94,13 +96,13 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Supplier Management"
-        subtitle="Manage ice suppliers"
+        title={t("supplier.title")}
+        subtitle={t("supplier.subtitle")}
       >
         {userRole === "admin" && (
           <Button onClick={() => setIsAddOpen(true)}>
             <Plus className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Add Supplier</span>
+            <span className="hidden sm:inline">{t("supplier.add")}</span>
           </Button>
         )}
       </PageHeader>
@@ -109,14 +111,14 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
         <CardContent className="pt-6">
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input className="pl-10" placeholder="Search suppliers..." value={search} onChange={(e) => setSearch(e.target.value)} />
+            <Input className="pl-10" placeholder={t("supplier.search-placeholder")} value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Suppliers ({filtered.length})</CardTitle>
+          <CardTitle>{t("supplier.count").replace("{count}", filtered.length.toString())}</CardTitle>
         </CardHeader>
         <CardContent>
           {/* Desktop table */}
@@ -124,17 +126,17 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
             <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Added</TableHead>
-                {userRole === "admin" && <TableHead>Actions</TableHead>}
+                <TableHead>{t("supplier.table-name")}</TableHead>
+                <TableHead>{t("supplier.table-phone")}</TableHead>
+                <TableHead>{t("supplier.table-added")}</TableHead>
+                {userRole === "admin" && <TableHead>{t("common.actions")}</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={userRole === "admin" ? 4 : 3} className="text-center text-muted-foreground py-8">
-                    {suppliers.length === 0 ? "No suppliers yet. Add your first supplier." : "No suppliers match your search."}
+                    {suppliers.length === 0 ? t("empty.no-suppliers") : t("empty.search-no-match")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -165,13 +167,13 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
           <div className="block md:hidden space-y-3">
             {filtered.map((s) => (
               <ResponsiveCard key={s.id}>
-                <ResponsiveRow label="Name">
+                <ResponsiveRow label={t("supplier.table-name")}>
                   <span className="flex items-center gap-2 font-medium">
                     <Building2 className="h-4 w-4 text-muted-foreground" /> {s.name}
                   </span>
                 </ResponsiveRow>
-                <ResponsiveRow label="Phone">{s.phone ? <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{s.phone}</span> : "—"}</ResponsiveRow>
-                <ResponsiveRow label="Added">{new Date(s.created_at).toLocaleDateString()}</ResponsiveRow>
+                <ResponsiveRow label={t("supplier.table-phone")}>{s.phone ? <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{s.phone}</span> : "—"}</ResponsiveRow>
+                <ResponsiveRow label={t("supplier.table-added")}>{new Date(s.created_at).toLocaleDateString()}</ResponsiveRow>
                 {userRole === "admin" && (
                   <div className="flex justify-end gap-1 pt-2 border-t">
                     <Button variant="ghost" size="sm" onClick={() => openEdit(s)}><Edit className="h-4 w-4" /></Button>
@@ -181,7 +183,7 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
               </ResponsiveCard>
             ))}
             {filtered.length === 0 && (
-              <p className="text-center text-muted-foreground py-4 text-sm">{suppliers.length === 0 ? "No suppliers yet. Add your first supplier." : "No suppliers match your search."}</p>
+              <p className="text-center text-muted-foreground py-4 text-sm">{suppliers.length === 0 ? t("empty.no-suppliers") : t("empty.search-no-match")}</p>
             )}
           </div>
         </CardContent>
@@ -190,9 +192,9 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
       <FormModal
         open={isAddOpen}
         onOpenChange={setIsAddOpen}
-        title="Add Supplier"
-        description="Add a new ice supplier"
-        submitLabel="Add Supplier"
+        title={t("supplier.add-modal-title")}
+        description={t("supplier.add-modal-desc")}
+        submitLabel={t("supplier.add-modal-button")}
         submitDisabled={!name.trim()}
         isSubmitting={submitting}
         onSubmit={handleAdd}
@@ -200,19 +202,19 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
       >
         <div className="space-y-3">
           <div>
-            <Label htmlFor="add_supplier_name" className="text-sm font-medium">Name *</Label>
-            <Input id="add_supplier_name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Supplier name" />
+            <Label htmlFor="add_supplier_name" className="text-sm font-medium">{t("supplier.name-label")}</Label>
+            <Input id="add_supplier_name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("supplier.name-placeholder")} />
           </div>
-          <PhoneInput label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone number" />
+          <PhoneInput label={t("supplier.phone-label")} value={phone} onChange={(e) => setPhone(e.target.value)} placeholder={t("supplier.phone-placeholder")} />
         </div>
       </FormModal>
 
       <FormModal
         open={isEditOpen}
         onOpenChange={setIsEditOpen}
-        title="Edit Supplier"
-        description="Update supplier information"
-        submitLabel="Update Supplier"
+        title={t("supplier.edit-modal-title")}
+        description={t("supplier.edit-modal-desc")}
+        submitLabel={t("supplier.edit-modal-button")}
         submitDisabled={!name.trim()}
         isSubmitting={submitting}
         onSubmit={handleEdit}
@@ -220,24 +222,24 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
       >
         <div className="space-y-3">
           <div>
-            <Label htmlFor="edit_supplier_name" className="text-sm font-medium">Name *</Label>
+            <Label htmlFor="edit_supplier_name" className="text-sm font-medium">{t("supplier.name-label")}</Label>
             <Input id="edit_supplier_name" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
-          <PhoneInput label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
+          <PhoneInput label={t("supplier.phone-label")} value={phone} onChange={(e) => setPhone(e.target.value)} />
         </div>
       </FormModal>
 
       <AlertDialog open={!!deleteConfirmId} onOpenChange={(o) => { if (!o) setDeleteConfirmId(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Supplier</AlertDialogTitle>
+            <AlertDialogTitle>{t("supplier.confirm-delete-title")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this supplier? Stock intake records linked to this supplier will be affected. This action cannot be undone.
+              {t("supplier.confirm-delete")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">{t("common.delete")}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

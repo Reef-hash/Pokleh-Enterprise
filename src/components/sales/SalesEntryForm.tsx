@@ -18,6 +18,7 @@ import { useTrucks } from "@/hooks/useTrucks";
 import { useStaffAssignments } from "@/hooks/useStaffAssignments";
 import { useSellingPrices } from "@/hooks/useSellingPrices";
 import { useAuthStore } from "@/stores/authStore";
+import { useLanguage } from "@/lib/i18n";
 import { formatCurrency } from "@/lib/currency";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -39,6 +40,7 @@ const emptyForm = () => ({
 });
 
 export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
+  const { t } = useLanguage();
   const { sales, loading, addSale } = useSales();
   const { customers } = useCustomers();
   const { trucks } = useTrucks();
@@ -99,7 +101,7 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
   };
 
   const handleAdd = async () => {
-    if (!form.customer_id || !resolvedTruckId || form.quantity <= 0 || form.selling_price <= 0 || submitting) { toast.error("Please select a customer, truck, and enter valid quantity and price."); return; }
+    if (!form.customer_id || !resolvedTruckId || form.quantity <= 0 || form.selling_price <= 0 || submitting) { toast.error(t("sales.error-required")); return; }
     setSubmitting(true);
     try {
       const result = await addSale({ ...form, truck_id: resolvedTruckId });
@@ -119,32 +121,32 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Sales Entry"
-        subtitle="Record sales (cash or debt)"
-        actionLabel="Record Sale"
+        title={t("sales.title")}
+        subtitle={t("sales.subtitle")}
+        actionLabel={t("sales.record")}
         actionIcon={Plus}
         onAction={() => setIsOpen(true)}
       />
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Total Sold</CardTitle></CardHeader>
-          <CardContent><p className="text-2xl font-bold">{totalSales} pax</p></CardContent>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">{t("sales.total-sold")}</CardTitle></CardHeader>
+          <CardContent><p className="text-2xl font-bold">{totalSales} {t("sales.unit")}</p></CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Revenue</CardTitle></CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">{t("sales.revenue")}</CardTitle></CardHeader>
           <CardContent><p className="text-2xl font-bold">{formatCurrency(totalRevenue)}</p></CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Outstanding Debt</CardTitle></CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">{t("debt.outstanding")}</CardTitle></CardHeader>
           <CardContent><p className="text-2xl font-bold text-destructive">{formatCurrency(totalDebt)}</p></CardContent>
         </Card>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Sales History ({sales.length})</CardTitle>
-          <CardDescription>All recorded sales transactions</CardDescription>
+          <CardTitle>{t("sales.history").replace("{count}", sales.length.toString())}</CardTitle>
+          <CardDescription>{t("sales.all-recorded")}</CardDescription>
         </CardHeader>
         <CardContent>
           {/* Desktop table */}
@@ -152,13 +154,13 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Truck</TableHead>
-                  <TableHead>Product</TableHead>
-                  <TableHead>Qty</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Type</TableHead>
+                  <TableHead>{t("sales.table-date")}</TableHead>
+                  <TableHead>{t("sales.table-customer")}</TableHead>
+                  <TableHead>{t("sales.table-truck")}</TableHead>
+                  <TableHead>{t("sales.table-product")}</TableHead>
+                  <TableHead>{t("sales.table-qty")}</TableHead>
+                  <TableHead>{t("sales.table-amount")}</TableHead>
+                  <TableHead>{t("sales.table-type")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -178,7 +180,7 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
                 {sales.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                      No sales recorded yet
+                      {t("empty.no-sales")}
                     </TableCell>
                   </TableRow>
                 )}
@@ -189,17 +191,17 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
           {/* Mobile cards */}
           <div className="block md:hidden space-y-3">
             {sales.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">No sales recorded yet</p>
+              <p className="text-center text-muted-foreground py-8">{t("empty.no-sales")}</p>
             ) : (
               sales.map((s) => (
                 <ResponsiveCard key={s.id}>
-                  <ResponsiveRow label="Date">{new Date(s.sale_date).toLocaleDateString()}</ResponsiveRow>
-                  <ResponsiveRow label="Customer">{s.customer?.name || "—"}</ResponsiveRow>
-                  <ResponsiveRow label="Truck">{s.truck?.name || "—"}</ResponsiveRow>
-                  <ResponsiveRow label="Product">{s.product_type || "—"}</ResponsiveRow>
-                  <ResponsiveRow label="Qty">{s.quantity}</ResponsiveRow>
-                  <ResponsiveRow label="Amount">{formatCurrency(s.selling_price)}</ResponsiveRow>
-                  <ResponsiveRow label="Type">
+                  <ResponsiveRow label={t("sales.table-date")}>{new Date(s.sale_date).toLocaleDateString()}</ResponsiveRow>
+                  <ResponsiveRow label={t("sales.table-customer")}>{s.customer?.name || "—"}</ResponsiveRow>
+                  <ResponsiveRow label={t("sales.table-truck")}>{s.truck?.name || "—"}</ResponsiveRow>
+                  <ResponsiveRow label={t("sales.table-product")}>{s.product_type || "—"}</ResponsiveRow>
+                  <ResponsiveRow label={t("sales.table-qty")}>{s.quantity}</ResponsiveRow>
+                  <ResponsiveRow label={t("sales.table-amount")}>{formatCurrency(s.selling_price)}</ResponsiveRow>
+                  <ResponsiveRow label={t("sales.table-type")}>
                     <span className={s.payment_type === "debt" ? "text-destructive font-medium" : "text-green-600 font-medium"}>
                       {s.payment_type}
                     </span>
@@ -214,9 +216,9 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
       <FormModal
         open={isOpen}
         onOpenChange={setIsOpen}
-        title="Record Sale"
-        description="Record an ice sale to a customer"
-        submitLabel="Save Sale"
+        title={t("sales.modal-title")}
+        description={t("sales.modal-desc")}
+        submitLabel={t("sales.modal-button")}
         submitDisabled={!form.customer_id || !resolvedTruckId || form.quantity <= 0 || form.selling_price <= 0}
         isSubmitting={submitting}
         onSubmit={handleAdd}
@@ -225,15 +227,15 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
         <div className="space-y-4">
           {/* Truck — auto-resolved for staff with an active assignment */}
           <div className="space-y-1.5">
-            <Label className="text-sm font-medium">Truck</Label>
+            <Label className="text-sm font-medium">{t("sales.truck-label")}</Label>
             {truckLocked ? (
               <div className="flex items-center justify-between gap-2 rounded-xl border border-border bg-muted/30 px-3.5 py-2.5">
                 <div className="flex items-center gap-2">
                   <Badge>{myTruckName}</Badge>
-                  <span className="text-xs text-muted-foreground">Truck anda</span>
+                  <span className="text-xs text-muted-foreground">{t("sales.your-truck")}</span>
                 </div>
                 <Button type="button" variant="ghost" size="sm" onClick={() => setOverrideTruck(true)}>
-                  Tukar
+                  {t("sales.change")}
                 </Button>
               </div>
             ) : (
@@ -241,7 +243,7 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
                 value={form.truck_id}
                 onValueChange={(v) => setForm((f) => ({ ...f, truck_id: v, customer_id: "" }))}
               >
-                <SelectTrigger><SelectValue placeholder="Select truck" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder={t("sales.truck-select")} /></SelectTrigger>
                 <SelectContent>
                   {trucks.map((t) => (<SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>))}
                 </SelectContent>
@@ -251,17 +253,17 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
 
           {/* Customer — search + tap, filtered to the active truck */}
           <div className="space-y-1.5">
-            <Label className="text-sm font-medium">Customer</Label>
+            <Label className="text-sm font-medium">{t("sales.customer-label")}</Label>
             {selectedCustomer ? (
               <div className="flex items-center justify-between gap-2 rounded-xl border border-primary/30 bg-primary/5 px-3.5 py-2.5">
                 <div>
                   <p className="text-sm font-semibold">{selectedCustomer.name}</p>
                   {selectedCustomer.debt_balance > 0 && (
-                    <p className="text-xs text-destructive font-medium">Debt: {formatCurrency(selectedCustomer.debt_balance)}</p>
+                    <p className="text-xs text-destructive font-medium">{t("sales.debt-label")} {formatCurrency(selectedCustomer.debt_balance)}</p>
                   )}
                 </div>
                 <Button type="button" variant="ghost" size="sm" onClick={() => setForm((f) => ({ ...f, customer_id: "" }))}>
-                  Tukar
+                  {t("sales.change")}
                 </Button>
               </div>
             ) : (
@@ -270,14 +272,14 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     className="pl-10"
-                    placeholder="Cari nama pelanggan..."
+                    placeholder={t("sales.customer-search")}
                     value={customerSearch}
                     onChange={(e) => setCustomerSearch(e.target.value)}
                   />
                 </div>
                 <div className="max-h-44 overflow-y-auto rounded-xl border border-border divide-y divide-border">
                   {filteredCustomers.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-4">No customers found</p>
+                    <p className="text-sm text-muted-foreground text-center py-4">{t("sales.no-customers")}</p>
                   ) : (
                     filteredCustomers.map((c) => (
                       <button
@@ -300,7 +302,7 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
 
           {/* Product — tap to select */}
           <div className="space-y-1.5">
-            <Label className="text-sm font-medium">Jenis Produk</Label>
+            <Label className="text-sm font-medium">{t("sales.product-type")}</Label>
             <div className="grid grid-cols-3 gap-2">
               {PRODUCT_TYPES.map((p) => (
                 <button
@@ -323,14 +325,14 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
           {/* Quantity + Price */}
           <div className="grid grid-cols-2 gap-2">
             <QuantityInput
-              label="Quantity (pax)"
+              label={t("sales.qty-label")}
               value={form.quantity || ""}
               onChange={(e) => setForm({ ...form, quantity: parseInt(e.target.value) || 0 })}
               min={1}
             />
 
             <CurrencyInput
-              label="Selling Price"
+              label={t("sales.price-label")}
               currency="RM"
               value={form.selling_price || ""}
               onChange={(e) => setForm({ ...form, selling_price: parseFloat(e.target.value) || 0 })}
@@ -341,21 +343,21 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
             <div className="bg-accent/30 p-2.5 rounded-lg">
               <div className="flex items-center justify-between gap-2 text-sm">
                 <span className={suggested.isCustomerSpecific ? "text-amber-600 font-medium" : "text-muted-foreground"}>
-                  {suggested.isCustomerSpecific ? "Harga khusus" : "Harga biasa"}: {formatCurrency(suggested.perPax)}/pax
+                  {suggested.isCustomerSpecific ? t("sales.price-type").split(" / ")[0] : t("sales.price-type").split(" / ")[1]}: {formatCurrency(suggested.perPax)}{t("sales.price-unit")}
                 </span>
                 {form.selling_price !== suggested.total && (
                   <button type="button" onClick={applysuggested} className="inline-flex items-center gap-1 text-primary text-xs hover:underline font-medium">
-                    <RotateCcw className="h-3 w-3" /> Guna
+                    <RotateCcw className="h-3 w-3" /> {t("sales.use")}
                   </button>
                 )}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">Total: {formatCurrency(suggested.total)}</p>
+              <p className="text-xs text-muted-foreground mt-1">{t("sales.total")} {formatCurrency(suggested.total)}</p>
             </div>
           )}
 
           {/* Payment type — segmented toggle */}
           <div className="space-y-1.5">
-            <Label className="text-sm font-medium">Payment Type</Label>
+            <Label className="text-sm font-medium">{t("sales.payment-type")}</Label>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
@@ -367,7 +369,7 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
                     : "border-border bg-muted/30 hover:bg-accent/60"
                 )}
               >
-                Cash
+                {t("sales.cash")}
               </button>
               <button
                 type="button"
@@ -379,7 +381,7 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
                     : "border-border bg-muted/30 hover:bg-accent/60"
                 )}
               >
-                Debt
+                {t("sales.debt")}
               </button>
             </div>
           </div>
@@ -387,7 +389,7 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
           {/* Secondary fields — rarely changed from their defaults */}
           <div className="grid grid-cols-2 gap-2 pt-1">
             <div>
-              <Label htmlFor="sale_date" className="text-xs font-medium text-muted-foreground">Date</Label>
+              <Label htmlFor="sale_date" className="text-xs font-medium text-muted-foreground">{t("sales.date-label")}</Label>
               <Input
                 id="sale_date"
                 type="date"
@@ -397,12 +399,12 @@ export const SalesEntryForm = ({ userRole }: SalesEntryFormProps) => {
               />
             </div>
             <div>
-              <Label htmlFor="notes" className="text-xs font-medium text-muted-foreground">Notes</Label>
+              <Label htmlFor="notes" className="text-xs font-medium text-muted-foreground">{t("sales.notes-label")}</Label>
               <Input
                 id="notes"
                 value={form.notes}
                 onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                placeholder="Optional"
+                placeholder={t("common.optional")}
                 className="h-10 text-sm"
               />
             </div>

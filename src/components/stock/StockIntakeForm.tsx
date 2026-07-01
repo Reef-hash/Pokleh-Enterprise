@@ -14,6 +14,7 @@ import { useStockIntake } from "@/hooks/useStockIntake";
 import { usePoklehSuppliers } from "@/hooks/usePoklehSuppliers";
 import { useTrucks } from "@/hooks/useTrucks";
 import { formatCurrency } from "@/lib/currency";
+import { useLanguage } from "@/lib/i18n";
 import { toast } from "sonner";
 import { PRODUCT_TYPES, type ProductType } from "@/types/pokleh";
 
@@ -30,6 +31,7 @@ const emptyLines = (): LineState =>
   }, {} as LineState);
 
 export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
+  const { t } = useLanguage();
   const { intakes, loading, addIntake } = useStockIntake();
   const { suppliers } = usePoklehSuppliers();
   const { trucks } = useTrucks();
@@ -63,7 +65,7 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
     })).filter((l) => l.quantity_received > 0 && l.cost_per_pax > 0);
 
     if (!supplierId || !truckId || activeLines.length === 0 || submitting) {
-      toast.error("Please select a supplier, a truck, and enter quantity and cost for at least one product.");
+      toast.error(t('intake.error-required'));
       return;
     }
     setSubmitting(true);
@@ -89,33 +91,33 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Stock Intake"
-        subtitle="Record incoming stock from suppliers"
+        title={t('intake.title')}
+        subtitle={t('intake.subtitle')}
       >
         {userRole === "admin" && (
           <Button onClick={() => setIsOpen(true)}>
             <Plus className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Record Intake</span>
+            <span className="hidden sm:inline">{t('intake.record')}</span>
           </Button>
         )}
       </PageHeader>
 
       <Card>
         <CardHeader>
-          <CardTitle>Intake History ({intakes.length})</CardTitle>
-          <CardDescription>Total cost: {formatCurrency(totalCost)}</CardDescription>
+          <CardTitle>{t('intake.history').replace('{count}', intakes.length.toString())}</CardTitle>
+          <CardDescription>{t('intake.total-cost')} {formatCurrency(totalCost)}</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Truck</TableHead>
-                <TableHead>Supplier</TableHead>
-                <TableHead>Product</TableHead>
-                <TableHead>Quantity (pax)</TableHead>
-                <TableHead>Cost/Pax</TableHead>
-                <TableHead>Total Cost</TableHead>
+                <TableHead>{t('common.date')}</TableHead>
+                <TableHead>{t('common.truck')}</TableHead>
+                <TableHead>{t('common.supplier')}</TableHead>
+                <TableHead>{t('common.product')}</TableHead>
+                <TableHead>{t('intake.qty-label')}</TableHead>
+                <TableHead>{t('intake.cost-label')}</TableHead>
+                <TableHead>{t('common.amount')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -133,7 +135,7 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
               {intakes.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                    No stock intake recorded yet
+                    {t('intake.no-intake')}
                   </TableCell>
                 </TableRow>
               )}
@@ -145,9 +147,9 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
       <FormModal
         open={isOpen}
         onOpenChange={setIsOpen}
-        title="Record Stock Intake"
-        description="Enter quantity and cost for each product type"
-        submitLabel="Save Intake"
+        title={t('intake.modal-title')}
+        description={t('intake.modal-desc')}
+        submitLabel={t('intake.modal-button')}
         submitDisabled={!supplierId || !truckId}
         isSubmitting={submitting}
         onSubmit={handleAdd}
@@ -155,7 +157,7 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
       >
         <div className="space-y-3">
           <div>
-            <Label htmlFor="intake_date" className="text-sm font-medium">Date</Label>
+            <Label htmlFor="intake_date" className="text-sm font-medium">{t('intake.date-label')}</Label>
             <Input
               id="intake_date"
               type="date"
@@ -165,9 +167,9 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
           </div>
 
           <div>
-            <Label htmlFor="truck" className="text-sm font-medium">Truck</Label>
+            <Label htmlFor="truck" className="text-sm font-medium">{t('intake.truck-label')}</Label>
             <Select value={truckId} onValueChange={setTruckId}>
-              <SelectTrigger id="truck"><SelectValue placeholder="Select truck" /></SelectTrigger>
+              <SelectTrigger id="truck"><SelectValue placeholder={t('intake.truck-select')} /></SelectTrigger>
               <SelectContent>
                 {trucks.map((t) => (<SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>))}
               </SelectContent>
@@ -175,9 +177,9 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
           </div>
 
           <div>
-            <Label htmlFor="supplier" className="text-sm font-medium">Supplier</Label>
+            <Label htmlFor="supplier" className="text-sm font-medium">{t('intake.supplier-label')}</Label>
             <Select value={supplierId} onValueChange={setSupplierId}>
-              <SelectTrigger id="supplier"><SelectValue placeholder="Select supplier" /></SelectTrigger>
+              <SelectTrigger id="supplier"><SelectValue placeholder={t('intake.supplier-select')} /></SelectTrigger>
               <SelectContent>
                 {suppliers.map((s) => (<SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>))}
               </SelectContent>
@@ -187,10 +189,10 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
           <div className="space-y-2 pt-1">
             <div className="flex items-center gap-2 text-sm font-medium">
               <Package className="h-4 w-4" />
-              Products
+              {t('intake.products-label')}
             </div>
             <p className="text-xs text-muted-foreground">
-              Enter quantity (pax) and cost per pax for each product. Leave blank to skip.
+              {t('intake.products-hint')}
             </p>
             <div className="space-y-3">
               {PRODUCT_TYPES.map((p) => (
@@ -198,13 +200,13 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
                   <p className="text-sm font-semibold">{p}</p>
                   <div className="grid grid-cols-2 gap-2">
                     <NumberInput
-                      label="Qty (pax)"
+                      label={t('intake.qty-label')}
                       min={0}
                       value={lines[p].quantity_received}
                       onChange={(e) => updateLine(p, "quantity_received", e.target.value)}
                     />
                     <CurrencyInput
-                      label="Cost/Pax (RM)"
+                      label={t('intake.cost-label')}
                       currency="RM"
                       value={lines[p].cost_per_pax}
                       onChange={(e) => updateLine(p, "cost_per_pax", e.target.value)}
@@ -216,12 +218,12 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
           </div>
 
           <div>
-            <Label htmlFor="notes" className="text-sm font-medium">Notes (Optional)</Label>
+            <Label htmlFor="notes" className="text-sm font-medium">{t('intake.notes-label')}</Label>
             <Input
               id="notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Add any notes..."
+              placeholder={t('intake.notes-placeholder')}
             />
           </div>
         </div>

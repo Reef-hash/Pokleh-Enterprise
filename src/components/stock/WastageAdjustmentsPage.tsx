@@ -9,6 +9,7 @@ import { WastageAdjustmentForm } from "./WastageAdjustmentForm";
 import { useStockWastage } from "@/hooks/useStockWastage";
 import { useStockIntake } from "@/hooks/useStockIntake";
 import { useTrucks } from "@/hooks/useTrucks";
+import { useLanguage } from "@/lib/i18n";
 import { formatCurrency } from "@/lib/currency";
 
 interface WastageAdjustmentsPageProps {
@@ -16,6 +17,7 @@ interface WastageAdjustmentsPageProps {
 }
 
 export const WastageAdjustmentsPage = ({ userRole }: WastageAdjustmentsPageProps) => {
+  const { t } = useLanguage();
   const { intakes, loading: intakesLoading } = useStockIntake();
   const { trucks, loading: trucksLoading } = useTrucks();
   const { adjustments, addAdjustment, loading } = useStockWastage();
@@ -36,8 +38,8 @@ export const WastageAdjustmentsPage = ({ userRole }: WastageAdjustmentsPageProps
   if (userRole !== "admin") {
     return (
       <div className="text-center py-12">
-        <h3 className="text-lg font-semibold mb-2">Access Denied</h3>
-        <p className="text-muted-foreground">Only administrators can manage wastage adjustments.</p>
+        <h3 className="text-lg font-semibold mb-2">{t('common.error')}</h3>
+        <p className="text-muted-foreground">{t('empty.no-logs')}</p>
       </div>
     );
   }
@@ -47,7 +49,7 @@ export const WastageAdjustmentsPage = ({ userRole }: WastageAdjustmentsPageProps
       <div>
         <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Wastage Adjustments</h2>
         <p className="text-muted-foreground">
-          Record supplier negotiations — when they agree to reduce wastage charges
+          {t('stock.wastage-subtitle')}
         </p>
       </div>
 
@@ -68,7 +70,7 @@ export const WastageAdjustmentsPage = ({ userRole }: WastageAdjustmentsPageProps
                 <p className="text-2xl font-bold">{adjustments.length}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Units Reduced</p>
+                <p className="text-sm text-muted-foreground">{t('supplier.table-reduction')} ({t('common.pax')})</p>
                 <p className="text-2xl font-bold text-green-600">{totalReduction}</p>
               </div>
               <div>
@@ -88,7 +90,7 @@ export const WastageAdjustmentsPage = ({ userRole }: WastageAdjustmentsPageProps
               <HandshakeIcon className="h-5 w-5 text-blue-500" />
               Adjustment History
             </CardTitle>
-            <CardDescription>Recent supplier negotiations</CardDescription>
+            <CardDescription>Recent supplier agreements</CardDescription>
           </CardHeader>
           <CardContent>
             {/* Desktop Table */}
@@ -96,12 +98,12 @@ export const WastageAdjustmentsPage = ({ userRole }: WastageAdjustmentsPageProps
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Supplier</TableHead>
-                    <TableHead>Truck</TableHead>
+                    <TableHead>{t('common.date')}</TableHead>
+                    <TableHead>{t('supplier.supplier')}</TableHead>
+                    <TableHead>{t('common.truck')}</TableHead>
                     <TableHead className="text-right">Wasted</TableHead>
-                    <TableHead className="text-right">Reduction</TableHead>
-                    <TableHead className="text-right">Cost/Unit</TableHead>
+                    <TableHead className="text-right">{t('supplier.table-reduction')}</TableHead>
+                    <TableHead className="text-right">{t('supplier.cost-per-pax')}</TableHead>
                     <TableHead className="text-right">Savings</TableHead>
                     <TableHead>Reason</TableHead>
                   </TableRow>
@@ -148,20 +150,20 @@ export const WastageAdjustmentsPage = ({ userRole }: WastageAdjustmentsPageProps
                 const savings = adj.reduction_quantity * (intake?.cost_per_pax || 0);
                 return (
                   <ResponsiveCard key={adj.id}>
-                    <ResponsiveRow label="Date">
+                    <ResponsiveRow label={t('common.date')}>
                       {new Date(adj.adjustment_date).toLocaleDateString()}
                     </ResponsiveRow>
-                    <ResponsiveRow label="Supplier">
+                    <ResponsiveRow label={t('supplier.supplier')}>
                       <span className="font-medium">{intake?.supplier?.name || "Unknown"}</span>
                     </ResponsiveRow>
-                    <ResponsiveRow label="Truck">{truck?.name || "Unknown"}</ResponsiveRow>
+                    <ResponsiveRow label={t('common.truck')}>{truck?.name || "Unknown"}</ResponsiveRow>
                     <ResponsiveRow label="Wasted">
                       <span className="text-orange-600">{adj.total_wasted}</span>
                     </ResponsiveRow>
-                    <ResponsiveRow label="Reduction">
+                    <ResponsiveRow label={t('supplier.table-reduction')}>
                       <span className="font-bold text-green-600">-{adj.reduction_quantity}</span>
                     </ResponsiveRow>
-                    <ResponsiveRow label="Cost/Unit">
+                    <ResponsiveRow label={t('supplier.cost-per-pax')}>
                       {formatCurrency(intake?.cost_per_pax || 0)}
                     </ResponsiveRow>
                     <ResponsiveRow label="Savings">
@@ -180,7 +182,7 @@ export const WastageAdjustmentsPage = ({ userRole }: WastageAdjustmentsPageProps
         <Card>
           <CardContent className="text-center py-12">
             <HandshakeIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-            <p className="text-muted-foreground">No adjustments recorded yet</p>
+            <p className="text-muted-foreground">{t('empty.no-collections')}</p>
           </CardContent>
         </Card>
       )}

@@ -11,6 +11,7 @@ import { formatCurrency } from "@/lib/currency";
 import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
 import { generateDetailedBillPDF } from "@/lib/pdf-utils";
 import { toast } from "sonner";
+import { useLanguage } from "@/lib/i18n";
 import type { DailyBillSummary } from "@/hooks/useDailyBill";
 
 interface DailyBillViewProps {
@@ -19,6 +20,7 @@ interface DailyBillViewProps {
 }
 
 export const DailyBillView = ({ dailyBills, isLoading }: DailyBillViewProps) => {
+  const { t } = useLanguage();
   const [filterDate, setFilterDate] = useState("");
   const [filterTruck, setFilterTruck] = useState("all");
   const [generatingPDF, setGeneratingPDF] = useState(false);
@@ -44,9 +46,9 @@ export const DailyBillView = ({ dailyBills, isLoading }: DailyBillViewProps) => 
     try {
       setGeneratingPDF(true);
       generateDetailedBillPDF(filtered, "POKLEH ENTERPRISE");
-      toast.success("PDF downloaded successfully!");
+      toast.success(t('common.success'));
     } catch (error) {
-      toast.error("Failed to generate PDF");
+      toast.error(t('common.error'));
       console.error(error);
     } finally {
       setGeneratingPDF(false);
@@ -54,16 +56,16 @@ export const DailyBillView = ({ dailyBills, isLoading }: DailyBillViewProps) => 
   };
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading daily bills...</div>;
+    return <div className="text-center py-8">{t('common.loading')}</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Daily Bills</h2>
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight">{t('stock.daily-bills-title')}</h2>
           <p className="text-muted-foreground">
-            Track daily wastage and payable amounts to suppliers
+            {t('stock.daily-bills-subtitle')}
           </p>
         </div>
         {filtered.length > 0 && (
@@ -74,7 +76,7 @@ export const DailyBillView = ({ dailyBills, isLoading }: DailyBillViewProps) => 
             className="gap-2"
           >
             <Download className="h-4 w-4" />
-            {generatingPDF ? "Generating..." : "Export PDF"}
+            {generatingPDF ? t('common.loading') : t('stock.export-pdf')}
           </Button>
         )}
       </div>
@@ -87,7 +89,7 @@ export const DailyBillView = ({ dailyBills, isLoading }: DailyBillViewProps) => 
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="filter-date">Date</Label>
+              <Label htmlFor="filter-date">{t('common.date')}</Label>
               <Input
                 id="filter-date"
                 type="date"
@@ -96,13 +98,13 @@ export const DailyBillView = ({ dailyBills, isLoading }: DailyBillViewProps) => 
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="filter-truck">Truck</Label>
+              <Label htmlFor="filter-truck">{t('common.truck')}</Label>
               <Select value={filterTruck} onValueChange={setFilterTruck}>
                 <SelectTrigger id="filter-truck">
-                  <SelectValue placeholder="All trucks" />
+                  <SelectValue placeholder={t('customer.all-trucks')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All trucks</SelectItem>
+                  <SelectItem value="all">{t('customer.all-trucks')}</SelectItem>
                   {trucks.map((t) => (
                     <SelectItem key={t.id} value={t.id}>
                       {t.name}
@@ -125,17 +127,17 @@ export const DailyBillView = ({ dailyBills, isLoading }: DailyBillViewProps) => 
                 <p className="text-2xl font-bold">{filtered.length}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Units Sold</p>
+                <p className="text-sm text-muted-foreground">{t('sales.total-sold')}</p>
                 <p className="text-2xl font-bold">{filtered.reduce((s, b) => s + b.totalSold, 0)}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Wasted</p>
+                <p className="text-sm text-muted-foreground">{t('stock.reason-damaged')}</p>
                 <p className="text-2xl font-bold text-orange-600">
                   {filtered.reduce((s, b) => s + b.totalWasted, 0)}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Payable</p>
+                <p className="text-sm text-muted-foreground">{t('supplier.table-payable')}</p>
                 <p className="text-2xl font-bold text-green-600">{formatCurrency(totalAmount)}</p>
               </div>
             </div>
@@ -153,7 +155,7 @@ export const DailyBillView = ({ dailyBills, isLoading }: DailyBillViewProps) => 
         </CardHeader>
         <CardContent>
           {filtered.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">No bills found</p>
+            <p className="text-center text-muted-foreground py-8">{t('empty.no-collections')}</p>
           ) : (
             <>
               {/* Desktop Table */}
@@ -161,15 +163,15 @@ export const DailyBillView = ({ dailyBills, isLoading }: DailyBillViewProps) => 
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Truck</TableHead>
-                      <TableHead>Product</TableHead>
-                      <TableHead className="text-right">Sold</TableHead>
-                      <TableHead className="text-right">Wasted</TableHead>
-                      <TableHead className="text-right">Reduction</TableHead>
-                      <TableHead className="text-right">Payable Qty</TableHead>
-                      <TableHead className="text-right">Cost/Pax</TableHead>
-                      <TableHead className="text-right">Amount (RM)</TableHead>
+                      <TableHead>{t('common.date')}</TableHead>
+                      <TableHead>{t('common.truck')}</TableHead>
+                      <TableHead>{t('common.product')}</TableHead>
+                      <TableHead className="text-right">{t('closing.sold')}</TableHead>
+                      <TableHead className="text-right">{t('stock.reason-damaged')}</TableHead>
+                      <TableHead className="text-right">{t('supplier.table-reduction')}</TableHead>
+                      <TableHead className="text-right">{t('supplier.table-payable-qty')}</TableHead>
+                      <TableHead className="text-right">{t('supplier.cost-per-pax')}</TableHead>
+                      <TableHead className="text-right">{t('common.amount')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -223,7 +225,7 @@ export const DailyBillView = ({ dailyBills, isLoading }: DailyBillViewProps) => 
                       </TableRow>
                     ))}
                     <TableRow className="bg-muted/50 font-bold">
-                      <TableCell colSpan={3}>TOTAL</TableCell>
+                      <TableCell colSpan={3}>TOTAL ({t('common.pax')})</TableCell>
                       <TableCell className="text-right">{filtered.reduce((s, b) => s + b.totalSold, 0)}</TableCell>
                       <TableCell className="text-right text-orange-600">
                         {filtered.reduce((s, b) => s + b.totalWasted, 0)}
@@ -243,27 +245,27 @@ export const DailyBillView = ({ dailyBills, isLoading }: DailyBillViewProps) => 
               <div className="block md:hidden space-y-3">
                 {filtered.map((bill) => (
                   <ResponsiveCard key={bill.date + bill.truckId}>
-                    <ResponsiveRow label="Date">{new Date(bill.date).toLocaleDateString()}</ResponsiveRow>
-                    <ResponsiveRow label="Truck">
+                    <ResponsiveRow label={t('common.date')}>{new Date(bill.date).toLocaleDateString()}</ResponsiveRow>
+                    <ResponsiveRow label={t('common.truck')}>
                       <span className="font-medium">{bill.truckName}</span>
                     </ResponsiveRow>
                     {bill.lines.map((line, idx) => (
                       <div key={idx} className="space-y-2 py-2 border-t">
-                        <ResponsiveRow label="Product">{line.productType}</ResponsiveRow>
-                        <ResponsiveRow label="Sold">{line.quantitySold}</ResponsiveRow>
-                        <ResponsiveRow label="Wasted">
+                        <ResponsiveRow label={t('common.product')}>{line.productType}</ResponsiveRow>
+                        <ResponsiveRow label={t('closing.sold')}>{line.quantitySold}</ResponsiveRow>
+                        <ResponsiveRow label={t('stock.reason-damaged')}>
                           <span className="text-orange-600 font-medium">{line.quantityWasted}</span>
                         </ResponsiveRow>
                         {line.wastageReduction > 0 && (
-                          <ResponsiveRow label="Reduction">
+                          <ResponsiveRow label={t('supplier.table-reduction')}>
                             <span className="text-green-600">-{line.wastageReduction}</span>
                           </ResponsiveRow>
                         )}
-                        <ResponsiveRow label="Payable Qty">
+                        <ResponsiveRow label={t('supplier.table-payable-qty')}>
                           <span className="font-bold">{line.payableQuantity}</span>
                         </ResponsiveRow>
-                        <ResponsiveRow label="Cost/Pax">{formatCurrency(line.costPerPax)}</ResponsiveRow>
-                        <ResponsiveRow label="Amount">
+                        <ResponsiveRow label={t('supplier.cost-per-pax')}>{formatCurrency(line.costPerPax)}</ResponsiveRow>
+                        <ResponsiveRow label={t('common.amount')}>
                           <span className="font-bold">{formatCurrency(line.payableAmount)}</span>
                         </ResponsiveRow>
                       </div>

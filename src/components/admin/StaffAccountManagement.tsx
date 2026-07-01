@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthStore } from "@/stores/authStore";
+import { useLanguage } from "@/lib/i18n";
 import { toast } from "sonner";
 import { Trash2, Shield, UserCog, Calendar, Mail } from "lucide-react";
 import { PageLoader } from "@/components/ui/PageLoader";
@@ -20,6 +21,7 @@ interface StaffAccount {
 }
 
 export const StaffAccountManagement = () => {
+  const { t } = useLanguage();
   const [staff, setStaff] = useState<StaffAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
@@ -55,7 +57,7 @@ export const StaffAccountManagement = () => {
     setStaff((prev) => prev.filter((s) => s.user_id !== deleteConfirmId));
     setDeleteConfirmId(null);
     setSubmitting(false);
-    toast.success("User account deleted");
+    toast.success(t('staff.success-delete'));
   };
 
   if (loading) return <PageLoader />;
@@ -66,24 +68,24 @@ export const StaffAccountManagement = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Staff Accounts</h2>
-        <p className="text-muted-foreground">Manage all user accounts in the system</p>
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight">{t('staff.title')}</h2>
+        <p className="text-muted-foreground">{t('staff.subtitle')}</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Administrators ({admins.length})</CardTitle>
-          <CardDescription>Users with full system access</CardDescription>
+          <CardTitle>{t('staff.administrators').replace('{count}', admins.length.toString())}</CardTitle>
+          <CardDescription>{t('staff.admin-desc')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="hidden md:block overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Created</TableHead>
+                  <TableHead>{t('common.name')}</TableHead>
+                  <TableHead>{t('common.email')}</TableHead>
+                  <TableHead>{t('common.role')}</TableHead>
+                  <TableHead>{t('common.created')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -91,12 +93,12 @@ export const StaffAccountManagement = () => {
                   <TableRow key={a.id}>
                     <TableCell className="font-medium flex items-center gap-2"><Shield className="h-4 w-4 text-primary" />{a.name}</TableCell>
                     <TableCell>{a.email}</TableCell>
-                    <TableCell><span className="text-primary font-medium">Admin</span></TableCell>
+                    <TableCell><span className="text-primary font-medium">{t('common.admin')}</span></TableCell>
                     <TableCell className="text-muted-foreground">{new Date(a.created_at).toLocaleDateString()}</TableCell>
                   </TableRow>
                 ))}
                 {admins.length === 0 && (
-                  <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">No administrators found.</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">{t('empty.no-administrators')}</TableCell></TableRow>
                 )}
               </TableBody>
             </Table>
@@ -105,31 +107,31 @@ export const StaffAccountManagement = () => {
             {admins.map((a) => (
               <ResponsiveCard key={a.id}>
                 <div className="flex items-center gap-2 mb-2"><Shield className="h-4 w-4 text-primary" /><span className="font-medium">{a.name}</span></div>
-                <ResponsiveRow label="Email">{a.email}</ResponsiveRow>
-                <ResponsiveRow label="Role"><span className="text-primary font-medium">Admin</span></ResponsiveRow>
-                <ResponsiveRow label="Created">{new Date(a.created_at).toLocaleDateString()}</ResponsiveRow>
+                <ResponsiveRow label={t('common.email')}>{a.email}</ResponsiveRow>
+                <ResponsiveRow label={t('common.role')}><span className="text-primary font-medium">{t('common.admin')}</span></ResponsiveRow>
+                <ResponsiveRow label={t('common.created')}>{new Date(a.created_at).toLocaleDateString()}</ResponsiveRow>
               </ResponsiveCard>
             ))}
-            {admins.length === 0 && <p className="text-center text-muted-foreground py-4 text-sm">No administrators found.</p>}
+            {admins.length === 0 && <p className="text-center text-muted-foreground py-4 text-sm">{t('empty.no-administrators')}</p>}
           </div>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Staff Members ({staffMembers.length})</CardTitle>
-          <CardDescription>Staff accounts with truck-restricted access</CardDescription>
+          <CardTitle>{t('staff.members').replace('{count}', staffMembers.length.toString())}</CardTitle>
+          <CardDescription>{t('staff.members-desc')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="hidden md:block overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead>{t('common.name')}</TableHead>
+                  <TableHead>{t('common.email')}</TableHead>
+                  <TableHead>{t('common.role')}</TableHead>
+                  <TableHead>{t('common.created')}</TableHead>
+                  <TableHead>{t('common.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -137,7 +139,7 @@ export const StaffAccountManagement = () => {
                   <TableRow key={s.id}>
                     <TableCell className="font-medium"><span className="flex items-center gap-2"><UserCog className="h-4 w-4 text-muted-foreground" />{s.name}</span></TableCell>
                     <TableCell><span className="flex items-center gap-1"><Mail className="h-3 w-3 text-muted-foreground" />{s.email}</span></TableCell>
-                    <TableCell>Staff</TableCell>
+                    <TableCell>{t('common.staff')}</TableCell>
                     <TableCell className="text-muted-foreground"><span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{new Date(s.created_at).toLocaleDateString()}</span></TableCell>
                     <TableCell>
                       <Button
@@ -153,7 +155,7 @@ export const StaffAccountManagement = () => {
                   </TableRow>
                 ))}
                 {staffMembers.length === 0 && (
-                  <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">No staff members yet.</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">{t('empty.no-staff')}</TableCell></TableRow>
                 )}
               </TableBody>
             </Table>
@@ -173,12 +175,12 @@ export const StaffAccountManagement = () => {
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-                <ResponsiveRow label="Email">{s.email}</ResponsiveRow>
-                <ResponsiveRow label="Role">Staff</ResponsiveRow>
-                <ResponsiveRow label="Created">{new Date(s.created_at).toLocaleDateString()}</ResponsiveRow>
+                <ResponsiveRow label={t('common.email')}>{s.email}</ResponsiveRow>
+                <ResponsiveRow label={t('common.role')}>{t('common.staff')}</ResponsiveRow>
+                <ResponsiveRow label={t('common.created')}>{new Date(s.created_at).toLocaleDateString()}</ResponsiveRow>
               </ResponsiveCard>
             ))}
-            {staffMembers.length === 0 && <p className="text-center text-muted-foreground py-4 text-sm">No staff members yet.</p>}
+            {staffMembers.length === 0 && <p className="text-center text-muted-foreground py-4 text-sm">{t('empty.no-staff')}</p>}
           </div>
         </CardContent>
       </Card>
@@ -186,15 +188,15 @@ export const StaffAccountManagement = () => {
       <AlertDialog open={!!deleteConfirmId} onOpenChange={(o) => { if (!o) setDeleteConfirmId(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete User Account</AlertDialogTitle>
+            <AlertDialogTitle>{t('staff.confirm-delete-title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete this user account, their profile, and all associated data. This action cannot be undone.
+              {t('staff.confirm-delete')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} disabled={submitting} className="bg-destructive text-destructive-foreground">
-              {submitting ? "Deleting..." : "Delete Account"}
+              {submitting ? t('staff.deleting') : t('staff.delete-account')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

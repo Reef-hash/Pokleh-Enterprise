@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { AlertCircle, Droplet } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useLanguage } from "@/lib/i18n";
 import type { Truck, ProductType } from "@/types/pokleh";
 import { PRODUCT_TYPES } from "@/types/pokleh";
 
@@ -23,6 +24,7 @@ interface RecordWastageFormProps {
 }
 
 export const RecordWastageForm = ({ trucks, onSubmit, isLoading }: RecordWastageFormProps) => {
+  const { t } = useLanguage();
   const [truckId, setTruckId] = useState("");
   const [productType, setProductType] = useState<ProductType>("Air Batu Besar");
   const [quantity, setQuantity] = useState("");
@@ -58,10 +60,10 @@ export const RecordWastageForm = ({ trucks, onSubmit, isLoading }: RecordWastage
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Droplet className="h-5 w-5 text-blue-500" />
-          Record Wastage (Sating)
+          {t('stock.record-wastage')}
         </CardTitle>
         <CardDescription>
-          Track units that melted or are damaged during the day
+          {t('stock.wastage-subtitle')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -69,16 +71,16 @@ export const RecordWastageForm = ({ trucks, onSubmit, isLoading }: RecordWastage
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Wastage will be added to bill amount. Supplier can negotiate reduction later.
+              {t('stock.wastage-subtitle')}
             </AlertDescription>
           </Alert>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="truck">Truck</Label>
+              <Label htmlFor="truck">{t('common.truck')}</Label>
               <Select value={truckId} onValueChange={setTruckId}>
                 <SelectTrigger id="truck">
-                  <SelectValue placeholder="Select truck" />
+                  <SelectValue placeholder={t('common.select-truck')} />
                 </SelectTrigger>
                 <SelectContent>
                   {trucks.map((t) => (
@@ -91,7 +93,7 @@ export const RecordWastageForm = ({ trucks, onSubmit, isLoading }: RecordWastage
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="product">Product Type</Label>
+              <Label htmlFor="product">{t('sales.product-type')}</Label>
               <Select value={productType} onValueChange={(v) => setProductType(v as ProductType)}>
                 <SelectTrigger id="product">
                   <SelectValue />
@@ -109,7 +111,7 @@ export const RecordWastageForm = ({ trucks, onSubmit, isLoading }: RecordWastage
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="quantity">Quantity Wasted (pax)</Label>
+              <Label htmlFor="quantity">{t('stock.quantity-pax')}</Label>
               <Input
                 id="quantity"
                 type="number"
@@ -122,7 +124,7 @@ export const RecordWastageForm = ({ trucks, onSubmit, isLoading }: RecordWastage
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="date">Date</Label>
+              <Label htmlFor="date">{t('common.date')}</Label>
               <Input
                 id="date"
                 type="date"
@@ -134,7 +136,7 @@ export const RecordWastageForm = ({ trucks, onSubmit, isLoading }: RecordWastage
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="notes">Notes (optional)</Label>
+            <Label htmlFor="notes">{t('common.notes')}</Label>
             <Textarea
               id="notes"
               value={notes}
@@ -145,7 +147,7 @@ export const RecordWastageForm = ({ trucks, onSubmit, isLoading }: RecordWastage
           </div>
 
           <Button type="submit" disabled={!truckId || !quantity || submitting || isLoading} className="w-full">
-            {submitting ? "Saving..." : "Record Wastage"}
+            {submitting ? t('common.loading') : t('stock.record-wastage')}
           </Button>
         </form>
       </CardContent>

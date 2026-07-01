@@ -198,7 +198,7 @@ export const StaffAssignment = ({ userRole }: StaffAssignmentProps) => {
           <AlertDialogHeader>
             <AlertDialogTitle>{t('staff.end-assignment')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('staff.end-assignment-confirm')}
+              {t('staff.end-assignment-desc')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
