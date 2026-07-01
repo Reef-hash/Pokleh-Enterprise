@@ -138,6 +138,8 @@ export const generateDetailedBillPDF = (
   yPosition += 12;
 
   // Table for each bill
+  let tableX = margin + 2; // Declare at function level for scope
+
   dailyBills.forEach((bill, billIndex) => {
     checkNewPage(15);
 
@@ -174,7 +176,7 @@ export const generateDetailedBillPDF = (
     pdf.setFontSize(8);
     pdf.setTextColor(0, 0, 0);
 
-    let tableX = margin + 2;
+    tableX = margin + 2;
     pdf.text("Product", tableX, yPosition);
     tableX += colWidths.product;
     pdf.text("Sold", tableX, yPosition);
