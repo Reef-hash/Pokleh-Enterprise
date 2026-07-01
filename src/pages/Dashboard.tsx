@@ -12,6 +12,9 @@ import { StockDistributionForm } from "@/components/stock/StockDistributionForm"
 import { StockReturnForm } from "@/components/stock/StockReturnForm";
 import { SupplierSettlementView } from "@/components/stock/SupplierSettlementView";
 import { TruckStockView } from "@/components/stock/TruckStockView";
+import { RecordWastagePage } from "@/components/stock/RecordWastagePage";
+import { DailyBillsPage } from "@/components/stock/DailyBillsPage";
+import { WastageAdjustmentsPage } from "@/components/stock/WastageAdjustmentsPage";
 import { SuppliersManagement } from "@/components/suppliers/SuppliersManagement";
 import { SalesEntryForm } from "@/components/sales/SalesEntryForm";
 import { DebtLedgerView } from "@/components/sales/DebtLedgerView";
@@ -94,6 +97,12 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
         return <StockReturnForm userRole={user.role} />;
       case 'truck-stock':
         return <TruckStockView />;
+      case 'record-wastage':
+        return <RecordWastagePage userRole={user.role} />;
+      case 'daily-bills':
+        return <DailyBillsPage userRole={user.role} />;
+      case 'wastage-adjustments':
+        return <WastageAdjustmentsPage userRole={user.role} />;
       case 'settlements':
         return <SupplierSettlementView userRole={user.role} />;
       case 'suppliers':

@@ -82,6 +82,8 @@ export const SupplierSettlementView = ({ userRole }: SupplierSettlementViewProps
                   <TableHead>Intake Date</TableHead>
                   <TableHead>Received</TableHead>
                   <TableHead>Sold</TableHead>
+                  <TableHead>Wasted</TableHead>
+                  <TableHead>Reduction</TableHead>
                   <TableHead>Returned</TableHead>
                   <TableHead>Payable Qty</TableHead>
                   <TableHead>Cost/Pax</TableHead>
@@ -99,6 +101,8 @@ export const SupplierSettlementView = ({ userRole }: SupplierSettlementViewProps
                     </TableCell>
                     <TableCell>{s.total_received}</TableCell>
                     <TableCell>{s.total_sold}</TableCell>
+                    <TableCell className="text-orange-600 font-medium">{s.total_wastage || 0}</TableCell>
+                    <TableCell className="text-green-600">{s.wastage_reduction || 0 > 0 ? `-${s.wastage_reduction || 0}` : "—"}</TableCell>
                     <TableCell>{s.total_returned}</TableCell>
                     <TableCell className="font-medium">{s.payable_quantity}</TableCell>
                     <TableCell>{formatCurrency(s.cost_per_pax)}</TableCell>
@@ -142,6 +146,14 @@ export const SupplierSettlementView = ({ userRole }: SupplierSettlementViewProps
                 </ResponsiveRow>
                 <ResponsiveRow label="Received">{s.total_received}</ResponsiveRow>
                 <ResponsiveRow label="Sold">{s.total_sold}</ResponsiveRow>
+                <ResponsiveRow label="Wasted">
+                  <span className="text-orange-600 font-medium">{s.total_wastage || 0}</span>
+                </ResponsiveRow>
+                {(s.wastage_reduction || 0) > 0 && (
+                  <ResponsiveRow label="Reduction">
+                    <span className="text-green-600">-{s.wastage_reduction || 0}</span>
+                  </ResponsiveRow>
+                )}
                 <ResponsiveRow label="Returned">{s.total_returned}</ResponsiveRow>
                 <ResponsiveRow label="Payable Qty">
                   <span className="font-medium">{s.payable_quantity}</span>

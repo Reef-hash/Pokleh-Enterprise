@@ -196,6 +196,35 @@ export interface OfflineDailyClosing {
   syncedAt?: string;
 }
 
+export interface OfflineStockWastage {
+  id: string;
+  truck_id: string;
+  product_type: string;
+  quantity_wasted: number;
+  waste_date: string;
+  intake_id?: string;
+  notes?: string;
+  created_by: string;
+  created_at: string;
+  syncedAt?: string;
+}
+
+export interface OfflineWastageAdjustment {
+  id: string;
+  intake_id: string;
+  truck_id: string;
+  product_type: string;
+  total_wasted: number;
+  reduction_quantity: number;
+  reason?: string;
+  adjustment_date: string;
+  approved_by?: string;
+  approved_at?: string;
+  created_by: string;
+  created_at: string;
+  syncedAt?: string;
+}
+
 export class PoklehDB extends Dexie {
   profiles!: Table<OfflineProfile, number>;
   customers!: Table<OfflineCustomer, string>;
@@ -211,6 +240,8 @@ export class PoklehDB extends Dexie {
   expenses!: Table<OfflineExpense, string>;
   supplierPriceHistory!: Table<OfflineSupplierPriceHistory, string>;
   dailyClosings!: Table<OfflineDailyClosing, string>;
+  stockWastages!: Table<OfflineStockWastage, string>;
+  wastageAdjustments!: Table<OfflineWastageAdjustment, string>;
   syncQueue!: Table<SyncQueueItem, number>;
   auditLogs!: Table<OfflineAuditLog, number>;
 
@@ -250,6 +281,26 @@ export class PoklehDB extends Dexie {
       expenses: "id, category, expense_date, created_at",
       supplierPriceHistory: "id, supplier_id, effective_date",
       dailyClosings: "id, closing_date, truck_id, product_type, status",
+      syncQueue: "++id, entity, entityId, createdAt",
+      auditLogs: "++id, entity, entity_id, created_at",
+    });
+    this.version(7).stores({
+      profiles: "++id, user_id, role",
+      customers: "id, name, truck_id, active",
+      trucks: "id, name",
+      suppliers: "id, name",
+      stockIntakes: "id, supplier_id, truck_id, product_type, intake_date, created_at",
+      stockDistributions: "id, intake_id, from_truck_id, to_truck_id, product_type, created_at",
+      stockReturns: "id, distribution_id, intake_id, truck_id, return_date, created_at",
+      supplierSettlements: "id, intake_id, settled_date",
+      sales: "id, customer_id, truck_id, staff_id, sale_date, payment_type, product_type",
+      debtLedger: "id, customer_id, entry_type, created_at",
+      debtCollections: "id, customer_id, staff_id, collection_date",
+      expenses: "id, category, expense_date, created_at",
+      supplierPriceHistory: "id, supplier_id, effective_date",
+      dailyClosings: "id, closing_date, truck_id, product_type, status",
+      stockWastages: "id, truck_id, waste_date, intake_id, created_at",
+      wastageAdjustments: "id, intake_id, truck_id, adjustment_date",
       syncQueue: "++id, entity, entityId, createdAt",
       auditLogs: "++id, entity, entity_id, created_at",
     });

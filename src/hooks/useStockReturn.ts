@@ -29,6 +29,7 @@ export const useStockReturn = (truckId?: string) => {
     distribution_id?: string;
     intake_id?: string;
     truck_id: string;
+    product_type: string;
     quantity_returned: number;
     return_date: string;
   }) => {
@@ -41,6 +42,7 @@ export const useStockReturn = (truckId?: string) => {
       distribution_id: data.distribution_id ?? null,
       intake_id: data.intake_id ?? null,
       truck_id: data.truck_id,
+      product_type: data.product_type,
       quantity_returned: data.quantity_returned,
       return_date: data.return_date,
       created_by: userId!,

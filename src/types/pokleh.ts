@@ -140,6 +140,7 @@ export interface StockReturn {
   distribution_id: string | null;
   intake_id: string | null;
   truck_id: string;
+  product_type: ProductType;
   quantity_returned: number;
   return_date: string;
   created_by: string;
@@ -151,12 +152,45 @@ export interface StockReturn {
   truck?: Truck;
 }
 
+export interface StockWastage {
+  id: string;
+  truck_id: string;
+  product_type: ProductType;
+  quantity_wasted: number;
+  waste_date: string;
+  intake_id: string | null;
+  notes: string | null;
+  created_by: string;
+  created_at: string;
+  truck?: Truck;
+  intake?: StockIntake;
+}
+
+export interface WastageAdjustment {
+  id: string;
+  intake_id: string;
+  truck_id: string;
+  product_type: ProductType;
+  total_wasted: number;
+  reduction_quantity: number;
+  reason: string | null;
+  adjustment_date: string;
+  approved_by: string | null;
+  approved_at: string | null;
+  created_by: string;
+  created_at: string;
+  intake?: StockIntake;
+  truck?: Truck;
+}
+
 export interface SupplierSettlement {
   id: string;
   intake_id: string;
   total_received: number;
   total_sold: number;
   total_returned: number;
+  total_wastage: number;
+  wastage_reduction: number;
   payable_quantity: number;
   cost_per_pax: number;
   payable_amount: number;

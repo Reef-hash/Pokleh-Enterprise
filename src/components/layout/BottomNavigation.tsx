@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Home, Package, DollarSign, Users, MoreVertical, ChevronRight, ClipboardList, ArrowLeftRight, RotateCcw, BookOpen, HandCoins, FileSpreadsheet, Truck, Building2, Clock, Receipt, TrendingUp, CalendarCheck, Tag, Shield } from "lucide-react";
+import { Home, Package, DollarSign, Users, MoreVertical, ChevronRight, ClipboardList, ArrowLeftRight, RotateCcw, BookOpen, HandCoins, FileSpreadsheet, Truck, Building2, Clock, Receipt, TrendingUp, CalendarCheck, Tag, Shield, Droplet, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -41,6 +41,8 @@ export const BottomNavigation = ({
         { id: "stock-intake", label: "Masukan Stok", icon: ClipboardList },
         { id: "stock-distribution", label: "Pengagihan Stok", icon: ArrowLeftRight },
         { id: "stock-return", label: "Pulangan Stok", icon: RotateCcw },
+        { id: "record-wastage", label: "Record Sating", icon: Droplet },
+        { id: "daily-bills", label: "Daily Bills", icon: Receipt },
       ],
     },
     {
@@ -62,6 +64,7 @@ export const BottomNavigation = ({
 
   const moreItems = [
     { id: "settlements", label: "Settlements", icon: FileSpreadsheet },
+    { id: "wastage-adjustments", label: "Wastage Adjustments", icon: TrendingDown },
     { id: "trucks", label: "Trucks", icon: Truck },
     { id: "suppliers", label: "Suppliers", icon: Building2 },
     { id: "staff-assignments", label: "Staff Assignments", icon: Users },

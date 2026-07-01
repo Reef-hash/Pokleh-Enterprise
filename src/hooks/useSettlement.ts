@@ -46,14 +46,6 @@ export const useSettlements = () => {
       }
 
       const totalSold = (soldData as number) || 0;
-      const { data: distData } = await supabase
-        .from("stock_distribution")
-        .select("quantity_assigned")
-        .eq("intake_id", intakeId);
-      const totalAssigned = ((distData || []) as { quantity_assigned: number }[]).reduce(
-        (sum, d) => sum + d.quantity_assigned, 0
-      );
-
       const { data: returnData } = await settlementRpc.getTotalReturned(intakeId);
       const totalReturned = (returnData as number) || 0;
       const costPerPax = (await stockIntakeRepo.fetchById(intakeId)).data as { cost_per_pax: number; quantity_received: number } | null;
@@ -63,7 +55,26 @@ export const useSettlements = () => {
         return { success: false };
       }
 
-      const payableQty = totalSold;
+      // Calculate total wastage for this intake
+      const { data: wastageData } = await supabase
+        .from("stock_wastage")
+        .select("quantity_wasted")
+        .eq("intake_id", intakeId);
+      const totalWastage = ((wastageData || []) as { quantity_wasted: number }[]).reduce(
+        (sum, w) => sum + w.quantity_wasted, 0
+      );
+
+      // Calculate wastage reduction (from adjustments)
+      const { data: adjustmentData } = await supabase
+        .from("wastage_adjustments")
+        .select("reduction_quantity")
+        .eq("intake_id", intakeId);
+      const wastageReduction = ((adjustmentData || []) as { reduction_quantity: number }[]).reduce(
+        (sum, a) => sum + a.reduction_quantity, 0
+      );
+
+      // Payable = Sold + (Wastage - Reduction)
+      const payableQty = totalSold + Math.max(0, totalWastage - wastageReduction);
       const payableAmount = payableQty * costPerPax.cost_per_pax;
 
       const { data: existing } = await settlementRepo.fetchExisting(intakeId);
@@ -76,6 +87,8 @@ export const useSettlements = () => {
             total_received: costPerPax.quantity_received,
             total_sold: totalSold,
             total_returned: totalReturned,
+            total_wastage: totalWastage,
+            wastage_reduction: wastageReduction,
             payable_quantity: payableQty,
             cost_per_pax: costPerPax.cost_per_pax,
             payable_amount: payableAmount,
@@ -94,6 +107,8 @@ export const useSettlements = () => {
           total_received: costPerPax.quantity_received,
           total_sold: totalSold,
           total_returned: totalReturned,
+          total_wastage: totalWastage,
+          wastage_reduction: wastageReduction,
           payable_quantity: payableQty,
           cost_per_pax: costPerPax.cost_per_pax,
           payable_amount: payableAmount,
