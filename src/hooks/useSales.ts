@@ -11,6 +11,7 @@ export const useSales = () => {
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
   const userId = useAuthStore((s) => s.user?.id);
+  const triggerRefresh = useSyncStore((s) => s.triggerRefresh);
 
   const fetchSales = useCallback(async () => {
     try {
@@ -60,7 +61,15 @@ export const useSales = () => {
         add: () => setSales((prev) => [optimistic, ...prev]),
         remove: () => setSales((prev) => prev.filter((s) => s.id !== tempId)),
       },
-      onSuccess: (sale: Sale) => setSales((prev) => prev.map((s) => (s.id === tempId ? sale : s))),
+      onSuccess: (sale: Sale) => {
+        setSales((prev) => prev.map((s) => (s.id === tempId ? sale : s)));
+        // Debt sales mutate customers.debt_balance via a DB trigger
+        // (sync_sale_to_debt_ledger), so re-fetch customers to reflect the
+        // updated cached balance. Cash sales need no refresh.
+        if (input.payment_type === "debt") {
+          triggerRefresh();
+        }
+      },
       dexiePut: (sale: Sale) => db.sales.put(sale as unknown as import("@/lib/db").OfflineSale),
       cacheOffline: async () => db.sales.put(optimistic as unknown as import("@/lib/db").OfflineSale),
       msg: "Sale recorded",
