@@ -48,6 +48,7 @@ export interface Supplier {
 export interface SupplierPriceHistory {
   id: string;
   supplier_id: string;
+  product_type: ProductType;
   cost_per_pax: number;
   effective_date: string;
   created_at: string;

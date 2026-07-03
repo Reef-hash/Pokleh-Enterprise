@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import { Plus, Package } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { useStockIntake } from "@/hooks/useStockIntake";
 import { usePoklehSuppliers } from "@/hooks/usePoklehSuppliers";
+import { useSupplierPriceHistory } from "@/hooks/useSupplierPriceHistory";
 import { useTrucks } from "@/hooks/useTrucks";
 import { formatCurrency } from "@/lib/currency";
 import { useLanguage } from "@/lib/i18n";
@@ -34,6 +35,7 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
   const { t } = useLanguage();
   const { intakes, loading, addIntake } = useStockIntake();
   const { suppliers } = usePoklehSuppliers();
+  const { pricesBySupplier } = useSupplierPriceHistory();
   const { trucks } = useTrucks();
   const [isOpen, setIsOpen] = useState(false);
   const [intakeDate, setIntakeDate] = useState(new Date().toISOString().split("T")[0]);
@@ -42,6 +44,25 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
   const [notes, setNotes] = useState("");
   const [lines, setLines] = useState<LineState>(emptyLines());
   const [submitting, setSubmitting] = useState(false);
+
+  // Auto-fill cost_per_pax from the supplier's price list whenever the
+  // selected supplier changes. Drivers (staff) only enter quantity; the cost
+  // is resolved from the prices the admin set on the Suppliers page.
+  useEffect(() => {
+    if (!supplierId) return;
+    const prices = pricesBySupplier.get(supplierId) ?? {};
+    setLines((prev) => {
+      const next = { ...prev };
+      for (const p of PRODUCT_TYPES) {
+        const price = prices[p];
+        // Only auto-fill when the field is empty or the user hasn't manually
+        // overridden it for this supplier yet. We overwrite on supplier change
+        // so switching suppliers refreshes the suggested cost.
+        next[p] = { ...next[p], cost_per_pax: price !== undefined ? String(price) : "" };
+      }
+      return next;
+    });
+  }, [supplierId, pricesBySupplier]);
 
   if (loading) return <PageLoader />;
 
@@ -62,10 +83,16 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
       product_type: p,
       quantity_received: parseInt(lines[p].quantity_received) || 0,
       cost_per_pax: parseFloat(lines[p].cost_per_pax) || 0,
-    })).filter((l) => l.quantity_received > 0 && l.cost_per_pax > 0);
+    })).filter((l) => l.quantity_received > 0);
 
     if (!supplierId || !truckId || activeLines.length === 0 || submitting) {
       toast.error(t('intake.error-required'));
+      return;
+    }
+    // Warn if any active line has no cost set (admin forgot to set supplier price)
+    const missingCost = activeLines.filter((l) => l.cost_per_pax <= 0);
+    if (missingCost.length > 0) {
+      toast.error("Harga cost belum ditetapkan untuk produk ini. Sila pilih supplier yang ada harga, atau admin tetapkan harga di halaman Suppliers.");
       return;
     }
     setSubmitting(true);
@@ -195,25 +222,37 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
               {t('intake.products-hint')}
             </p>
             <div className="space-y-3">
-              {PRODUCT_TYPES.map((p) => (
-                <div key={p} className="rounded-xl border border-border bg-muted/30 p-3 space-y-2.5">
-                  <p className="text-sm font-semibold">{p}</p>
-                  <div className="grid grid-cols-2 gap-2">
-                    <NumberInput
-                      label={t('intake.qty-label')}
-                      min={0}
-                      value={lines[p].quantity_received}
-                      onChange={(e) => updateLine(p, "quantity_received", e.target.value)}
-                    />
-                    <CurrencyInput
-                      label={t('intake.cost-label')}
-                      currency="RM"
-                      value={lines[p].cost_per_pax}
-                      onChange={(e) => updateLine(p, "cost_per_pax", e.target.value)}
-                    />
+              {PRODUCT_TYPES.map((p) => {
+                const costVal = parseFloat(lines[p].cost_per_pax) || 0;
+                return (
+                  <div key={p} className="rounded-xl border border-border bg-muted/30 p-3 space-y-2.5">
+                    <p className="text-sm font-semibold">{p}</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <NumberInput
+                        label={t('intake.qty-label')}
+                        min={0}
+                        value={lines[p].quantity_received}
+                        onChange={(e) => updateLine(p, "quantity_received", e.target.value)}
+                      />
+                      {userRole === "admin" ? (
+                        <CurrencyInput
+                          label={t('intake.cost-label')}
+                          currency="RM"
+                          value={lines[p].cost_per_pax}
+                          onChange={(e) => updateLine(p, "cost_per_pax", e.target.value)}
+                        />
+                      ) : (
+                        <div className="space-y-1">
+                          <Label className="text-xs text-muted-foreground">{t('intake.cost-label')}</Label>
+                          <div className="h-10 flex items-center rounded-md border border-input bg-muted px-3 text-sm font-medium">
+                            {costVal > 0 ? `${formatCurrency(costVal)}` : <span className="text-muted-foreground italic text-xs">Belum ditetapkan</span>}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 

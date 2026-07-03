@@ -10,7 +10,7 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Lock, CheckCircle2, AlertCircle } from "lucide-react";
+import { Lock, CheckCircle2 } from "lucide-react";
 import { ResponsiveCard, ResponsiveRow } from "@/components/ui/ResponsiveTable";
 import { useDailyClosings } from "@/hooks/useDailyClosings";
 import { useTrucks } from "@/hooks/useTrucks";
@@ -24,27 +24,54 @@ interface DailyClosingWorkflowProps {
 
 export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) => {
   const { t } = useLanguage();
-  const { closings, loading, closeDay, reconcileDay } = useDailyClosings();
+  const { closings, loading, closeDayAll, reconcileDayAll } = useDailyClosings();
   const { trucks } = useTrucks();
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [truckId, setTruckId] = useState("");
-  const [productType, setProductType] = useState<ProductType>("Air Batu Besar");
   const [action, setAction] = useState<"close" | "reconcile">("close");
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   if (loading) return <PageLoader />;
 
-  const selectedClosing = closings.find(
-    (c) => c.closing_date === date && c.truck_id === truckId && c.product_type === productType
+  // All closing records for the selected truck + date (one per product)
+  const selectedClosings = closings.filter(
+    (c) => c.closing_date === date && c.truck_id === truckId
   );
   const selectedTruck = trucks.find((t) => t.id === truckId);
 
+  // Per-product status lookup
+  const closingForProduct = (p: ProductType) =>
+    selectedClosings.find((c) => c.product_type === p);
+
+  // Aggregate status across all products for this truck+date
+  const allClosed = PRODUCT_TYPES.every((p) => {
+    const c = closingForProduct(p);
+    return c && (c.status === "closed" || c.status === "reconciled");
+  });
+  const allReconciled = PRODUCT_TYPES.every((p) => {
+    const c = closingForProduct(p);
+    return c && c.status === "reconciled";
+  });
+  const anyOpen = PRODUCT_TYPES.some((p) => {
+    const c = closingForProduct(p);
+    return !c || c.status === "open";
+  });
+  const canClose = anyOpen;
+  const canReconcile = allClosed && !allReconciled;
+
   const handleConfirm = async () => {
     setConfirmOpen(false);
-    if (action === "close") {
-      await closeDay(date, truckId, productType);
-    } else {
-      await reconcileDay(date, truckId, productType);
+    if (!truckId) return;
+    setSubmitting(true);
+    try {
+      if (action === "close") {
+        await closeDayAll(date, truckId);
+      } else {
+        await reconcileDayAll(date, truckId);
+      }
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -57,9 +84,6 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
     const s = map[status] || { label: status, variant: "secondary" as const };
     return <Badge variant={s.variant}>{s.label}</Badge>;
   };
-
-  const canClose = selectedClosing?.status === "open" || !selectedClosing;
-  const canReconcile = selectedClosing?.status === "closed";
 
   return (
     <div className="space-y-6">
@@ -74,7 +98,7 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
           <CardDescription>{t('closing.close-reconcile-desc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label>{t('closing.date-label')}</Label>
               <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
@@ -88,58 +112,83 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label>{t('closing.product-label')}</Label>
-              <Select value={productType} onValueChange={(v) => setProductType(v as ProductType)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {PRODUCT_TYPES.map((p) => (<SelectItem key={p} value={p}>{p}</SelectItem>))}
-                </SelectContent>
-              </Select>
-            </div>
           </div>
 
           {truckId && (
-            <div className="rounded-lg border p-4 space-y-2">
+            <div className="rounded-lg border p-4 space-y-3">
               <div className="flex justify-between items-center">
-                <span className="font-medium">{selectedTruck?.name} — {productType} — {new Date(date).toLocaleDateString()}</span>
-                {selectedClosing ? statusBadge(selectedClosing.status) : <Badge variant="secondary">{t('closing.status-open')} ({t('closing.no-record')})</Badge>}
+                <span className="font-medium">
+                  {selectedTruck?.name} — {new Date(date).toLocaleDateString()}
+                </span>
+                {allReconciled ? (
+                  <Badge variant="outline">{t('closing.status-reconciled')} (semua)</Badge>
+                ) : allClosed ? (
+                  <Badge variant="default">{t('closing.status-closed')} (semua)</Badge>
+                ) : (
+                  <Badge variant="secondary">{t('closing.status-open')} ({selectedClosings.length}/{PRODUCT_TYPES.length} ditutup)</Badge>
+                )}
               </div>
-              {selectedClosing && selectedClosing.status !== "open" && (
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <span>{t('closing.intake')}: {selectedClosing.total_intake}</span>
-                  <span>{t('closing.transfer-in')}: {selectedClosing.total_transfer_in}</span>
-                  <span>{t('closing.sold')}: {selectedClosing.total_sold}</span>
-                  <span>{t('closing.transfer-out')}: {selectedClosing.total_transfer_out}</span>
-                  <span>{t('closing.returned')}: {selectedClosing.total_returned}</span>
-                  <span>{t('closing.carry-forward')}: {selectedClosing.closing_balance}</span>
-                  <span>{t('closing.cash')}: {formatCurrency(selectedClosing.cash_sales)}</span>
-                  <span>{t('closing.debt')}: {formatCurrency(selectedClosing.debt_sales)}</span>
-                  <span>{t('closing.collections')}: {formatCurrency(selectedClosing.debt_collections)}</span>
-                  <span>{t('closing.expenses')}: {formatCurrency(selectedClosing.expenses_total)}</span>
-                  <span>{t('closing.profit')}: {formatCurrency(selectedClosing.profit_estimate)}</span>
+
+              {/* Per-product status breakdown */}
+              <div className="space-y-2">
+                {PRODUCT_TYPES.map((p) => {
+                  const c = closingForProduct(p);
+                  return (
+                    <div key={p} className="flex justify-between items-center text-sm border-b pb-2 last:border-0">
+                      <span className="font-medium">{p}</span>
+                      <div className="flex items-center gap-3">
+                        {c ? (
+                          <>
+                            <span className="text-muted-foreground">
+                              {t('closing.sold')}: {c.total_sold} · {t('closing.balance')}: {c.closing_balance}
+                            </span>
+                            {statusBadge(c.status)}
+                          </>
+                        ) : (
+                          <Badge variant="secondary">{t('closing.status-open')} ({t('closing.no-record')})</Badge>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Aggregated financials across all products */}
+              {selectedClosings.length > 0 && (
+                <div className="grid grid-cols-2 gap-2 text-sm pt-2">
+                  <span>{t('closing.intake')}: {selectedClosings.reduce((s, c) => s + (c.total_intake || 0), 0)}</span>
+                  <span>{t('closing.sold')}: {selectedClosings.reduce((s, c) => s + (c.total_sold || 0), 0)}</span>
+                  <span>{t('closing.carry-forward')}: {selectedClosings.reduce((s, c) => s + (c.closing_balance || 0), 0)}</span>
+                  <span>{t('closing.cash')}: {formatCurrency(selectedClosings.reduce((s, c) => s + (c.cash_sales || 0), 0))}</span>
+                  <span>{t('closing.debt')}: {formatCurrency(selectedClosings.reduce((s, c) => s + (c.debt_sales || 0), 0))}</span>
+                  <span>{t('closing.collections')}: {formatCurrency(selectedClosings.reduce((s, c) => s + (c.debt_collections || 0), 0))}</span>
+                  <span>{t('closing.expenses')}: {formatCurrency(selectedClosings.reduce((s, c) => s + (c.expenses_total || 0), 0))}</span>
+                  <span className={selectedClosings.reduce((s, c) => s + (c.profit_estimate || 0), 0) >= 0 ? "text-green-600 font-medium" : "text-destructive font-medium"}>
+                    {t('closing.profit')}: {formatCurrency(selectedClosings.reduce((s, c) => s + (c.profit_estimate || 0), 0))}
+                  </span>
                 </div>
               )}
+
               <div className="flex gap-2 mt-2">
                 <Button
-                  disabled={!canClose}
+                  disabled={!canClose || submitting}
                   onClick={() => { setAction("close"); setConfirmOpen(true); }}
                 >
-                  <Lock className="mr-2 h-4 w-4" /> {t('closing.close-day')}
+                  <Lock className="mr-2 h-4 w-4" /> {t('closing.close-day')} (semua produk)
                 </Button>
                 {userRole === "admin" && (
                   <Button
                     variant="outline"
-                    disabled={!canReconcile}
+                    disabled={!canReconcile || submitting}
                     onClick={() => { setAction("reconcile"); setConfirmOpen(true); }}
                   >
-                    <CheckCircle2 className="mr-2 h-4 w-4" /> {t('closing.reconcile')}
+                    <CheckCircle2 className="mr-2 h-4 w-4" /> {t('closing.reconcile')} (semua produk)
                   </Button>
                 )}
               </div>
-              {!canClose && action === "close" && selectedClosing && selectedClosing.status !== "open" && (
+              {!canClose && !canReconcile && allReconciled && (
                 <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                  <AlertCircle className="h-3 w-3" /> {t('closing.already-status')} {selectedClosing.status}
+                  <CheckCircle2 className="h-3 w-3" /> Semua produk sudah direconcile untuk tarikh ini.
                 </p>
               )}
             </div>
@@ -241,7 +290,7 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
           <div className="py-2">
             <p><strong>{t('common.date')}:</strong> {new Date(date).toLocaleDateString()}</p>
             <p><strong>{t('common.truck')}:</strong> {selectedTruck?.name}</p>
-            <p><strong>{t('closing.product')}:</strong> {productType}</p>
+            <p><strong>{t('closing.product')}:</strong> semua ({PRODUCT_TYPES.length} produk)</p>
             {action === "close" && (
               <p className="text-sm text-muted-foreground mt-2">
                 {t('closing.validation-note')}
@@ -249,9 +298,9 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
             )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmOpen(false)}>{t('common.cancel')}</Button>
-            <Button onClick={handleConfirm}>
-              {action === "close" ? t('closing.close-day') : t('closing.reconcile')}
+            <Button variant="outline" onClick={() => setConfirmOpen(false)} disabled={submitting}>{t('common.cancel')}</Button>
+            <Button onClick={handleConfirm} disabled={submitting}>
+              {submitting ? "..." : (action === "close" ? t('closing.close-day') : t('closing.reconcile'))}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -164,6 +164,7 @@ export interface OfflineExpense {
 export interface OfflineSupplierPriceHistory {
   id: string;
   supplier_id: string;
+  product_type: string;
   cost_per_pax: number;
   effective_date: string;
   created_at: string;
@@ -298,6 +299,26 @@ export class PoklehDB extends Dexie {
       debtCollections: "id, customer_id, staff_id, collection_date",
       expenses: "id, category, expense_date, created_at",
       supplierPriceHistory: "id, supplier_id, effective_date",
+      dailyClosings: "id, closing_date, truck_id, product_type, status",
+      stockWastages: "id, truck_id, waste_date, intake_id, created_at",
+      wastageAdjustments: "id, intake_id, truck_id, adjustment_date",
+      syncQueue: "++id, entity, entityId, createdAt",
+      auditLogs: "++id, entity, entity_id, created_at",
+    });
+    this.version(8).stores({
+      profiles: "++id, user_id, role",
+      customers: "id, name, truck_id, active",
+      trucks: "id, name",
+      suppliers: "id, name",
+      stockIntakes: "id, supplier_id, truck_id, product_type, intake_date, created_at",
+      stockDistributions: "id, intake_id, from_truck_id, to_truck_id, product_type, created_at",
+      stockReturns: "id, distribution_id, intake_id, truck_id, return_date, created_at",
+      supplierSettlements: "id, intake_id, settled_date",
+      sales: "id, customer_id, truck_id, staff_id, sale_date, payment_type, product_type",
+      debtLedger: "id, customer_id, entry_type, created_at",
+      debtCollections: "id, customer_id, staff_id, collection_date",
+      expenses: "id, category, expense_date, created_at",
+      supplierPriceHistory: "id, supplier_id, product_type, effective_date",
       dailyClosings: "id, closing_date, truck_id, product_type, status",
       stockWastages: "id, truck_id, waste_date, intake_id, created_at",
       wastageAdjustments: "id, intake_id, truck_id, adjustment_date",

@@ -62,12 +62,18 @@ export const useDailyBill = (
       if (existingLine) {
         existingLine.quantitySold += sale.quantity;
       } else {
-        const intake = intakes.find(
-          (i) =>
-            i.truck_id === sale.truck_id &&
-            i.product_type === sale.product_type &&
-            i.intake_date === sale.sale_date
-        );
+        // Resolve intake via the distribution -> intake chain first (handles
+        // carry-forward stock: intake on day 1, sold on day 2). Fall back to
+        // matching intake_date === sale_date for same-day sales without a
+        // distribution link.
+        const intake =
+          sale.distribution?.intake ||
+          intakes.find(
+            (i) =>
+              i.truck_id === sale.truck_id &&
+              i.product_type === sale.product_type &&
+              i.intake_date === sale.sale_date
+          );
         bill.lines.push({
           truckId: sale.truck_id,
           truckName,
@@ -107,7 +113,7 @@ export const useDailyBill = (
       );
 
       const intake = wastage.intake_id
-        ? intakes.find((i) => i.id === wastage.intake_id)
+        ? wastage.intake || intakes.find((i) => i.id === wastage.intake_id)
         : intakes.find(
             (i) =>
               i.truck_id === wastage.truck_id &&
