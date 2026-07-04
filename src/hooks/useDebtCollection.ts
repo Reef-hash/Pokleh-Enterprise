@@ -1,10 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSyncStore } from "@/stores/syncStore";
-import { debtCollectionRepo, debtLedgerRepo } from "@/repositories/debtRepo";
-import { customersRepo } from "@/repositories/customersRepo";
+import { debtCollectionRepo } from "@/repositories/debtRepo";
 import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
-import { toast } from "sonner";
 import { persistWrite, mergeUnSyncedData } from "@/lib/writeHelper";
 import type { DebtCollection } from "@/types/pokleh";
 
@@ -12,6 +10,7 @@ export const useDebtCollection = () => {
   const [collections, setCollections] = useState<DebtCollection[]>([]);
   const [loading, setLoading] = useState(true);
   const userId = useAuthStore((s) => s.user?.id);
+  const triggerRefresh = useSyncStore((s) => s.triggerRefresh);
 
   const fetchCollections = useCallback(async () => {
     try {
@@ -48,8 +47,6 @@ export const useDebtCollection = () => {
       created_at: new Date().toISOString(),
     };
 
-    let collectionResult: DebtCollection | null = null;
-
     const result = await persistWrite<DebtCollection>({
       entity: "debt_collection",
       action: "INSERT",
@@ -61,36 +58,20 @@ export const useDebtCollection = () => {
         remove: () => setCollections((prev) => prev.filter((c) => c.id !== tempId)),
       },
       onSuccess: (collection) => {
-        collectionResult = collection;
         setCollections((prev) =>
           prev.map((c) => (c.id === tempId ? collection : c))
         );
+        // The debt_collection insert mutates customers.debt_balance via a DB
+        // trigger (sync_debt_collection_to_ledger -> maintain_debt_balance),
+        // so re-fetch customers to reflect the updated cached balance —
+        // mirrors useSales.addSale for debt sales.
+        triggerRefresh();
       },
       dexiePut: (collection) =>
         db.debtCollections.put(collection as unknown as import("@/lib/db").OfflineDebtCollection),
       cacheOffline: async () => db.debtCollections.put(optimistic as unknown as import("@/lib/db").OfflineDebtCollection),
       msg: "Debt collection recorded",
     });
-
-    if (result.success && collectionResult) {
-      const { data: cust } = await customersRepo.fetchBalance(input.customer_id);
-      const balanceBefore = (cust as { debt_balance: number } | null)?.debt_balance ?? 0;
-      const balanceAfter = balanceBefore - input.amount;
-
-      const { error: ledError } = await debtLedgerRepo.create({
-        customer_id: input.customer_id,
-        entry_type: "payment",
-        amount: input.amount,
-        reference_type: "debt_collection",
-        reference_id: collectionResult.id,
-        balance_before: balanceBefore,
-        balance_after: balanceAfter,
-        created_by: userId,
-      });
-      if (ledError) {
-        toast.error("Collection recorded but debt ledger update failed");
-      }
-    }
 
     return result;
   };
