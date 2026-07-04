@@ -111,17 +111,17 @@ export const PoklehReports = ({ userRole }: PoklehReportsProps) => {
   const staffData = useMemo(() => {
     const map = new Map<string, { staff: string; sales: number; revenue: number; collections: number }>();
     sales.forEach((s) => {
-      const name = s.staff?.name || "Unknown";
+      const name = s.staff?.name || t('wastage-adj.unknown');
       if (!map.has(s.staff_id)) map.set(s.staff_id, { staff: name, sales: 0, revenue: 0, collections: 0 });
       const d = map.get(s.staff_id)!; d.sales += s.quantity; d.revenue += s.selling_price;
     });
     collections.forEach((c) => {
-      const name = c.staff?.name || "Unknown";
+      const name = c.staff?.name || t('wastage-adj.unknown');
       if (!map.has(c.staff_id)) map.set(c.staff_id, { staff: name, sales: 0, revenue: 0, collections: 0 });
       map.get(c.staff_id)!.collections += c.amount;
     });
     return Array.from(map.values());
-  }, [sales, collections]);
+  }, [sales, collections, t]);
 
   const productData = useMemo(() => {
     const map = new Map<ProductType, { product: ProductType; sold: number; revenue: number; wasted: number }>();

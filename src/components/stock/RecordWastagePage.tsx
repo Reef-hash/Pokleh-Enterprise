@@ -53,18 +53,18 @@ export const RecordWastagePage = ({ userRole }: RecordWastagePageProps) => {
                 <p className="text-2xl font-bold">{wastages.length}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Units Wasted</p>
+                <p className="text-sm text-muted-foreground">{t('wastage.total-units')}</p>
                 <p className="text-2xl font-bold text-orange-600">{totalWasted}</p>
               </div>
               <div className="col-span-2 md:col-span-1">
-                <p className="text-sm text-muted-foreground">Last 7 Days</p>
+                <p className="text-sm text-muted-foreground">{t('wastage.last-7-days')}</p>
                 <p className="text-lg font-bold">
                   {wastages.filter(
                     (w) =>
                       new Date(w.waste_date).getTime() >
                       new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).getTime()
                   ).length}
-                  {" records"}
+                  {t('wastage.records-suffix')}
                 </p>
               </div>
             </div>
@@ -78,9 +78,9 @@ export const RecordWastagePage = ({ userRole }: RecordWastagePageProps) => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Droplet className="h-5 w-5 text-orange-500" />
-              Recent Wastage Records
+              {t('wastage.recent-title')}
             </CardTitle>
-            <CardDescription>Last 20 records ({t('common.pax')})</CardDescription>
+            <CardDescription>{t('wastage.recent-subtitle').replace('{pax}', t('common.pax'))}</CardDescription>
           </CardHeader>
           <CardContent>
             {/* Desktop Table */}
@@ -103,7 +103,7 @@ export const RecordWastagePage = ({ userRole }: RecordWastagePageProps) => {
                         <TableCell className="font-medium">
                           {new Date(w.waste_date).toLocaleDateString()}
                         </TableCell>
-                        <TableCell>{truck?.name || "Unknown"}</TableCell>
+                        <TableCell>{truck?.name || t('wastage-adj.unknown')}</TableCell>
                         <TableCell>
                           <Badge variant="outline">{w.product_type}</Badge>
                         </TableCell>
@@ -129,7 +129,7 @@ export const RecordWastagePage = ({ userRole }: RecordWastagePageProps) => {
                     <ResponsiveRow label={t('common.date')}>
                       {new Date(w.waste_date).toLocaleDateString()}
                     </ResponsiveRow>
-                    <ResponsiveRow label={t('common.truck')}>{truck?.name || "Unknown"}</ResponsiveRow>
+                    <ResponsiveRow label={t('common.truck')}>{truck?.name || t('wastage-adj.unknown')}</ResponsiveRow>
                     <ResponsiveRow label={t('common.product')}>
                       <Badge variant="outline">{w.product_type}</Badge>
                     </ResponsiveRow>

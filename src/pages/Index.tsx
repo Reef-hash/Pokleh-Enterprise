@@ -6,11 +6,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAppBootstrap } from "@/hooks/useAppBootstrap";
 import { useNavigate } from "react-router-dom";
 import { SplashScreen } from "@/components/ui/PageLoader";
+import { useLanguage } from "@/lib/i18n";
 
 const Index = () => {
   const { user, profile, signOut } = useAuth();
   const { bootPhase, statusMessage, loading } = useAppBootstrap();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   // Show branded splash screen during boot
   if (loading) {
@@ -48,17 +50,16 @@ const Index = () => {
           </h1>
           
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Ice distribution management system — track stock, manage sales, handle debt collections, 
-            and generate reports with ease.
+            {t('landing.hero-description')}
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
               size="lg"
               onClick={() => navigate('/auth')}
               className="group"
             >
-              Get Started
+              {t('landing.get-started')}
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </div>
@@ -68,9 +69,9 @@ const Index = () => {
       {/* Features Section */}
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">Everything You Need</h2>
+          <h2 className="text-3xl font-bold mb-4">{t('landing.everything-title')}</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Purpose-built for ice distribution businesses — from stock intake to daily closing.
+            {t('landing.everything-description')}
           </p>
         </div>
 
@@ -80,9 +81,9 @@ const Index = () => {
               <div className="mx-auto w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
                 <Package className="h-6 w-6 text-primary" />
               </div>
-              <CardTitle>Stock Management</CardTitle>
+              <CardTitle>{t('landing.feature-stock-title')}</CardTitle>
               <CardDescription>
-                Full intake-to-distribution tracking with automated settlement calculations.
+                {t('landing.feature-stock-description')}
               </CardDescription>
             </CardHeader>
           </Card>
@@ -92,9 +93,9 @@ const Index = () => {
               <div className="mx-auto w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
                 <BarChart3 className="h-6 w-6 text-primary" />
               </div>
-              <CardTitle>Sales & Debt</CardTitle>
+              <CardTitle>{t('landing.feature-sales-title')}</CardTitle>
               <CardDescription>
-                Record sales, manage debt collections, and track customer balances in real time.
+                {t('landing.feature-sales-description')}
               </CardDescription>
             </CardHeader>
           </Card>
@@ -104,9 +105,9 @@ const Index = () => {
               <div className="mx-auto w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
                 <Users className="h-6 w-6 text-primary" />
               </div>
-              <CardTitle>Truck-Based Operations</CardTitle>
+              <CardTitle>{t('landing.feature-truck-title')}</CardTitle>
               <CardDescription>
-                Assign staff to trucks with role-based access and performance tracking.
+                {t('landing.feature-truck-description')}
               </CardDescription>
             </CardHeader>
           </Card>
@@ -116,9 +117,9 @@ const Index = () => {
               <div className="mx-auto w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
                 <Shield className="h-6 w-6 text-primary" />
               </div>
-              <CardTitle>Daily Closing</CardTitle>
+              <CardTitle>{t('landing.feature-closing-title')}</CardTitle>
               <CardDescription>
-                Automated end-of-day reconciliation with validation and profit calculation.
+                {t('landing.feature-closing-description')}
               </CardDescription>
             </CardHeader>
           </Card>

@@ -70,7 +70,7 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
       if (anySaved) {
         setPriceOpen(false);
       } else {
-        toast.error("Sila isi sekurang-kurangnya satu harga");
+        toast.error(t('supplier.error-at-least-one-price'));
       }
     } finally {
       setPriceSubmitting(false);
@@ -175,7 +175,7 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
               <TableRow>
                 <TableHead>{t("supplier.table-name")}</TableHead>
                 <TableHead>{t("supplier.table-phone")}</TableHead>
-                <TableHead>Harga / Produk</TableHead>
+                <TableHead>{t("supplier.table-price-product")}</TableHead>
                 <TableHead>{t("supplier.table-added")}</TableHead>
                 {userRole === "admin" && <TableHead>{t("common.actions")}</TableHead>}
               </TableRow>
@@ -207,7 +207,7 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
                         ) : null;
                       })}
                       {(!pricesBySupplier.get(s.id) || Object.keys(pricesBySupplier.get(s.id) ?? {}).length === 0) && (
-                        <span className="text-xs text-muted-foreground italic">Belum ditetapkan</span>
+                        <span className="text-xs text-muted-foreground italic">{t("supplier.price-not-set")}</span>
                       )}
                     </div>
                   </TableCell>
@@ -215,7 +215,7 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
                   {userRole === "admin" && (
                     <TableCell>
                       <div className="flex gap-1">
-                        <Button variant="ghost" size="sm" title="Tetapkan harga" onClick={() => openPriceModal(s)}><DollarSign className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" title={t("supplier.set-price-tooltip")} onClick={() => openPriceModal(s)}><DollarSign className="h-4 w-4" /></Button>
                         <Button variant="ghost" size="sm" onClick={() => openEdit(s)}><Edit className="h-4 w-4" /></Button>
                         <Button variant="ghost" size="sm" onClick={() => setDeleteConfirmId(s.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
                       </div>
@@ -237,7 +237,7 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
                   </span>
                 </ResponsiveRow>
                 <ResponsiveRow label={t("supplier.table-phone")}>{s.phone ? <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{s.phone}</span> : "—"}</ResponsiveRow>
-                <ResponsiveRow label="Harga / Produk">
+                <ResponsiveRow label={t("supplier.table-price-product")}>
                   <div className="flex flex-wrap gap-1">
                     {PRODUCT_TYPES.map((p) => {
                       const price = pricesBySupplier.get(s.id)?.[p];
@@ -248,14 +248,14 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
                       ) : null;
                     })}
                     {(!pricesBySupplier.get(s.id) || Object.keys(pricesBySupplier.get(s.id) ?? {}).length === 0) && (
-                      <span className="text-xs text-muted-foreground italic">Belum ditetapkan</span>
+                      <span className="text-xs text-muted-foreground italic">{t("supplier.price-not-set")}</span>
                     )}
                   </div>
                 </ResponsiveRow>
                 <ResponsiveRow label={t("supplier.table-added")}>{new Date(s.created_at).toLocaleDateString()}</ResponsiveRow>
                 {userRole === "admin" && (
                   <div className="flex justify-end gap-1 pt-2 border-t">
-                    <Button variant="ghost" size="sm" title="Tetapkan harga" onClick={() => openPriceModal(s)}><DollarSign className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="sm" title={t("supplier.set-price-tooltip")} onClick={() => openPriceModal(s)}><DollarSign className="h-4 w-4" /></Button>
                     <Button variant="ghost" size="sm" onClick={() => openEdit(s)}><Edit className="h-4 w-4" /></Button>
                     <Button variant="ghost" size="sm" onClick={() => setDeleteConfirmId(s.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
                   </div>
@@ -327,9 +327,9 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
       <FormModal
         open={priceOpen}
         onOpenChange={setPriceOpen}
-        title={`Harga Pembekal — ${priceSupplierName}`}
-        description="Tetapkan harga cost per pax untuk setiap produk. Harga ini akan auto-isi semasa terima stok."
-        submitLabel="Simpan Harga"
+        title={t('supplier.price-modal-title').replace('{name}', priceSupplierName)}
+        description={t('supplier.price-modal-desc')}
+        submitLabel={t('supplier.save-price')}
         submitDisabled={priceSubmitting}
         isSubmitting={priceSubmitting}
         onSubmit={handleSavePrices}
@@ -340,7 +340,7 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
             <div key={p} className="rounded-xl border border-border bg-muted/30 p-3 space-y-2">
               <p className="text-sm font-semibold">{p}</p>
               <CurrencyInput
-                label="Cost per pax (RM)"
+                label={t('supplier.cost-per-pax-rm-label')}
                 currency="RM"
                 value={priceLines[p] || ""}
                 onChange={(e) => setPriceLines((prev) => ({ ...prev, [p]: e.target.value }))}
@@ -348,7 +348,7 @@ export const SuppliersManagement = ({ userRole }: SuppliersManagementProps) => {
             </div>
           ))}
           <p className="text-xs text-muted-foreground">
-            Harga disimpan sebagai rekod baharu dengan tarikh hari ini. Harga lama kekal sebagai sejarah.
+            {t('supplier.price-modal-footnote')}
           </p>
         </div>
       </FormModal>

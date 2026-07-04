@@ -36,9 +36,9 @@ export const DailyBillView = ({ dailyBills, isLoading }: DailyBillViewProps) => 
   const trucks = useMemo(() => {
     return Array.from(new Set(dailyBills.map((b) => b.truckId))).map((id) => {
       const bill = dailyBills.find((b) => b.truckId === id);
-      return { id, name: bill?.truckName || "Unknown" };
+      return { id, name: bill?.truckName || t('wastage-adj.unknown') };
     });
-  }, [dailyBills]);
+  }, [dailyBills, t]);
 
   const totalAmount = filtered.reduce((sum, bill) => sum + bill.totalAmount, 0);
 
@@ -84,7 +84,7 @@ export const DailyBillView = ({ dailyBills, isLoading }: DailyBillViewProps) => 
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Filters</CardTitle>
+          <CardTitle className="text-base">{t('stock.filters')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -123,7 +123,7 @@ export const DailyBillView = ({ dailyBills, isLoading }: DailyBillViewProps) => 
           <CardContent className="pt-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div>
-                <p className="text-sm text-muted-foreground">Total Bills</p>
+                <p className="text-sm text-muted-foreground">{t('stock.total-bills')}</p>
                 <p className="text-2xl font-bold">{filtered.length}</p>
               </div>
               <div>
@@ -150,7 +150,7 @@ export const DailyBillView = ({ dailyBills, isLoading }: DailyBillViewProps) => 
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Daily Bills Breakdown
+            {t('stock.daily-bills-breakdown')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -206,7 +206,7 @@ export const DailyBillView = ({ dailyBills, isLoading }: DailyBillViewProps) => 
                         {/* Subtotal row for this bill */}
                         <TableRow className="bg-muted/40 font-bold border-t border-muted">
                           <TableCell colSpan={4} className="text-muted-foreground">
-                            Subtotal — {bill.truckName}
+                            {t('stock.subtotal-truck').replace('{truck}', bill.truckName)}
                           </TableCell>
                           <TableCell className="text-right">{bill.totalSold}</TableCell>
                           <TableCell className="text-right text-orange-600">{bill.totalWasted}</TableCell>
@@ -219,7 +219,7 @@ export const DailyBillView = ({ dailyBills, isLoading }: DailyBillViewProps) => 
                     ))}
                     {/* Grand total */}
                     <TableRow className="bg-blue-600 hover:bg-blue-600 text-white font-bold border-t-2 border-blue-800">
-                      <TableCell colSpan={4}>GRAND TOTAL ({t('common.pax')})</TableCell>
+                      <TableCell colSpan={4}>{t('stock.grand-total-pax').replace('{pax}', t('common.pax'))}</TableCell>
                       <TableCell className="text-right">{filtered.reduce((s, b) => s + b.totalSold, 0)}</TableCell>
                       <TableCell className="text-right">{filtered.reduce((s, b) => s + b.totalWasted, 0)}</TableCell>
                       <TableCell className="text-right">{filtered.reduce((s, b) => s + b.totalReduction, 0)}</TableCell>

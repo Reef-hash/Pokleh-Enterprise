@@ -3,6 +3,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/lib/i18n";
 
 interface AdminRouteProps {
   children: React.ReactNode;
@@ -10,15 +11,16 @@ interface AdminRouteProps {
 
 const AccessDenied = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center max-w-md mx-auto p-8">
         <ShieldAlert className="h-16 w-16 mx-auto mb-4 text-destructive" />
-        <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
+        <h1 className="text-2xl font-bold mb-2">{t('access-denied.title')}</h1>
         <p className="text-muted-foreground mb-6">
-          You do not have permission to access this page. Only administrators can view this section.
+          {t('access-denied.message')}
         </p>
-        <Button onClick={() => navigate("/")}>Return to Dashboard</Button>
+        <Button onClick={() => navigate("/")}>{t('access-denied.return-dashboard')}</Button>
       </div>
     </div>
   );

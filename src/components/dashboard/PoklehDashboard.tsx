@@ -4,6 +4,7 @@ import { useLanguage } from "@/lib/i18n";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package, Users, Truck, ArrowLeftRight, DollarSign } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
+import { SkeletonDashboard } from "@/components/ui/skeleton";
 
 interface PoklehDashboardProps {
   user: { id: string; email: string; role: string; name: string };
@@ -12,11 +13,15 @@ interface PoklehDashboardProps {
 
 export const PoklehDashboard = ({ user, onNavigate }: PoklehDashboardProps) => {
   const { t } = useLanguage();
-  const { customers } = useCustomers();
-  const { trucks } = useTrucks();
+  const { customers, loading: customersLoading } = useCustomers();
+  const { trucks, loading: trucksLoading } = useTrucks();
 
   const activeCustomers = customers.filter(c => c.active !== false).length;
   const totalDebt = customers.reduce((sum, c) => sum + Number(c.debt_balance || 0), 0);
+
+  if (customersLoading || trucksLoading) {
+    return <SkeletonDashboard />;
+  }
 
   const quickLinks = [
     { id: 'stock-intake', label: t('nav.stock-intake'), icon: Package, desc: t('dashboard.stock-intake-desc') },

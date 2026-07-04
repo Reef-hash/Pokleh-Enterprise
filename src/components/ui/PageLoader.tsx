@@ -1,4 +1,5 @@
 import { BRANDING } from "@/lib/branding";
+import { useLanguage } from "@/lib/i18n";
 
 /**
  * Branded splash screen — shown during app bootstrap.
@@ -11,14 +12,18 @@ import { BRANDING } from "@/lib/branding";
  * @param isAdmin - Whether the user has the admin role
  */
 export const SplashScreen = ({
-  status = "Loading…",
+  status,
   userName,
   isAdmin,
 }: {
   status?: string;
   userName?: string;
   isAdmin?: boolean;
-}) => (
+}) => {
+  const { t } = useLanguage();
+  const displayStatus = status ?? t("boot.loading");
+
+  return (
   <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center splash-safe"
     style={{
       background: "linear-gradient(160deg, #0a0812 0%, #120d24 30%, #0f0b1e 60%, #0a0815 100%)",
@@ -64,7 +69,7 @@ export const SplashScreen = ({
           {BRANDING.appName}
         </h1>
         <p className="text-sm text-white/50 mt-1 font-medium tracking-wide">
-          {BRANDING.tagline}
+          {t("app.tagline")}
         </p>
       </div>
 
@@ -72,13 +77,13 @@ export const SplashScreen = ({
       {isAdmin && userName ? (
         <div className="text-center mt-2">
           <p className="text-white/90 text-base font-semibold tracking-wide">
-            Hi Boss, {userName} 👑
+            {t("boot.hi-boss")}, {userName} 👑
           </p>
-          <p className="text-white/40 text-xs mt-1">{status}</p>
+          <p className="text-white/40 text-xs mt-1">{displayStatus}</p>
         </div>
       ) : (
         <div className="flex items-center gap-2 text-white/60 text-sm font-medium mt-2">
-          <span>{status}</span>
+          <span>{displayStatus}</span>
           <span className="inline-flex gap-[3px] ml-0.5">
             <span className="w-[4px] h-[4px] rounded-full bg-white/60 dot-bounce" />
             <span className="w-[4px] h-[4px] rounded-full bg-white/60 dot-bounce" />
@@ -95,7 +100,8 @@ export const SplashScreen = ({
       </div>
     </div>
   </div>
-);
+  );
+};
 
 export default SplashScreen;
 
@@ -106,13 +112,16 @@ export { SkeletonDashboard } from "./skeleton";
 
 import { Loader2 } from "lucide-react";
 
-export const PageLoader = () => (
+export const PageLoader = () => {
+  const { t } = useLanguage();
+  return (
   <div className="flex items-center justify-center py-16">
     <div className="flex flex-col items-center gap-3 animate-fade-in">
       <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
         <Loader2 className="h-5 w-5 animate-spin text-primary" />
       </div>
-      <p className="text-sm text-muted-foreground font-medium">Loading…</p>
+      <p className="text-sm text-muted-foreground font-medium">{t("boot.loading")}</p>
     </div>
   </div>
-);
+  );
+};

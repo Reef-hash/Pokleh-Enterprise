@@ -47,7 +47,7 @@ export const WastageAdjustmentsPage = ({ userRole }: WastageAdjustmentsPageProps
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Wastage Adjustments</h2>
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight">{t('nav.wastage-adjustments')}</h2>
         <p className="text-muted-foreground">
           {t('stock.wastage-subtitle')}
         </p>
@@ -66,7 +66,7 @@ export const WastageAdjustmentsPage = ({ userRole }: WastageAdjustmentsPageProps
           <CardContent className="pt-6">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div>
-                <p className="text-sm text-muted-foreground">Total Adjustments</p>
+                <p className="text-sm text-muted-foreground">{t('wastage-adj.total-adjustments')}</p>
                 <p className="text-2xl font-bold">{adjustments.length}</p>
               </div>
               <div>
@@ -74,7 +74,7 @@ export const WastageAdjustmentsPage = ({ userRole }: WastageAdjustmentsPageProps
                 <p className="text-2xl font-bold text-green-600">{totalReduction}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Savings</p>
+                <p className="text-sm text-muted-foreground">{t('wastage-adj.total-savings')}</p>
                 <p className="text-2xl font-bold text-green-600">{formatCurrency(totalSavings)}</p>
               </div>
             </div>
@@ -88,9 +88,9 @@ export const WastageAdjustmentsPage = ({ userRole }: WastageAdjustmentsPageProps
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <HandshakeIcon className="h-5 w-5 text-blue-500" />
-              Adjustment History
+              {t('wastage-adj.history-title')}
             </CardTitle>
-            <CardDescription>Recent supplier agreements</CardDescription>
+            <CardDescription>{t('wastage-adj.history-description')}</CardDescription>
           </CardHeader>
           <CardContent>
             {/* Desktop Table */}
@@ -101,11 +101,11 @@ export const WastageAdjustmentsPage = ({ userRole }: WastageAdjustmentsPageProps
                     <TableHead>{t('common.date')}</TableHead>
                     <TableHead>{t('supplier.supplier')}</TableHead>
                     <TableHead>{t('common.truck')}</TableHead>
-                    <TableHead className="text-right">Wasted</TableHead>
+                    <TableHead className="text-right">{t('wastage-adj.table-wasted')}</TableHead>
                     <TableHead className="text-right">{t('supplier.table-reduction')}</TableHead>
                     <TableHead className="text-right">{t('supplier.cost-per-pax')}</TableHead>
-                    <TableHead className="text-right">Savings</TableHead>
-                    <TableHead>Reason</TableHead>
+                    <TableHead className="text-right">{t('wastage-adj.table-savings')}</TableHead>
+                    <TableHead>{t('stock.reason')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -118,8 +118,8 @@ export const WastageAdjustmentsPage = ({ userRole }: WastageAdjustmentsPageProps
                         <TableCell className="font-medium">
                           {new Date(adj.adjustment_date).toLocaleDateString()}
                         </TableCell>
-                        <TableCell>{intake?.supplier?.name || "Unknown"}</TableCell>
-                        <TableCell>{truck?.name || "Unknown"}</TableCell>
+                        <TableCell>{intake?.supplier?.name || t('wastage-adj.unknown')}</TableCell>
+                        <TableCell>{truck?.name || t('wastage-adj.unknown')}</TableCell>
                         <TableCell className="text-right text-orange-600">
                           {adj.total_wasted}
                         </TableCell>
@@ -154,10 +154,10 @@ export const WastageAdjustmentsPage = ({ userRole }: WastageAdjustmentsPageProps
                       {new Date(adj.adjustment_date).toLocaleDateString()}
                     </ResponsiveRow>
                     <ResponsiveRow label={t('supplier.supplier')}>
-                      <span className="font-medium">{intake?.supplier?.name || "Unknown"}</span>
+                      <span className="font-medium">{intake?.supplier?.name || t('wastage-adj.unknown')}</span>
                     </ResponsiveRow>
-                    <ResponsiveRow label={t('common.truck')}>{truck?.name || "Unknown"}</ResponsiveRow>
-                    <ResponsiveRow label="Wasted">
+                    <ResponsiveRow label={t('common.truck')}>{truck?.name || t('wastage-adj.unknown')}</ResponsiveRow>
+                    <ResponsiveRow label={t('wastage-adj.table-wasted')}>
                       <span className="text-orange-600">{adj.total_wasted}</span>
                     </ResponsiveRow>
                     <ResponsiveRow label={t('supplier.table-reduction')}>
@@ -166,10 +166,10 @@ export const WastageAdjustmentsPage = ({ userRole }: WastageAdjustmentsPageProps
                     <ResponsiveRow label={t('supplier.cost-per-pax')}>
                       {formatCurrency(intake?.cost_per_pax || 0)}
                     </ResponsiveRow>
-                    <ResponsiveRow label="Savings">
+                    <ResponsiveRow label={t('wastage-adj.table-savings')}>
                       <span className="font-bold text-green-600">{formatCurrency(savings)}</span>
                     </ResponsiveRow>
-                    {adj.reason && <ResponsiveRow label="Reason">{adj.reason}</ResponsiveRow>}
+                    {adj.reason && <ResponsiveRow label={t('stock.reason')}>{adj.reason}</ResponsiveRow>}
                   </ResponsiveCard>
                 );
               })}

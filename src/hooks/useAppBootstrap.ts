@@ -5,17 +5,12 @@ import { customersRepo } from "@/repositories/customersRepo";
 import { trucksRepo } from "@/repositories/trucksRepo";
 import { db } from "@/lib/db";
 import type { OfflineCustomer, OfflineTruck } from "@/lib/db";
+import { useLanguage } from "@/lib/i18n";
 
 export type BootPhase = "auth" | "syncing" | "ready";
 
 /** Minimum visible splash time (ms) for that "exclusive" feel */
 const MIN_SPLASH_MS = 2800;
-
-const STATUS_MESSAGES: Record<BootPhase, string> = {
-  auth: "Restoring session…",
-  syncing: "Syncing your data…",
-  ready: "Ready",
-};
 
 /**
  * Orchestrates the app boot sequence:
@@ -26,8 +21,19 @@ const STATUS_MESSAGES: Record<BootPhase, string> = {
  * Reports status via `bootPhase` for the splash screen.
  */
 export const useAppBootstrap = () => {
+  const { t } = useLanguage();
+  const statusMessagesRef = useRef<Record<BootPhase, string>>({
+    auth: t("boot.restoring-session"),
+    syncing: t("boot.syncing"),
+    ready: t("boot.ready"),
+  });
+  statusMessagesRef.current = {
+    auth: t("boot.restoring-session"),
+    syncing: t("boot.syncing"),
+    ready: t("boot.ready"),
+  };
   const [bootPhase, setBootPhase] = useState<BootPhase>("auth");
-  const [statusMessage, setStatusMessage] = useState(STATUS_MESSAGES.auth);
+  const [statusMessage, setStatusMessage] = useState(statusMessagesRef.current.auth);
   const initialized = useAuthStore((s) => s.initialized);
   const restoreSession = useAuthStore((s) => s.restoreSession);
   const user = useAuthStore((s) => s.user);
@@ -43,7 +49,7 @@ export const useAppBootstrap = () => {
 
     readyTimerRef.current = setTimeout(() => {
       setBootPhase("ready");
-      setStatusMessage(STATUS_MESSAGES.ready);
+      setStatusMessage(statusMessagesRef.current.ready);
     }, remaining);
   }, []);
 
@@ -67,7 +73,7 @@ export const useAppBootstrap = () => {
   // Step 2: Once auth is resolved (user exists), pre-fetch data + sync
   const preFetch = useCallback(async () => {
     setBootPhase("syncing");
-    setStatusMessage(STATUS_MESSAGES.syncing);
+    setStatusMessage(statusMessagesRef.current.syncing);
 
     // Pre-fetch in parallel — silently cache, don't throw
     const results = await Promise.allSettled([
