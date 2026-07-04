@@ -7,6 +7,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useLanguage } from "@/lib/i18n";
 
 interface NavItem {
   id: string;
@@ -25,56 +26,57 @@ export const BottomNavigation = ({
   onNavigate,
 }: BottomNavigationProps) => {
   const [openPopover, setOpenPopover] = useState<string | null>(null);
+  const { t } = useLanguage();
 
   const mainItems: NavItem[] = [
     {
       id: "dashboard",
-      label: "Dashboard",
+      label: t('nav.dashboard'),
       icon: Home,
     },
     {
       id: "stock",
-      label: "Stock",
+      label: t('nav.stock'),
       icon: Package,
       subItems: [
-        { id: "truck-stock", label: "Stok Lori", icon: Truck },
-        { id: "stock-intake", label: "Masukan Stok", icon: ClipboardList },
-        { id: "stock-distribution", label: "Pengagihan Stok", icon: ArrowLeftRight },
-        { id: "stock-return", label: "Pulangan Stok", icon: RotateCcw },
-        { id: "record-wastage", label: "Record Sating", icon: Droplet },
-        { id: "daily-bills", label: "Daily Bills", icon: Receipt },
+        { id: "truck-stock", label: t('nav.truck-stock'), icon: Truck },
+        { id: "stock-intake", label: t('nav.stock-intake'), icon: ClipboardList },
+        { id: "stock-distribution", label: t('nav.stock-distribution'), icon: ArrowLeftRight },
+        { id: "stock-return", label: t('nav.stock-return'), icon: RotateCcw },
+        { id: "record-wastage", label: t('nav.record-wastage'), icon: Droplet },
+        { id: "daily-bills", label: t('nav.daily-bills'), icon: Receipt },
       ],
     },
     {
       id: "sales",
-      label: "Sales",
+      label: t('nav.sales-debt'),
       icon: DollarSign,
       subItems: [
-        { id: "sales", label: "Sales Entry", icon: DollarSign },
-        { id: "debt-ledger", label: "Debt Ledger", icon: BookOpen },
-        { id: "debt-collection", label: "Debt Collection", icon: HandCoins },
+        { id: "sales", label: t('nav.sales'), icon: DollarSign },
+        { id: "debt-ledger", label: t('nav.debt-ledger'), icon: BookOpen },
+        { id: "debt-collection", label: t('nav.debt-collection'), icon: HandCoins },
       ],
     },
     {
       id: "customers",
-      label: "Customers",
+      label: t('nav.customers'),
       icon: Users,
     },
   ];
 
   const moreItems = [
-    { id: "settlements", label: "Settlements", icon: FileSpreadsheet },
-    { id: "wastage-adjustments", label: "Wastage Adjustments", icon: TrendingDown },
-    { id: "trucks", label: "Trucks", icon: Truck },
-    { id: "suppliers", label: "Suppliers", icon: Building2 },
-    { id: "staff-assignments", label: "Staff Assignments", icon: Users },
-    { id: "price-history", label: "Price History", icon: Clock },
-    { id: "selling-prices", label: "Harga Jual", icon: Tag },
-    { id: "expenses", label: "Expenses", icon: Receipt },
-    { id: "pokleh-reports", label: "Reports", icon: TrendingUp },
-    { id: "daily-closing", label: "Daily Closing", icon: CalendarCheck },
-    { id: "audit-logs", label: "Audit Logs", icon: Shield },
-    { id: "staff-accounts", label: "Staff Accounts", icon: Users },
+    { id: "settlements", label: t('nav.settlements'), icon: FileSpreadsheet },
+    { id: "wastage-adjustments", label: t('nav.wastage-adjustments'), icon: TrendingDown },
+    { id: "trucks", label: t('nav.trucks'), icon: Truck },
+    { id: "suppliers", label: t('nav.suppliers'), icon: Building2 },
+    { id: "staff-assignments", label: t('nav.staff-assignments'), icon: Users },
+    { id: "price-history", label: t('nav.price-history'), icon: Clock },
+    { id: "selling-prices", label: t('nav.selling-prices'), icon: Tag },
+    { id: "expenses", label: t('nav.expenses'), icon: Receipt },
+    { id: "pokleh-reports", label: t('nav.pokleh-reports'), icon: TrendingUp },
+    { id: "daily-closing", label: t('nav.daily-closing'), icon: CalendarCheck },
+    { id: "audit-logs", label: t('nav.audit-logs'), icon: Shield },
+    { id: "staff-accounts", label: t('nav.staff-accounts'), icon: Users },
   ];
 
   const handleNavigation = (pageId: string) => {
@@ -153,7 +155,7 @@ export const BottomNavigation = ({
           <PopoverTrigger asChild>
             <button className="flex-1 flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-[background-color,color] duration-150 ease-out active:scale-90">
               <MoreVertical className="h-5 w-5" />
-              <span className="text-xs font-medium leading-none">More</span>
+              <span className="text-xs font-medium leading-none">{t('nav.more')}</span>
             </button>
           </PopoverTrigger>
           <PopoverContent align="center" side="top" className="w-56 p-0 mb-2">

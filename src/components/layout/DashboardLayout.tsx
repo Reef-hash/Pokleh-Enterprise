@@ -118,10 +118,10 @@ export const DashboardLayout = ({
       suppliers: t('nav.suppliers'),
       'staff-assignments': t('nav.staff-assignments'),
       'price-history': t('nav.price-history'),
-      'selling-prices': 'Selling Prices',
+      'selling-prices': t('nav.selling-prices'),
       expenses: t('nav.expenses'),
       'pokleh-reports': t('nav.pokleh-reports'),
-      'truck-stock': 'Truck Stock',
+      'truck-stock': t('nav.truck-stock'),
       'daily-closing': t('nav.daily-closing'),
       'audit-logs': t('nav.audit-logs'),
       'staff-accounts': t('nav.staff-accounts'),
@@ -137,7 +137,7 @@ export const DashboardLayout = ({
     {
       label: t('nav.stock'), key: 'stock',
       items: [
-        { id: 'truck-stock', label: 'Truck Stock', icon: Truck },
+        { id: 'truck-stock', label: t('nav.truck-stock'), icon: Truck },
         { id: 'stock-intake', label: t('nav.stock-intake'), icon: ClipboardList },
         { id: 'stock-distribution', label: t('nav.stock-distribution'), icon: ArrowLeftRight },
         { id: 'stock-return', label: t('nav.stock-return'), icon: RotateCcw },
@@ -160,7 +160,7 @@ export const DashboardLayout = ({
         { id: 'suppliers', label: t('nav.suppliers'), icon: Building2 },
         { id: 'staff-assignments', label: t('nav.staff-assignments'), icon: UserCheck },
         { id: 'price-history', label: t('nav.price-history'), icon: Clock },
-        { id: 'selling-prices', label: 'Selling Prices', icon: Tag },
+        { id: 'selling-prices', label: t('nav.selling-prices'), icon: Tag },
         { id: 'expenses', label: t('nav.expenses'), icon: Receipt },
       ]
     },
@@ -188,7 +188,7 @@ export const DashboardLayout = ({
     {
       label: t('nav.stock'), key: 'stock',
       items: [
-        { id: 'truck-stock', label: 'Truck Stock', icon: Truck },
+        { id: 'truck-stock', label: t('nav.truck-stock'), icon: Truck },
         { id: 'stock-distribution', label: t('nav.stock-distribution'), icon: ArrowLeftRight },
         { id: 'stock-return', label: t('nav.stock-return'), icon: RotateCcw },
       ]
@@ -337,7 +337,7 @@ export const DashboardLayout = ({
               onClick={() => setHelpOpen(true)}
               className="inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-muted hover:bg-muted-foreground/20 text-muted-foreground hover:text-foreground transition-colors text-xs font-bold shrink-0"
               aria-label="Page help"
-              title="Help"
+              title={t('common.help')}
             >
               ?
             </button>

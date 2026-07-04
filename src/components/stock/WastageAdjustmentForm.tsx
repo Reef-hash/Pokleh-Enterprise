@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { AlertCircle, HandshakeIcon } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useLanguage } from "@/lib/i18n";
+import { toast } from "sonner";
 import type { StockIntake, Truck } from "@/types/pokleh";
 import { PRODUCT_TYPES } from "@/types/pokleh";
 
@@ -50,7 +51,7 @@ export const WastageAdjustmentForm = ({
     if (!intakeId || !totalWasted || !reduction || !adjustmentDate) return;
 
     if (parseInt(reduction) > parseInt(totalWasted)) {
-      alert("Reduction cannot exceed total wasted quantity");
+      toast.error(t('wastage-adj.error-exceeds'));
       return;
     }
 
@@ -82,10 +83,10 @@ export const WastageAdjustmentForm = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <HandshakeIcon className="h-5 w-5 text-blue-500" />
-          Wastage Adjustment
+          {t('wastage-adj.title')}
         </CardTitle>
         <CardDescription>
-          Record when supplier agrees to reduce charges on damaged/wasted stock
+          {t('wastage-adj.description')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -93,15 +94,15 @@ export const WastageAdjustmentForm = ({
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              When supplier agrees to reduce wastage charges, record the negotiated reduction here.
+              {t('wastage-adj.alert')}
             </AlertDescription>
           </Alert>
 
           <div className="space-y-2">
-            <Label htmlFor="intake">Select Intake</Label>
+            <Label htmlFor="intake">{t('wastage-adj.select-intake')}</Label>
             <Select value={intakeId} onValueChange={setIntakeId}>
               <SelectTrigger id="intake">
-                <SelectValue placeholder="Select an intake..." />
+                <SelectValue placeholder={t('wastage-adj.select-intake-placeholder')} />
               </SelectTrigger>
               <SelectContent>
                 {intakes
@@ -128,28 +129,28 @@ export const WastageAdjustmentForm = ({
                 <span className="font-medium">{t('common.product')}:</span> {selectedIntake.product_type}
               </p>
               <p>
-                <span className="font-medium">Cost/Unit:</span> RM {selectedIntake.cost_per_pax.toFixed(2)}
+                <span className="font-medium">{t('wastage-adj.cost-per-unit')}:</span> RM {selectedIntake.cost_per_pax.toFixed(2)}
               </p>
             </div>
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="total-wasted">Total {t('stock.reason-damaged')} Units</Label>
+              <Label htmlFor="total-wasted">{t('wastage-adj.total-wasted-units').replace('{reason}', t('stock.reason-damaged'))}</Label>
               <Input
                 id="total-wasted"
                 type="number"
                 min="1"
                 value={totalWasted}
                 onChange={(e) => setTotalWasted(e.target.value)}
-                placeholder="e.g., 50"
+                placeholder={t('wastage-adj.total-wasted-placeholder')}
                 required
               />
-              <p className="text-xs text-muted-foreground">Full wastage amount on invoice</p>
+              <p className="text-xs text-muted-foreground">{t('wastage-adj.total-wasted-hint')}</p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="reduction">Units Reduction (supplier agreed)</Label>
+              <Label htmlFor="reduction">{t('wastage-adj.reduction-units')}</Label>
               <Input
                 id="reduction"
                 type="number"
@@ -157,11 +158,11 @@ export const WastageAdjustmentForm = ({
                 max={totalWasted || 999}
                 value={reduction}
                 onChange={(e) => setReduction(e.target.value)}
-                placeholder="e.g., 25"
+                placeholder={t('wastage-adj.reduction-placeholder')}
                 disabled={!totalWasted}
                 required
               />
-              <p className="text-xs text-muted-foreground">We don't pay for these units</p>
+              <p className="text-xs text-muted-foreground">{t('wastage-adj.reduction-hint')}</p>
             </div>
           </div>
 
@@ -169,24 +170,24 @@ export const WastageAdjustmentForm = ({
             <div className="bg-green-50 dark:bg-green-950 p-4 rounded-lg space-y-2">
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <p className="text-xs text-muted-foreground">Reduction %</p>
+                  <p className="text-xs text-muted-foreground">{t('wastage-adj.reduction-percent')}</p>
                   <p className="text-lg font-bold text-green-600">{reductionPercent}%</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Units Reduction</p>
+                  <p className="text-xs text-muted-foreground">{t('wastage-adj.units-reduction')}</p>
                   <p className="text-lg font-bold text-green-600">{reduction}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Amount Saved</p>
+                  <p className="text-xs text-muted-foreground">{t('wastage-adj.amount-saved')}</p>
                   <p className="text-lg font-bold text-green-600">RM {savingsAmount.toFixed(2)}</p>
                 </div>
               </div>
               <p className="text-xs">
-                <span className="font-medium">Before:</span> {totalWasted} units × RM {selectedIntake?.cost_per_pax.toFixed(2)} = RM{" "}
+                <span className="font-medium">{t('wastage-adj.before')}:</span> {totalWasted} units × RM {selectedIntake?.cost_per_pax.toFixed(2)} = RM{" "}
                 {(parseInt(totalWasted) * (selectedIntake?.cost_per_pax || 0)).toFixed(2)}
               </p>
               <p className="text-xs">
-                <span className="font-medium">After:</span> {parseInt(totalWasted) - parseInt(reduction)} units × RM{" "}
+                <span className="font-medium">{t('wastage-adj.after')}:</span> {parseInt(totalWasted) - parseInt(reduction)} units × RM{" "}
                 {selectedIntake?.cost_per_pax.toFixed(2)} = RM
                 {((parseInt(totalWasted) - parseInt(reduction)) * (selectedIntake?.cost_per_pax || 0)).toFixed(2)}
               </p>
@@ -194,12 +195,12 @@ export const WastageAdjustmentForm = ({
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="reason">Reason</Label>
+            <Label htmlFor="reason">{t('stock.reason')}</Label>
             <Textarea
               id="reason"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="e.g., Quality issue, Customer complaint"
+              placeholder={t('wastage-adj.reason-placeholder')}
               rows={3}
             />
           </div>
@@ -220,7 +221,7 @@ export const WastageAdjustmentForm = ({
             disabled={!intakeId || !totalWasted || !reduction || !validReduction || submitting || isLoading}
             className="w-full"
           >
-            {submitting ? t('common.loading') : "Record Adjustment"}
+            {submitting ? t('common.loading') : t('wastage-adj.submit')}
           </Button>
         </form>
       </CardContent>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -19,6 +19,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
 
   // Sign in form
   const [signInData, setSignInData] = useState({
@@ -74,7 +75,7 @@ const Auth = () => {
       });
       if (error) throw error;
     } catch (err) {
-      toast.error('Google sign-in failed');
+      toast.error(t('auth.google-failed'));
     }
   };
 
@@ -90,12 +91,11 @@ const Auth = () => {
 
         <Card className="shadow-xl">
           <CardHeader className="text-center">
-            <CardTitle>{t('auth.sign-in')}</CardTitle>
-            <CardDescription>{t('auth.sign-in')} / {t('auth.sign-up')}</CardDescription>
+            <CardTitle>{activeTab === 'signin' ? t('auth.sign-in') : t('auth.sign-up')}</CardTitle>
           </CardHeader>
-          
+
           <CardContent>
-            <Tabs defaultValue="signin" className="w-full">
+            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'signin' | 'signup')} className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="signin" className="flex items-center gap-2">
                   <LogIn className="h-4 w-4" />
@@ -110,24 +110,24 @@ const Auth = () => {
               <TabsContent value="signin" className="space-y-6">
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">{t('auth.email')}</Label>
                     <Input
                       id="email"
                       type="email"
-                      placeholder="Enter your email"
+                      placeholder={t('auth.email-placeholder')}
                       value={signInData.email}
                       onChange={(e) => setSignInData({ ...signInData, email: e.target.value })}
                       required
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password">{t('auth.password')}</Label>
                     <div className="relative">
                       <Input
                         id="password"
                         type={showPassword ? 'text' : 'password'}
-                        placeholder="Enter your password"
+                        placeholder={t('auth.password-placeholder')}
                         value={signInData.password}
                         onChange={(e) => setSignInData({ ...signInData, password: e.target.value })}
                         required
@@ -143,21 +143,21 @@ const Auth = () => {
                       </Button>
                     </div>
                   </div>
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full" 
+
+                  <Button
+                    type="submit"
+                    className="w-full"
                     disabled={isLoading || !signInData.email || !signInData.password}
                   >
                     {isLoading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Signing in...
+                        {t('auth.signing-in')}
                       </>
                     ) : (
                       <>
                         <LogIn className="mr-2 h-4 w-4" />
-                        Sign In
+                        {t('auth.sign-in')}
                       </>
                     )}
                   </Button>
@@ -168,14 +168,14 @@ const Auth = () => {
                     <span className="w-full border-t" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                    <span className="bg-card px-2 text-muted-foreground">{t('auth.or-continue')}</span>
                   </div>
                 </div>
 
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  className="w-full" 
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
                   onClick={handleGoogleSignIn}
                 >
                   <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
@@ -184,43 +184,43 @@ const Auth = () => {
                     <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
                     <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                   </svg>
-                  Continue with Google
+                  {t('auth.continue-google')}
                 </Button>
               </TabsContent>
               
               <TabsContent value="signup" className="space-y-4">
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name">Full Name</Label>
+                    <Label htmlFor="signup-name">{t('auth.full-name')}</Label>
                     <Input
                       id="signup-name"
                       type="text"
-                      placeholder="Enter your full name"
+                      placeholder={t('auth.full-name-placeholder')}
                       value={signUpData.name}
                       onChange={(e) => setSignUpData({ ...signUpData, name: e.target.value })}
                       required
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
+                    <Label htmlFor="signup-email">{t('auth.email')}</Label>
                     <Input
                       id="signup-email"
                       type="email"
-                      placeholder="Enter your email"
+                      placeholder={t('auth.email-placeholder')}
                       value={signUpData.email}
                       onChange={(e) => setSignUpData({ ...signUpData, email: e.target.value })}
                       required
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
+                    <Label htmlFor="signup-password">{t('auth.password')}</Label>
                     <div className="relative">
                       <Input
                         id="signup-password"
                         type={showPassword ? 'text' : 'password'}
-                        placeholder="Create a password"
+                        placeholder={t('auth.password-placeholder')}
                         value={signUpData.password}
                         onChange={(e) => setSignUpData({ ...signUpData, password: e.target.value })}
                         required
@@ -236,34 +236,34 @@ const Auth = () => {
                       </Button>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
-                    <Label htmlFor="role">Role</Label>
+                    <Label htmlFor="role">{t('auth.role')}</Label>
                     <Select value={signUpData.role} onValueChange={(value: 'admin' | 'staff') => setSignUpData({ ...signUpData, role: value })}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select your role" />
+                        <SelectValue placeholder={t('auth.select-role')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="staff">Staff Member</SelectItem>
-                        <SelectItem value="admin">Administrator</SelectItem>
+                        <SelectItem value="staff">{t('auth.role-staff')}</SelectItem>
+                        <SelectItem value="admin">{t('auth.role-admin')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full" 
+
+                  <Button
+                    type="submit"
+                    className="w-full"
                     disabled={isLoading || !signUpData.email || !signUpData.password || !signUpData.name}
                   >
                     {isLoading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Creating account...
+                        {t('auth.creating-account')}
                       </>
                     ) : (
                       <>
                         <UserPlus className="mr-2 h-4 w-4" />
-                        Create Account
+                        {t('auth.create-account')}
                       </>
                     )}
                   </Button>
@@ -281,12 +281,12 @@ const Auth = () => {
             className="text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Home
+            {t('auth.back-to-home')}
           </Button>
           <Link to="/docs">
             <Button variant="link" className="text-muted-foreground">
               <HelpCircle className="mr-2 h-4 w-4" />
-              View Documentation
+              {t('auth.view-docs')}
             </Button>
           </Link>
         </div>

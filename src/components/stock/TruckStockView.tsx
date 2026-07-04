@@ -49,7 +49,7 @@ export const TruckStockView = () => {
       >
         <Button variant="outline" size="sm" onClick={refresh} disabled={loading}>
           <RefreshCw className={cn("h-4 w-4 sm:mr-2", loading && "animate-spin")} />
-          <span className="hidden sm:inline">Refresh</span>
+          <span className="hidden sm:inline">{t('stock.refresh')}</span>
         </Button>
       </PageHeader>
 
@@ -59,7 +59,7 @@ export const TruckStockView = () => {
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2 text-base">
               <Package className="h-4 w-4 text-muted-foreground" />
-              Grand Total - All Trucks
+              {t('stock.grand-total-all-trucks')}
             </CardTitle>
             <Badge variant="outline" className="text-xs font-normal text-muted-foreground">
               {grandTotal} {t('common.pax')}
@@ -160,7 +160,7 @@ export const TruckStockView = () => {
 
       {lastRefreshed && !loading && (
         <p className="text-center text-xs text-muted-foreground">
-          Last updated: {lastRefreshed.toLocaleTimeString()}
+          {t('stock.last-updated').replace('{time}', lastRefreshed.toLocaleTimeString())}
         </p>
       )}
     </div>

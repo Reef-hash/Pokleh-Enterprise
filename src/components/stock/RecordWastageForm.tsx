@@ -118,7 +118,7 @@ export const RecordWastageForm = ({ trucks, onSubmit, isLoading }: RecordWastage
                 min="1"
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
-                placeholder="e.g., 5"
+                placeholder={t('wastage.quantity-placeholder')}
                 required
               />
             </div>
@@ -141,7 +141,7 @@ export const RecordWastageForm = ({ trucks, onSubmit, isLoading }: RecordWastage
               id="notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="e.g., Melted due to sun, cracked during transport"
+              placeholder={t('wastage.notes-placeholder')}
               rows={3}
             />
           </div>

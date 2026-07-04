@@ -92,7 +92,7 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
     // Warn if any active line has no cost set (admin forgot to set supplier price)
     const missingCost = activeLines.filter((l) => l.cost_per_pax <= 0);
     if (missingCost.length > 0) {
-      toast.error("Harga cost belum ditetapkan untuk produk ini. Sila pilih supplier yang ada harga, atau admin tetapkan harga di halaman Suppliers.");
+      toast.error(t('intake.error-cost-not-set'));
       return;
     }
     setSubmitting(true);
@@ -245,7 +245,7 @@ export const StockIntakeForm = ({ userRole }: StockIntakeFormProps) => {
                         <div className="space-y-1">
                           <Label className="text-xs text-muted-foreground">{t('intake.cost-label')}</Label>
                           <div className="h-10 flex items-center rounded-md border border-input bg-muted px-3 text-sm font-medium">
-                            {costVal > 0 ? `${formatCurrency(costVal)}` : <span className="text-muted-foreground italic text-xs">Belum ditetapkan</span>}
+                            {costVal > 0 ? `${formatCurrency(costVal)}` : <span className="text-muted-foreground italic text-xs">{t('supplier.price-not-set')}</span>}
                           </div>
                         </div>
                       )}

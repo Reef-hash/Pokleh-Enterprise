@@ -121,9 +121,9 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
                   {selectedTruck?.name} — {new Date(date).toLocaleDateString()}
                 </span>
                 {allReconciled ? (
-                  <Badge variant="outline">{t('closing.status-reconciled')} (semua)</Badge>
+                  <Badge variant="outline">{t('closing.status-reconciled')} {t('closing.all-suffix')}</Badge>
                 ) : allClosed ? (
-                  <Badge variant="default">{t('closing.status-closed')} (semua)</Badge>
+                  <Badge variant="default">{t('closing.status-closed')} {t('closing.all-suffix')}</Badge>
                 ) : (
                   <Badge variant="secondary">{t('closing.status-open')} ({selectedClosings.length}/{PRODUCT_TYPES.length} ditutup)</Badge>
                 )}
@@ -174,7 +174,7 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
                   disabled={!canClose || submitting}
                   onClick={() => { setAction("close"); setConfirmOpen(true); }}
                 >
-                  <Lock className="mr-2 h-4 w-4" /> {t('closing.close-day')} (semua produk)
+                  <Lock className="mr-2 h-4 w-4" /> {t('closing.close-day')} {t('closing.all-products-suffix')}
                 </Button>
                 {userRole === "admin" && (
                   <Button
@@ -182,13 +182,13 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
                     disabled={!canReconcile || submitting}
                     onClick={() => { setAction("reconcile"); setConfirmOpen(true); }}
                   >
-                    <CheckCircle2 className="mr-2 h-4 w-4" /> {t('closing.reconcile')} (semua produk)
+                    <CheckCircle2 className="mr-2 h-4 w-4" /> {t('closing.reconcile')} {t('closing.all-products-suffix')}
                   </Button>
                 )}
               </div>
               {!canClose && !canReconcile && allReconciled && (
                 <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                  <CheckCircle2 className="h-3 w-3" /> Semua produk sudah direconcile untuk tarikh ini.
+                  <CheckCircle2 className="h-3 w-3" /> {t('closing.all-reconciled-notice')}
                 </p>
               )}
             </div>
@@ -290,7 +290,7 @@ export const DailyClosingWorkflow = ({ userRole }: DailyClosingWorkflowProps) =>
           <div className="py-2">
             <p><strong>{t('common.date')}:</strong> {new Date(date).toLocaleDateString()}</p>
             <p><strong>{t('common.truck')}:</strong> {selectedTruck?.name}</p>
-            <p><strong>{t('closing.product')}:</strong> semua ({PRODUCT_TYPES.length} produk)</p>
+            <p><strong>{t('closing.product')}:</strong> {t('closing.all-products-count').replace('{count}', String(PRODUCT_TYPES.length))}</p>
             {action === "close" && (
               <p className="text-sm text-muted-foreground mt-2">
                 {t('closing.validation-note')}
