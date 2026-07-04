@@ -465,6 +465,11 @@ export const translations: Record<Language, Record<string, string>> = {
     'debt.debtor-select': 'Pilih penghutang',
     'debt.error-required': 'Sila pilih pelanggan dan masukkan jumlah yang sah.',
     'debt.success-add': 'Kutipan telah direkod',
+    'debt.customer-summary': 'Ringkasan Pelanggan ({count})',
+    'debt.customer-summary-desc': 'Klik seorang pelanggan untuk lihat sejarah hutang penuh',
+    'debt.transactions-count': 'Transaksi',
+    'debt.last-activity': 'Aktiviti Terakhir',
+    'debt.view-history': 'Lihat Sejarah',
 
     // Stock Management
     'stock.distribution-title': 'Pengagihan Stok',
@@ -1189,6 +1194,11 @@ export const translations: Record<Language, Record<string, string>> = {
     'debt.debtor-select': 'Select debtor',
     'debt.error-required': 'Please select a customer and enter a valid amount.',
     'debt.success-add': 'Collection recorded successfully',
+    'debt.customer-summary': 'Customer Summary ({count})',
+    'debt.customer-summary-desc': 'Click a customer to view their full debt history',
+    'debt.transactions-count': 'Transactions',
+    'debt.last-activity': 'Last Activity',
+    'debt.view-history': 'View History',
 
     // Stock Management
     'stock.distribution-title': 'Stock Distribution',
