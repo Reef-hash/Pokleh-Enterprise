@@ -50,6 +50,26 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   restoreSession: async () => {
     set({ loading: true });
+
+    // Register this before the awaits below: it's the only place in the
+    // codebase that subscribes to auth state changes, so if a timeout
+    // (or any other error) sends the initial restore into the catch
+    // branch, the app must still react to a session becoming available
+    // or expiring later — otherwise it's stuck until a full reload.
+    supabase.auth.onAuthStateChange(async (_event, session) => {
+      set({ session, user: session?.user ?? null });
+      if (session?.user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("user_id", session.user.id)
+          .single();
+        set({ profile: profile as unknown as UserProfile });
+      } else {
+        set({ profile: null });
+      }
+    });
+
     try {
       const { data: sessionData } = await withTimeout(supabase.auth.getSession(), AUTH_TIMEOUT_MS);
       const session = sessionData.session;
@@ -72,20 +92,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       } else {
         set({ loading: false, initialized: true });
       }
-
-      supabase.auth.onAuthStateChange(async (_event, session) => {
-        set({ session, user: session?.user ?? null });
-        if (session?.user) {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("user_id", session.user.id)
-            .single();
-          set({ profile: profile as unknown as UserProfile });
-        } else {
-          set({ profile: null });
-        }
-      });
     } catch {
       set({ user: null, session: null, profile: null, loading: false, initialized: true });
     }

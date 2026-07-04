@@ -37,12 +37,21 @@ export const PullToRefresh = ({ onRefresh, children, className }: PullToRefreshP
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (startYRef.current === null || refreshing) return;
-    const delta = e.touches[0].clientY - startYRef.current;
+    const currentY = e.touches[0].clientY;
+    const delta = currentY - startYRef.current;
     if (delta <= 0) {
       setPullDistance(0);
+      // Re-baseline so a subsequent pull-down (without lifting the finger)
+      // is measured from here, not the original touch point.
+      startYRef.current = currentY;
       return;
     }
     setPullDistance(Math.min(MAX_PULL, delta / RESISTANCE));
+  };
+
+  const resetPull = () => {
+    startYRef.current = null;
+    setPullDistance(0);
   };
 
   const handleTouchEnd = async () => {
@@ -72,6 +81,7 @@ export const PullToRefresh = ({ onRefresh, children, className }: PullToRefreshP
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      onTouchCancel={resetPull}
     >
       <div
         className="flex items-center justify-center overflow-hidden transition-[height] duration-150 ease-out"
