@@ -11,6 +11,15 @@ export const useCustomers = (truckId?: string) => {
   const triggerRefresh = useSyncStore((s) => s.triggerRefresh);
 
   const fetchCustomers = useCallback(async () => {
+    // Show cached data immediately (if this page has been opened online
+    // before) so it never blocks on the network; refresh silently
+    // underneath and keep the cache showing if that refresh fails.
+    const cached = await db.customers.where("truck_id").equals(truckId || "").toArray();
+    if (cached.length > 0) {
+      setCustomers(cached as unknown as Customer[]);
+      setLoading(false);
+    }
+
     try {
       const { data, error } = await customersRepo.fetchAll(truckId);
       if (error) throw error;
@@ -25,13 +34,7 @@ export const useCustomers = (truckId?: string) => {
         }))
       );
     } catch {
-      const cached = await db.customers
-        .where("truck_id")
-        .equals(truckId || "")
-        .toArray();
-      if (cached.length > 0) {
-        setCustomers(cached as unknown as Customer[]);
-      }
+      // Network failed — cached data (if any) is already shown above.
     }
   }, [truckId]);
 

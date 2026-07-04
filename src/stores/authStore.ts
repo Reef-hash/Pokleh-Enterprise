@@ -1,6 +1,9 @@
 import { create } from "zustand";
 import { supabase } from "@/integrations/supabase/client";
+import { withTimeout } from "@/lib/withTimeout";
 import type { User, Session } from "@supabase/supabase-js";
+
+const AUTH_TIMEOUT_MS = 8000;
 
 export interface UserProfile {
   id: string;
@@ -48,15 +51,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   restoreSession: async () => {
     set({ loading: true });
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
+      const { data: sessionData } = await withTimeout(supabase.auth.getSession(), AUTH_TIMEOUT_MS);
       const session = sessionData.session;
 
       if (session?.user) {
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("user_id", session.user.id)
-          .single();
+        const { data: profile, error: profileError } = await withTimeout(
+          supabase.from("profiles").select("*").eq("user_id", session.user.id).single(),
+          AUTH_TIMEOUT_MS
+        );
 
         if (profileError) throw profileError;
 

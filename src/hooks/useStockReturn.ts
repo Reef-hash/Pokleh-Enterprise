@@ -12,6 +12,15 @@ export const useStockReturn = (truckId?: string) => {
   const userId = useAuthStore((s) => s.user?.id);
 
   const fetchReturns = useCallback(async () => {
+    // Show cached data immediately (if this page has been opened online
+    // before) so it never blocks on the network; refresh silently
+    // underneath and keep the cache showing if that refresh fails.
+    const cached = await db.stockReturns.orderBy("return_date").reverse().toArray();
+    if (cached.length > 0) {
+      setReturns(cached as unknown as StockReturn[]);
+      setLoading(false);
+    }
+
     try {
       const { data, error } = await stockReturnRepo.fetchAll(truckId);
       if (error) throw error;
@@ -20,8 +29,7 @@ export const useStockReturn = (truckId?: string) => {
       setReturns(merged);
       await db.stockReturns.bulkPut(merged as unknown as import("@/lib/db").OfflineStockReturn[]);
     } catch {
-      const cached = await db.stockReturns.orderBy("return_date").reverse().toArray();
-      if (cached.length > 0) setReturns(cached as unknown as StockReturn[]);
+      // Network failed — cached data (if any) is already shown above.
     }
   }, [truckId]);
 

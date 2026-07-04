@@ -13,6 +13,15 @@ export const useSupplierPriceHistory = () => {
   const triggerRefresh = useSyncStore((s) => s.triggerRefresh);
 
   const fetchHistory = useCallback(async () => {
+    // Show cached data immediately (if this page has been opened online
+    // before) so it never blocks on the network; refresh silently
+    // underneath and keep the cache showing if that refresh fails.
+    const cached = await db.supplierPriceHistory.orderBy("effective_date").reverse().toArray();
+    if (cached.length > 0) {
+      setHistory(cached as unknown as SupplierPriceHistory[]);
+      setLoading(false);
+    }
+
     try {
       const { data, error } = await priceHistoryRepo.fetchAll();
       if (error) throw error;
@@ -21,8 +30,7 @@ export const useSupplierPriceHistory = () => {
       setHistory(merged);
       await db.supplierPriceHistory.bulkPut(merged as unknown as import("@/lib/db").OfflineSupplierPriceHistory[]);
     } catch {
-      const cached = await db.supplierPriceHistory.orderBy("effective_date").reverse().toArray();
-      setHistory(cached as unknown as SupplierPriceHistory[]);
+      // Network failed — cached data (if any) is already shown above.
     }
   }, [triggerRefresh]);
 

@@ -14,6 +14,15 @@ export const useSales = () => {
   const triggerRefresh = useSyncStore((s) => s.triggerRefresh);
 
   const fetchSales = useCallback(async () => {
+    // Show cached data immediately (if this page has been opened online
+    // before) so it never blocks on the network; refresh silently
+    // underneath and keep the cache showing if that refresh fails.
+    const cached = await db.sales.orderBy("sale_date").reverse().toArray();
+    if (cached.length > 0) {
+      setSales(cached as unknown as Sale[]);
+      setLoading(false);
+    }
+
     try {
       const { data, error } = await salesRepo.fetchAll();
       if (error) throw error;
@@ -24,8 +33,7 @@ export const useSales = () => {
       setSales(merged);
       await db.sales.bulkPut(merged as unknown as import("@/lib/db").OfflineSale[]);
     } catch {
-      const cached = await db.sales.orderBy("sale_date").reverse().toArray();
-      setSales(cached as unknown as Sale[]);
+      // Network failed — cached data (if any) is already shown above.
     }
   }, []);
 

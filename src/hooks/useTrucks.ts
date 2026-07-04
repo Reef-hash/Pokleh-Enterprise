@@ -12,6 +12,15 @@ export const useTrucks = () => {
   const triggerRefresh = useSyncStore((s) => s.triggerRefresh);
 
   const fetchTrucks = useCallback(async () => {
+    // Show cached data immediately (if this page has been opened online
+    // before) so it never blocks on the network; refresh silently
+    // underneath and keep the cache showing if that refresh fails.
+    const cached = await db.trucks.toArray();
+    if (cached.length > 0) {
+      setTrucks(cached as Truck[]);
+      setLoading(false);
+    }
+
     try {
       const { data, error } = await trucksRepo.fetchAll();
       if (error) throw error;
@@ -19,11 +28,8 @@ export const useTrucks = () => {
       const merged = await mergeUnSyncedData("trucks", result);
       setTrucks(merged);
       await db.trucks.bulkPut(merged.map((t) => ({ ...t, syncedAt: new Date().toISOString() })));
-    } catch (err) {
-      const cached = await db.trucks.toArray();
-      if (cached.length > 0) {
-        setTrucks(cached as Truck[]);
-      }
+    } catch {
+      // Network failed — cached data (if any) is already shown above.
     }
   }, []);
 

@@ -6,11 +6,17 @@ import { trucksRepo } from "@/repositories/trucksRepo";
 import { db } from "@/lib/db";
 import type { OfflineCustomer, OfflineTruck } from "@/lib/db";
 import { useLanguage } from "@/lib/i18n";
+import { withTimeout } from "@/lib/withTimeout";
 
 export type BootPhase = "auth" | "syncing" | "ready";
 
 /** Minimum visible splash time (ms) for that "exclusive" feel */
 const MIN_SPLASH_MS = 2800;
+
+/** Bounds each boot fetch so a stalled request (e.g. network still
+ * reconnecting after the PWA was backgrounded/killed and reopened) can't
+ * leave the splash screen spinning forever. */
+const FETCH_TIMEOUT_MS = 8000;
 
 /**
  * Orchestrates the app boot sequence:
@@ -79,7 +85,7 @@ export const useAppBootstrap = () => {
     const results = await Promise.allSettled([
       // Customers
       (async () => {
-        const { data, error } = await customersRepo.fetchAll();
+        const { data, error } = await withTimeout(customersRepo.fetchAll(), FETCH_TIMEOUT_MS);
         if (error) throw error;
         const customers = (data || []) as unknown as OfflineCustomer[];
         if (customers.length > 0) {
@@ -89,7 +95,7 @@ export const useAppBootstrap = () => {
       })(),
       // Trucks
       (async () => {
-        const { data, error } = await trucksRepo.fetchAll();
+        const { data, error } = await withTimeout(trucksRepo.fetchAll(), FETCH_TIMEOUT_MS);
         if (error) throw error;
         const trucks = (data || []) as unknown as OfflineTruck[];
         if (trucks.length > 0) {
@@ -99,7 +105,7 @@ export const useAppBootstrap = () => {
       })(),
       // Process offline sync queue
       (async () => {
-        await processNow();
+        await withTimeout(processNow(), FETCH_TIMEOUT_MS);
       })(),
     ]);
 
