@@ -12,6 +12,15 @@ export const useStockDistribution = (intakeId?: string) => {
   const userId = useAuthStore((s) => s.user?.id);
 
   const fetchDistributions = useCallback(async () => {
+    // Show cached data immediately (if this page has been opened online
+    // before) so it never blocks on the network; refresh silently
+    // underneath and keep the cache showing if that refresh fails.
+    const cached = await db.stockDistributions.orderBy("created_at").reverse().toArray();
+    if (cached.length > 0) {
+      setDistributions(cached as unknown as StockDistribution[]);
+      setLoading(false);
+    }
+
     try {
       const { data, error } = await stockDistributionRepo.fetchAll(intakeId);
       if (error) throw error;
@@ -20,8 +29,7 @@ export const useStockDistribution = (intakeId?: string) => {
       setDistributions(merged);
       await db.stockDistributions.bulkPut(merged as unknown as import("@/lib/db").OfflineStockDistribution[]);
     } catch {
-      const cached = await db.stockDistributions.orderBy("created_at").reverse().toArray();
-      if (cached.length > 0) setDistributions(cached as unknown as StockDistribution[]);
+      // Network failed — cached data (if any) is already shown above.
     }
   }, [intakeId]);
 

@@ -20,26 +20,44 @@ export const useStockWastage = () => {
   const triggerRefresh = useSyncStore((s) => s.triggerRefresh);
 
   const fetchWastages = useCallback(async () => {
+    // Show cached data immediately (if this page has been opened online
+    // before) so it never blocks on the network; refresh silently
+    // underneath and keep the cache showing if that refresh fails.
+    const cached = await db.stockWastages?.toArray();
+    if (cached?.length) {
+      setWastages(cached as unknown as StockWastage[]);
+      setLoading(false);
+    }
+
     try {
       const { data, error } = await wastageRepo.fetchAll();
       if (error) throw error;
       const result = (data || []) as unknown as StockWastage[];
       setWastages(result);
+      if (result.length > 0) await db.stockWastages?.bulkPut(result as unknown as import("@/lib/db").OfflineStockWastage[]);
     } catch {
-      const cached = await db.stockWastages?.toArray();
-      if (cached?.length) setWastages(cached as unknown as StockWastage[]);
+      // Network failed — cached data (if any) is already shown above.
     }
   }, []);
 
   const fetchAdjustments = useCallback(async () => {
+    // Show cached data immediately (if this page has been opened online
+    // before) so it never blocks on the network; refresh silently
+    // underneath and keep the cache showing if that refresh fails.
+    const cached = await db.wastageAdjustments?.toArray();
+    if (cached?.length) {
+      setAdjustments(cached as unknown as WastageAdjustment[]);
+      setLoading(false);
+    }
+
     try {
       const { data, error } = await wastageAdjustmentRepo.fetchAll();
       if (error) throw error;
       const result = (data || []) as unknown as WastageAdjustment[];
       setAdjustments(result);
+      if (result.length > 0) await db.wastageAdjustments?.bulkPut(result as unknown as import("@/lib/db").OfflineWastageAdjustment[]);
     } catch {
-      const cached = await db.wastageAdjustments?.toArray();
-      if (cached?.length) setAdjustments(cached as unknown as WastageAdjustment[]);
+      // Network failed — cached data (if any) is already shown above.
     }
   }, []);
 

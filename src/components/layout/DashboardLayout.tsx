@@ -34,6 +34,7 @@ import { HelpSlidePanel } from "@/components/help/HelpSlidePanel";
 import { Logo } from "@/components/ui/Logo";
 import { getHelpContent } from "@/lib/help-content";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import { PullToRefresh } from "@/components/ui/PullToRefresh";
 import { useSyncStore } from "@/stores/syncStore";
 import { BottomNavigation } from "./BottomNavigation";
 
@@ -359,10 +360,12 @@ export const DashboardLayout = ({
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-auto p-4 pb-24 lg:pb-4 content-scroll">
-          <div className="animate-fade-in-up">
-            {children}
-          </div>
+        <main className="flex-1 min-h-0 flex flex-col">
+          <PullToRefresh onRefresh={handleSync} className="flex-1 overflow-auto p-4 pb-24 lg:pb-4 content-scroll">
+            <div className="animate-fade-in-up">
+              {children}
+            </div>
+          </PullToRefresh>
         </main>
       </div>
 

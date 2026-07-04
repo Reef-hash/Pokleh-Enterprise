@@ -16,6 +16,15 @@ export const useStockIntake = () => {
   const userId = useAuthStore((s) => s.user?.id);
 
   const fetchIntakes = useCallback(async () => {
+    // Show cached data immediately (if this page has been opened online
+    // before) so it never blocks on the network; refresh silently
+    // underneath and keep the cache showing if that refresh fails.
+    const cached = await db.stockIntakes.orderBy("intake_date").reverse().toArray();
+    if (cached.length > 0) {
+      setIntakes(cached as unknown as StockIntake[]);
+      setLoading(false);
+    }
+
     try {
       const { data, error } = await stockIntakeRepo.fetchAll();
       if (error) throw error;
@@ -24,8 +33,7 @@ export const useStockIntake = () => {
       setIntakes(merged);
       await db.stockIntakes.bulkPut(merged as unknown as import("@/lib/db").OfflineStockIntake[]);
     } catch {
-      const cached = await db.stockIntakes.orderBy("intake_date").reverse().toArray();
-      if (cached.length > 0) setIntakes(cached as unknown as StockIntake[]);
+      // Network failed — cached data (if any) is already shown above.
     }
   }, []);
 

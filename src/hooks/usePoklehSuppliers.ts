@@ -11,6 +11,15 @@ export const usePoklehSuppliers = () => {
   const triggerRefresh = useSyncStore((s) => s.triggerRefresh);
 
   const fetchSuppliers = useCallback(async () => {
+    // Show cached data immediately (if this page has been opened online
+    // before) so it never blocks on the network; refresh silently
+    // underneath and keep the cache showing if that refresh fails.
+    const cached = await db.suppliers.toArray();
+    if (cached.length > 0) {
+      setSuppliers(cached as unknown as Supplier[]);
+      setLoading(false);
+    }
+
     try {
       const { data, error } = await suppliersRepo.fetchAll();
       if (error) throw error;
@@ -21,8 +30,7 @@ export const usePoklehSuppliers = () => {
         merged.map((s) => ({ ...s, updatedAt: s.updated_at, syncedAt: new Date().toISOString() }))
       );
     } catch {
-      const cached = await db.suppliers.toArray();
-      if (cached.length > 0) setSuppliers(cached as unknown as Supplier[]);
+      // Network failed — cached data (if any) is already shown above.
     }
   }, []);
 

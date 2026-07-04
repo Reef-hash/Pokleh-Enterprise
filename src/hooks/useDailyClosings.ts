@@ -13,6 +13,15 @@ export const useDailyClosings = () => {
   const userId = useAuthStore((s) => s.user?.id);
 
   const fetchClosings = useCallback(async () => {
+    // Show cached data immediately (if this page has been opened online
+    // before) so it never blocks on the network; refresh silently
+    // underneath and keep the cache showing if that refresh fails.
+    const cached = await db.dailyClosings.orderBy("closing_date").reverse().toArray();
+    if (cached.length > 0) {
+      setClosings(cached as unknown as DailyClosing[]);
+      setLoading(false);
+    }
+
     try {
       const { data, error } = await closingRepo.fetchAll();
       if (error) throw error;
@@ -20,8 +29,7 @@ export const useDailyClosings = () => {
       setClosings(result);
       await db.dailyClosings.bulkPut(result as unknown as import("@/lib/db").OfflineDailyClosing[]);
     } catch {
-      const cached = await db.dailyClosings.orderBy("closing_date").reverse().toArray();
-      setClosings(cached as unknown as DailyClosing[]);
+      // Network failed — cached data (if any) is already shown above.
     }
   }, []);
 

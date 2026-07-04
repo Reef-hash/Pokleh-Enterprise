@@ -13,6 +13,15 @@ export const useDebtLedger = () => {
   const userId = useAuthStore((s) => s.user?.id);
 
   const fetchEntries = useCallback(async () => {
+    // Show cached data immediately (if this page has been opened online
+    // before) so it never blocks on the network; refresh silently
+    // underneath and keep the cache showing if that refresh fails.
+    const cached = await db.debtLedger.orderBy("created_at").reverse().toArray();
+    if (cached.length > 0) {
+      setEntries(cached as unknown as DebtLedgerEntry[]);
+      setLoading(false);
+    }
+
     try {
       const { data, error } = await debtLedgerRepo.fetchAll();
       if (error) throw error;
@@ -21,8 +30,7 @@ export const useDebtLedger = () => {
       setEntries(merged);
       await db.debtLedger.bulkPut(merged as unknown as import("@/lib/db").OfflineDebtLedgerEntry[]);
     } catch {
-      const cached = await db.debtLedger.orderBy("created_at").reverse().toArray();
-      setEntries(cached as unknown as DebtLedgerEntry[]);
+      // Network failed — cached data (if any) is already shown above.
     }
   }, []);
 

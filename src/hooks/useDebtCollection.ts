@@ -13,6 +13,15 @@ export const useDebtCollection = () => {
   const triggerRefresh = useSyncStore((s) => s.triggerRefresh);
 
   const fetchCollections = useCallback(async () => {
+    // Show cached data immediately (if this page has been opened online
+    // before) so it never blocks on the network; refresh silently
+    // underneath and keep the cache showing if that refresh fails.
+    const cached = await db.debtCollections.orderBy("collection_date").reverse().toArray();
+    if (cached.length > 0) {
+      setCollections(cached as unknown as DebtCollection[]);
+      setLoading(false);
+    }
+
     try {
       const { data, error } = await debtCollectionRepo.fetchAll();
       if (error) throw error;
@@ -21,8 +30,7 @@ export const useDebtCollection = () => {
       setCollections(merged);
       await db.debtCollections.bulkPut(merged as unknown as import("@/lib/db").OfflineDebtCollection[]);
     } catch {
-      const cached = await db.debtCollections.orderBy("collection_date").reverse().toArray();
-      setCollections(cached as unknown as DebtCollection[]);
+      // Network failed — cached data (if any) is already shown above.
     }
   }, []);
 

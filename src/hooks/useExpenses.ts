@@ -12,6 +12,15 @@ export const useExpenses = () => {
   const userId = useAuthStore((s) => s.user?.id);
 
   const fetchExpenses = useCallback(async () => {
+    // Show cached data immediately (if this page has been opened online
+    // before) so it never blocks on the network; refresh silently
+    // underneath and keep the cache showing if that refresh fails.
+    const cached = await db.expenses.orderBy("expense_date").reverse().toArray();
+    if (cached.length > 0) {
+      setExpenses(cached as unknown as Expense[]);
+      setLoading(false);
+    }
+
     try {
       const { data, error } = await expensesRepo.fetchAll();
       if (error) throw error;
@@ -20,8 +29,7 @@ export const useExpenses = () => {
       setExpenses(merged);
       await db.expenses.bulkPut(merged as unknown as import("@/lib/db").OfflineExpense[]);
     } catch {
-      const cached = await db.expenses.orderBy("expense_date").reverse().toArray();
-      setExpenses(cached as unknown as Expense[]);
+      // Network failed — cached data (if any) is already shown above.
     }
   }, []);
 
