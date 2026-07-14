@@ -42,5 +42,5 @@ export const billingConfig: BillingConfig = {
   ],
   qrImage: '/payment-qr.jpg',
   contactName: 'Zarif',
-  contactPhone: 'TODO: phone number',
+  contactPhone: '01155598954',
 };
