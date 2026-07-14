@@ -19,6 +19,8 @@ export interface BillingConfig {
     label: string;
     value: string;
   }[];
+  /** Path (under /public) to a DuitNow QR / scan-and-pay image, or null to hide it. */
+  qrImage: string | null;
   contactName: string;
   contactPhone: string;
 }
@@ -34,9 +36,11 @@ export const billingConfig: BillingConfig = {
   dueDate: '2026-07-28',
   status: 'unpaid',
   paymentMethods: [
-    { label: 'Bank', value: 'TODO: bank name + account no.' },
-    { label: 'DuitNow / E-wallet', value: 'TODO: phone number' },
+    { label: 'Bank', value: 'Maybank' },
+    { label: 'No. Akaun', value: '153048106549' },
+    { label: 'Nama Pemegang Akaun', value: 'Zarif El Mansour Bin Esidil Hamzah' },
   ],
+  qrImage: '/payment-qr.jpg',
   contactName: 'Zarif',
   contactPhone: 'TODO: phone number',
 };

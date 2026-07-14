@@ -114,6 +114,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'billing.balance-due': 'Baki Tertunggak',
     'billing.notice': 'Sistem ini dibangunkan oleh {provider} secara sekali bayar (bukan langganan). Sila selesaikan baki pembayaran sebelum {date} untuk memastikan sokongan dan perkhidmatan berterusan.',
     'billing.pay-to': 'Bayaran kepada {provider}',
+    'billing.qr-alt': 'Kod QR DuitNow untuk bayaran',
     'billing.contact': 'Hubungi',
 
     'dashboard.total-sales': 'Jumlah Jualan',
@@ -872,6 +873,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'billing.balance-due': 'Balance Due',
     'billing.notice': 'This system was built by {provider} as a one-off project, not a subscription. Please settle the balance before {date} to keep support and service running.',
     'billing.pay-to': 'Payment to {provider}',
+    'billing.qr-alt': 'DuitNow QR code for payment',
     'billing.contact': 'Contact',
 
     'dashboard.total-sales': 'Total Sales',
