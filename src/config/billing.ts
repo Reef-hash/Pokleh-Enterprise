@@ -1,17 +1,20 @@
 /**
- * Service & hosting billing info shown to the app owner (admin) on the dashboard.
- * Edit the values below with real figures/dates/payment details before relying on this.
+ * One-off development payment + hosting/database info shown to the app owner
+ * (admin) on the dashboard. Edit the values below with real figures/dates/
+ * payment details before relying on this.
  */
 export interface BillingConfig {
   providerName: string;
   hostingProvider: string;
   databaseProvider: string;
+  /** Monthly infra cost Catalysm Inc currently absorbs while payment is pending. */
   monthlyHostingCost: number;
   monthlyDatabaseCost: number;
-  monthlyMaintenanceCost: number;
-  billingCycleStart: string; // ISO date, e.g. "2026-06-14"
-  dueDate: string; // ISO date, e.g. "2026-07-14"
-  status: 'paid' | 'due' | 'overdue';
+  /** One-off development fee for building the app — not a subscription. */
+  projectFee: number;
+  amountPaid: number;
+  dueDate: string; // ISO date, e.g. "2026-07-28"
+  status: 'paid' | 'unpaid' | 'overdue';
   paymentMethods: {
     label: string;
     value: string;
@@ -26,10 +29,10 @@ export const billingConfig: BillingConfig = {
   databaseProvider: 'Supabase',
   monthlyHostingCost: 0,
   monthlyDatabaseCost: 0,
-  monthlyMaintenanceCost: 0,
-  billingCycleStart: '2026-06-14',
-  dueDate: '2026-07-14',
-  status: 'due',
+  projectFee: 0,
+  amountPaid: 0,
+  dueDate: '2026-07-28',
+  status: 'unpaid',
   paymentMethods: [
     { label: 'Bank', value: 'TODO: bank name + account no.' },
     { label: 'DuitNow / E-wallet', value: 'TODO: phone number' },

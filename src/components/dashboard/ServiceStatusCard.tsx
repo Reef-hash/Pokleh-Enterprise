@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
 import { ServerCog, Database, ChevronDown, CircleCheck, Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/lib/i18n";
@@ -13,10 +12,8 @@ export const ServiceStatusCard = () => {
   const { t } = useLanguage();
   const [open, setOpen] = useState(true);
 
-  const totalMonthly =
-    billingConfig.monthlyHostingCost +
-    billingConfig.monthlyDatabaseCost +
-    billingConfig.monthlyMaintenanceCost;
+  const balanceDue = Math.max(billingConfig.projectFee - billingConfig.amountPaid, 0);
+  const monthlyInfraCost = billingConfig.monthlyHostingCost + billingConfig.monthlyDatabaseCost;
 
   const dueDate = new Date(billingConfig.dueDate).toLocaleDateString('ms-MY', {
     day: 'numeric', month: 'long', year: 'numeric',
@@ -24,7 +21,7 @@ export const ServiceStatusCard = () => {
 
   const statusBadge = {
     paid: { label: t('billing.status-paid'), className: 'bg-emerald-500/15 text-emerald-600 border-emerald-500/30' },
-    due: { label: t('billing.status-due'), className: 'bg-amber-500/15 text-amber-600 border-amber-500/30' },
+    unpaid: { label: t('billing.status-unpaid'), className: 'bg-amber-500/15 text-amber-600 border-amber-500/30' },
     overdue: { label: t('billing.status-overdue'), className: 'bg-destructive/15 text-destructive border-destructive/30' },
   }[billingConfig.status];
 
@@ -74,30 +71,36 @@ export const ServiceStatusCard = () => {
             </div>
           </div>
 
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            {t('billing.infra-notice')
+              .replace('{provider}', billingConfig.providerName)
+              .replace('{amount}', formatCurrency(monthlyInfraCost))}
+          </p>
+
           <Separator />
 
-          <div className="space-y-1 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">{t('billing.hosting-cost')}</span>
-              <span>{formatCurrency(billingConfig.monthlyHostingCost)}</span>
+          <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 space-y-1">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">{t('billing.project-fee')}</span>
+              <span>{formatCurrency(billingConfig.projectFee)}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">{t('billing.database-cost')}</span>
-              <span>{formatCurrency(billingConfig.monthlyDatabaseCost)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">{t('billing.maintenance-cost')}</span>
-              <span>{formatCurrency(billingConfig.monthlyMaintenanceCost)}</span>
-            </div>
+            {billingConfig.amountPaid > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">{t('billing.amount-paid')}</span>
+                <span>{formatCurrency(billingConfig.amountPaid)}</span>
+              </div>
+            )}
             <Separator className="my-1.5" />
-            <div className="flex justify-between font-semibold">
-              <span>{t('billing.total-monthly')}</span>
-              <span>{formatCurrency(totalMonthly)}</span>
+            <div className="flex justify-between font-semibold text-base">
+              <span>{t('billing.balance-due')}</span>
+              <span className="text-amber-600">{formatCurrency(balanceDue)}</span>
             </div>
           </div>
 
           <p className="text-xs text-muted-foreground leading-relaxed">
-            {t('billing.notice').replace('{provider}', billingConfig.providerName).replace('{date}', dueDate)}
+            {t('billing.notice')
+              .replace('{provider}', billingConfig.providerName)
+              .replace('{date}', dueDate)}
           </p>
 
           <div className="rounded-lg bg-muted/50 p-3 space-y-1.5">
