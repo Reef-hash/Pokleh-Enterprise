@@ -14,3 +14,9 @@ export function blockIfBillingLocked(): boolean {
   toast.error(LOCK_MESSAGE);
   return true;
 }
+
+/** Builds a wa.me link to the billing contact with a prefilled message. */
+export function buildBillingWhatsAppLink(phone: string, message: string): string {
+  const digits = phone.replace(/\D/g, "").replace(/^0/, "60");
+  return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
+}

@@ -1,7 +1,7 @@
 /**
- * One-off development payment + hosting/database info shown to the app owner
- * (admin) on the dashboard. Edit the values below with real figures/dates/
- * payment details before relying on this.
+ * One-off development payment + hosting/database info shown app-wide while
+ * payment is outstanding. Edit the values below with real figures/dates
+ * before relying on this.
  */
 export interface BillingConfig {
   providerName: string;
@@ -19,13 +19,8 @@ export interface BillingConfig {
   amountPaid: number;
   dueDate: string; // ISO date, e.g. "2026-07-28"
   status: 'paid' | 'unpaid' | 'overdue';
-  paymentMethods: {
-    label: string;
-    value: string;
-  }[];
-  /** Path (under /public) to a DuitNow QR / scan-and-pay image, or null to hide it. */
-  qrImage: string | null;
   contactName: string;
+  /** Local Malaysian format, e.g. "01155598954" — used to build the WhatsApp deep link. */
   contactPhone: string;
 }
 
@@ -39,12 +34,6 @@ export const billingConfig: BillingConfig = {
   amountPaid: 0,
   dueDate: '2026-07-28',
   status: 'unpaid',
-  paymentMethods: [
-    { label: 'Bank', value: 'Maybank' },
-    { label: 'No. Akaun', value: '153048106549' },
-    { label: 'Nama Pemegang Akaun', value: 'Zarif El Mansour Bin Esidil Hamzah' },
-  ],
-  qrImage: '/payment-qr.jpg',
   contactName: 'Zarif',
   contactPhone: '01155598954',
 };

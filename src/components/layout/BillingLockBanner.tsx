@@ -8,11 +8,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { TriangleAlert, ServerCog, Database, CircleCheck, Phone } from "lucide-react";
+import { TriangleAlert, ServerCog, Database, CircleCheck, MessageCircle } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 import { formatCurrency } from "@/lib/currency";
 import { billingConfig } from "@/config/billing";
-import { isBillingLocked } from "@/lib/billingLock";
+import { isBillingLocked, buildBillingWhatsAppLink } from "@/lib/billingLock";
 
 export const BillingLockBanner = () => {
   const { t } = useLanguage();
@@ -25,6 +25,13 @@ export const BillingLockBanner = () => {
   const dueDate = new Date(billingConfig.dueDate).toLocaleDateString('ms-MY', {
     day: 'numeric', month: 'long', year: 'numeric',
   });
+
+  const whatsappLink = buildBillingWhatsAppLink(
+    billingConfig.contactPhone,
+    t('billing.whatsapp-message')
+      .replace('{amount}', formatCurrency(balanceDue))
+      .replace('{provider}', billingConfig.providerName)
+  );
 
   return (
     <>
@@ -106,35 +113,12 @@ export const BillingLockBanner = () => {
                 .replace('{date}', dueDate)}
             </p>
 
-            <div className="rounded-lg bg-muted/50 p-3 space-y-3">
-              <p className="text-sm font-semibold text-center">{t('billing.pay-to').replace('{provider}', billingConfig.providerName)}</p>
-
-              {billingConfig.qrImage && (
-                <div className="flex justify-center">
-                  <img
-                    src={billingConfig.qrImage}
-                    alt={t('billing.qr-alt')}
-                    className="w-full max-w-[220px] rounded-lg border bg-white p-1"
-                  />
-                </div>
-              )}
-
-              <div className="space-y-1.5">
-                {billingConfig.paymentMethods.map((m) => (
-                  <div key={m.label} className="flex justify-between gap-2 text-sm">
-                    <span className="text-muted-foreground shrink-0">{m.label}</span>
-                    <span className="font-medium text-right">{m.value}</span>
-                  </div>
-                ))}
-              </div>
-
-              <Separator />
-
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground flex items-center gap-1"><Phone className="h-3.5 w-3.5" />{t('billing.contact')}</span>
-                <span className="font-medium">{billingConfig.contactName} — {billingConfig.contactPhone}</span>
-              </div>
-            </div>
+            <Button asChild className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">
+              <a href={whatsappLink} target="_blank" rel="noopener noreferrer">
+                <MessageCircle className="h-4 w-4 mr-2" />
+                {t('billing.whatsapp-cta')}
+              </a>
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
