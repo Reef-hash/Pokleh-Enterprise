@@ -3,6 +3,7 @@ import { syncEngine } from "@/services/sync";
 import { toast } from "sonner";
 import { getUserFriendlyError } from "@/lib/errors";
 import { db } from "@/lib/db";
+import { blockIfBillingLocked } from "@/lib/billingLock";
 
 export interface PersistConfig<T> {
   entity: string;
@@ -31,6 +32,7 @@ export async function persistWrite<T>(config: PersistConfig<T>): Promise<Persist
   const { entity, action, userId, data, id, execute, optimistic, onSuccess, dexiePut, dexieDelete, cacheOffline, msg } = config;
 
   if (userId === undefined || userId === null) return { success: false };
+  if (blockIfBillingLocked()) return { success: false };
 
   // Offline path
   if (!offlineDetector.isOnline) {

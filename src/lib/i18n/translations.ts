@@ -103,6 +103,9 @@ export const translations: Record<Language, Record<string, string>> = {
     // Billing / service status
     'billing.card-title': 'Status Pembayaran Pembangunan',
     'billing.card-subtitle': 'Hosting & pangkalan data sistem ini',
+    'billing.banner-title': 'Akses terhad — hanya boleh melihat data',
+    'billing.banner-desc': 'Sistem ini dikunci kepada mod lihat sahaja (tidak boleh tambah/kemas kini) sehingga bayaran diselesaikan.',
+    'billing.view-details': 'Lihat Butiran',
     'billing.status-paid': 'Telah Dibayar',
     'billing.status-unpaid': 'Belum Dibayar',
     'billing.status-overdue': 'Lewat Bayar',
@@ -862,6 +865,9 @@ export const translations: Record<Language, Record<string, string>> = {
     // Billing / service status
     'billing.card-title': 'Development Payment Status',
     'billing.card-subtitle': 'Hosting & database for this system',
+    'billing.banner-title': 'Access restricted — view only',
+    'billing.banner-desc': 'This system is locked to view-only mode (no adding/editing) until payment is settled.',
+    'billing.view-details': 'View Details',
     'billing.status-paid': 'Paid',
     'billing.status-unpaid': 'Unpaid',
     'billing.status-overdue': 'Overdue',

@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
 import { mergeUnSyncedData } from "@/lib/writeHelper";
+import { blockIfBillingLocked } from "@/lib/billingLock";
 import type { DebtLedgerEntry } from "@/types/pokleh";
 
 export const useDebtLedger = () => {
@@ -44,6 +45,7 @@ export const useDebtLedger = () => {
     balance_after: number;
   }) => {
     if (!userId) return { success: false, error: "Not authenticated" };
+    if (blockIfBillingLocked()) return { success: false, error: "Billing locked" };
     const { data, error } = await debtLedgerRepo.create({ ...input, created_by: userId });
     if (error) {
       toast.error(error.message);

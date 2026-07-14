@@ -37,6 +37,7 @@ import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { PullToRefresh } from "@/components/ui/PullToRefresh";
 import { useSyncStore } from "@/stores/syncStore";
 import { BottomNavigation } from "./BottomNavigation";
+import { BillingLockBanner } from "./BillingLockBanner";
 
 interface User {
   id: string;
@@ -358,6 +359,8 @@ export const DashboardLayout = ({
             <HelpButton />
           </div>
         </header>
+
+        <BillingLockBanner />
 
         {/* Page content */}
         <main className="flex-1 min-h-0 flex flex-col">

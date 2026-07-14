@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import type { SupplierSettlement } from "@/types/pokleh";
 import { useAuthStore } from "@/stores/authStore";
 import { getUserFriendlyError } from "@/lib/errors";
+import { blockIfBillingLocked } from "@/lib/billingLock";
 
 export const useSettlements = () => {
   const [settlements, setSettlements] = useState<SupplierSettlement[]>([]);
@@ -29,6 +30,7 @@ export const useSettlements = () => {
   }, []);
 
   const calculateSettlement = async (intakeId: string) => {
+    if (blockIfBillingLocked()) return { success: false };
     try {
       const intake = settlements.find((s) => s.intake_id === intakeId)?.intake;
       if (!intake) {
@@ -135,6 +137,7 @@ export const useSettlements = () => {
 
   const markSettled = async (id: string) => {
     if (!userId) return { success: false };
+    if (blockIfBillingLocked()) return { success: false };
 
     if (!offlineDetector.isOnline) {
       await syncEngine.enqueue({
