@@ -7,7 +7,11 @@ export interface BillingConfig {
   providerName: string;
   hostingProvider: string;
   databaseProvider: string;
-  /** Monthly infra cost Catalysm Inc currently absorbs while payment is pending. */
+  /**
+   * Monthly infra cost Catalysm Inc currently absorbs while payment is pending.
+   * Priced at each provider's entry-level paid plan (Vercel Pro / Supabase Pro),
+   * converted from USD at ~RM4.08/USD.
+   */
   monthlyHostingCost: number;
   monthlyDatabaseCost: number;
   /** One-off development fee for building the app — not a subscription. */
@@ -29,9 +33,9 @@ export const billingConfig: BillingConfig = {
   providerName: 'Catalysm Inc',
   hostingProvider: 'Vercel',
   databaseProvider: 'Supabase',
-  monthlyHostingCost: 0,
-  monthlyDatabaseCost: 0,
-  projectFee: 0,
+  monthlyHostingCost: 82, // Vercel Pro — USD 20/mo
+  monthlyDatabaseCost: 102, // Supabase Pro — USD 25/mo
+  projectFee: 770,
   amountPaid: 0,
   dueDate: '2026-07-28',
   status: 'unpaid',
