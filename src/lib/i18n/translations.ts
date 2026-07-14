@@ -103,6 +103,9 @@ export const translations: Record<Language, Record<string, string>> = {
     // Billing / service status
     'billing.card-title': 'Status Pembayaran Pembangunan',
     'billing.card-subtitle': 'Hosting & pangkalan data sistem ini',
+    'billing.banner-title': 'Akses terhad — hanya boleh melihat data',
+    'billing.banner-desc': 'Sistem ini dikunci kepada mod lihat sahaja (tidak boleh tambah/kemas kini) sehingga bayaran diselesaikan.',
+    'billing.view-details': 'Lihat Butiran',
     'billing.status-paid': 'Telah Dibayar',
     'billing.status-unpaid': 'Belum Dibayar',
     'billing.status-overdue': 'Lewat Bayar',
@@ -113,9 +116,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'billing.amount-paid': 'Telah Dibayar',
     'billing.balance-due': 'Baki Tertunggak',
     'billing.notice': 'Sistem ini dibangunkan oleh {provider} secara sekali bayar (bukan langganan). Sila selesaikan baki pembayaran sebelum {date} untuk memastikan sokongan dan perkhidmatan berterusan.',
-    'billing.pay-to': 'Bayaran kepada {provider}',
-    'billing.qr-alt': 'Kod QR DuitNow untuk bayaran',
-    'billing.contact': 'Hubungi',
+    'billing.whatsapp-cta': 'Selesaikan di WhatsApp',
+    'billing.whatsapp-message': 'Hai! Nak follow up pasal sistem Pokleh — hosting & pangkalan data (Vercel/Supabase) perlukan bayaran bulanan untuk terus jalan, dan baki bayaran pembangunan ({amount}) kepada {provider} pun belum settle. Bila boleh kita selesaikan?',
 
     'dashboard.total-sales': 'Jumlah Jualan',
     'dashboard.total-expenses': 'Jumlah Perbelanjaan',
@@ -862,6 +864,9 @@ export const translations: Record<Language, Record<string, string>> = {
     // Billing / service status
     'billing.card-title': 'Development Payment Status',
     'billing.card-subtitle': 'Hosting & database for this system',
+    'billing.banner-title': 'Access restricted — view only',
+    'billing.banner-desc': 'This system is locked to view-only mode (no adding/editing) until payment is settled.',
+    'billing.view-details': 'View Details',
     'billing.status-paid': 'Paid',
     'billing.status-unpaid': 'Unpaid',
     'billing.status-overdue': 'Overdue',
@@ -872,9 +877,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'billing.amount-paid': 'Amount Paid',
     'billing.balance-due': 'Balance Due',
     'billing.notice': 'This system was built by {provider} as a one-off project, not a subscription. Please settle the balance before {date} to keep support and service running.',
-    'billing.pay-to': 'Payment to {provider}',
-    'billing.qr-alt': 'DuitNow QR code for payment',
-    'billing.contact': 'Contact',
+    'billing.whatsapp-cta': 'Settle via WhatsApp',
+    'billing.whatsapp-message': 'Hi! Following up on the Pokleh system — hosting & database (Vercel/Supabase) need a monthly fee to keep running, and the outstanding development balance ({amount}) to {provider} is still unpaid. When can we settle this?',
 
     'dashboard.total-sales': 'Total Sales',
     'dashboard.total-expenses': 'Total Expenses',

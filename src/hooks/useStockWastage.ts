@@ -7,6 +7,7 @@ import { offlineDetector } from "@/services/offline";
 import { syncEngine } from "@/services/sync";
 import { toast } from "sonner";
 import { getUserFriendlyError } from "@/lib/errors";
+import { blockIfBillingLocked } from "@/lib/billingLock";
 import type { StockWastage, WastageAdjustment } from "@/types/pokleh";
 
 export const useStockWastage = () => {
@@ -70,6 +71,7 @@ export const useStockWastage = () => {
     notes?: string;
   }) => {
     if (!userId) return { success: false, error: "Not authenticated" };
+    if (blockIfBillingLocked()) return { success: false, error: "Billing locked" };
 
     const now = new Date().toISOString();
     const record = {
@@ -127,6 +129,7 @@ export const useStockWastage = () => {
     adjustment_date: string;
   }) => {
     if (!userId) return { success: false, error: "Not authenticated" };
+    if (blockIfBillingLocked()) return { success: false, error: "Billing locked" };
 
     const record = {
       intake_id: data.intake_id,

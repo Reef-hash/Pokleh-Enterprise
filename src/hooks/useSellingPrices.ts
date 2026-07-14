@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useSyncStore } from "@/stores/syncStore";
 import { sellingPriceRepo } from "@/repositories/sellingPriceRepo";
 import { mergeUnSyncedData } from "@/lib/writeHelper";
+import { blockIfBillingLocked } from "@/lib/billingLock";
 import { toast } from "sonner";
 import type { SellingPrice, ProductType } from "@/types/pokleh";
 
@@ -42,6 +43,7 @@ export const useSellingPrices = () => {
     price_per_pax: number;
     notes?: string | null;
   }) => {
+    if (blockIfBillingLocked()) return { success: false };
     const { data: result, error } = await sellingPriceRepo.setPrice(data);
     if (error) { toast.error("Gagal simpan harga"); return { success: false }; }
     const updated = result as unknown as SellingPrice;
@@ -56,6 +58,7 @@ export const useSellingPrices = () => {
   };
 
   const deletePrice = async (id: string) => {
+    if (blockIfBillingLocked()) return;
     const { error } = await sellingPriceRepo.delete(id);
     if (error) { toast.error("Gagal padam"); return; }
     setPrices((prev) => prev.filter((p) => p.id !== id));

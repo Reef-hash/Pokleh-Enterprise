@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package, Users, Truck, ArrowLeftRight, DollarSign } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
 import { SkeletonDashboard } from "@/components/ui/skeleton";
-import { ServiceStatusCard } from "@/components/dashboard/ServiceStatusCard";
 
 interface PoklehDashboardProps {
   user: { id: string; email: string; role: string; name: string };
@@ -41,8 +40,6 @@ export const PoklehDashboard = ({ user, onNavigate }: PoklehDashboardProps) => {
           {user.role === 'admin' ? t('dashboard.admin-message') : t('dashboard.staff-message')}
         </p>
       </div>
-
-      {user.role === 'admin' && <ServiceStatusCard />}
 
       {/* Stat cards with staggered entry */}
       <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-2 md:grid-cols-4">

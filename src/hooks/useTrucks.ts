@@ -4,6 +4,7 @@ import { trucksRepo } from "@/repositories/trucksRepo";
 import { db } from "@/lib/db";
 import { toast } from "sonner";
 import { mergeUnSyncedData } from "@/lib/writeHelper";
+import { blockIfBillingLocked } from "@/lib/billingLock";
 import type { Truck } from "@/types/pokleh";
 
 export const useTrucks = () => {
@@ -34,6 +35,7 @@ export const useTrucks = () => {
   }, []);
 
   const addTruck = async (name: string) => {
+    if (blockIfBillingLocked()) return { success: false };
     const { data, error } = await trucksRepo.create({ name });
     if (error) {
       toast.error(error.message);
@@ -48,6 +50,7 @@ export const useTrucks = () => {
   };
 
   const updateTruck = async (id: string, name: string) => {
+    if (blockIfBillingLocked()) return { success: false };
     const { error } = await trucksRepo.update(id, { name });
     if (error) {
       toast.error(error.message);
@@ -61,6 +64,7 @@ export const useTrucks = () => {
   };
 
   const deleteTruck = async (id: string) => {
+    if (blockIfBillingLocked()) return { success: false };
     const { error } = await trucksRepo.delete(id);
     if (error) {
       toast.error(error.message);
